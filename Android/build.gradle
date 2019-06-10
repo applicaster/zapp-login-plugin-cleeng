@@ -19,7 +19,14 @@ allprojects {
     repositories {
         google()
         jcenter()
-        
+        maven {
+            credentials {
+                username System.getenv("MAVEN_USERNAME")
+                password System.getenv("MAVEN_PASSWORD")
+
+            }
+            url 'https://dl.bintray.com/applicaster-ltd/maven'
+        }
     }
 }
 
