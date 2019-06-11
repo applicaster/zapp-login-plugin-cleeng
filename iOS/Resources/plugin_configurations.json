@@ -1,0 +1,66 @@
+[{
+	"plugin": {
+		"api": {
+			"require_startup_execution": true,
+			"class_name": "CleengLogin.ZappCleengLogin"
+		},
+		"author_name": "Zapp Developer",
+		"author_email": "applicaster@applicaster.com",
+		"manifest_version": "1.0.0",
+		"name": "Neon",
+		"description": "ZappCleengLogin",
+		"identifier": "CleengLogin",
+		"type": "login",
+		"platform": "ios",
+		"react_native": false,
+		"min_zapp_sdk": "5.0.0",
+		"whitelisted_account_ids": [],
+		"dependency_repository_url": [],
+		"dependency_name": "",
+		"dependency_version": ""
+	},
+	"configuration_json": {
+        "cleeng_login_start_on_app_launch": "1",
+        "cleeng_login_publisher_id": "5b3cc7c2fed4fa00149037d6",
+        "alternative_authentication_prompt_text": "Auth with Social Networks",
+    "alternative_authentication_separator_text": "Or",
+    
+    "login_title_text": "Login To Your Account",
+    "login_button_text": "LOG IN",
+    "password_reset_link_text": "Forgot Password?",
+    "sign_up_prompt_text": "Don't have an account?",
+    "sign_up_link_text": "Sign Up",
+    
+    "sign_up_title_text": "Create an account",
+    "sign_up_button_text": "Sign Up",
+    "login_prompt_text": "Have already an account?",
+    "login_link_text": "Log In",
+    
+    "password_reset_title_text": "Reset Password",
+    "password_reset_description_text": "Type in you e-mail so we would send you the new password",
+    "password_reset_button_text": "Reset Password",
+    
+    "password_reset_confirmation_title_text": "Password Reset Delivered",
+    "password_reset_confirmation_description_text": "Check your email in order reset your password for this account",
+    "password_reset_confirmation_button_text": "OK",
+    
+    "storefront_screen_title_text": "Choose your subscription",
+    "restore_promt_text": "If you have purchased already a subscription?",
+    "restore_link_text": "Restore",
+    
+    "storefront_redeem_text": "Redeem",
+    "storefront_button_text": "SUBSCRIBE FOR",
+    "storefront_promo_text": "1 MONTH FREE",
+    
+    "alert_mandatory_field_empty": "Mandatory field is empty!",
+    
+    "default_auth_screen": "login",
+    "facebook_login_required" : "true",
+    
+    "authentication_input_fields": "{ \"signup\": [{\"type\": \"TEXT\",\"key\": \"email\",\"title\": \"Email\",\"hint\": \"Email\",\"mandatory\": true },{\"type\": \"PASSWORD\",\"key\": \"password\",\"title\": \"Password\",\"hint\": \"Password\",\"mandatory\": true },{\"type\": \"NUMBER\",\"key\": \"Phone\",\"title\": \"Phone\",\"hint\": \"Phone\",\"mandatory\": true},{\"type\": \"TEXT\",\"key\": \"gender\",\"title\": \"Gender\",\"hint\": \"Gender\",\"mandatory\": false }],\"login\": [{\"type\": \"TEXT\",\"key\": \"email\",\"title\": \"Email\",\"hint\": \"Email\",\"mandatory\": true},{\"type\": \"PASSWORD\",\"key\": \"password\",\"title\": \"Password\",\"hint\": \"Password\",\"mandatory\": true},{\"type\": \"NUMBER\",\"key\": \"birthdate\",\"title\": \"Birth Date\",\"hint\": \"Birth Date\",\"mandatory\": true},{\"type\": \"NUMBER\",\"key\": \"birthdate\",\"title\": \"Birth Date\",\"hint\": \"Birth Date\",\"mandatory\": true}, {\"type\": \"NUMBER\",\"key\": \"birthdate\",\"title\": \"Birth Date\",\"hint\": \"Birth Date\",\"mandatory\": true}],\"password\": [{\"type\": \"PASSWORD\",\"key\": \"password\",\"title\": \"Password\",\"hint\": \"Password\",\"mandatory\": true }]}",
+
+    "payment_confirmation_title_text": "Congratulations!",
+    "payment_confirmation_description_text": "You are susccessfully subscribed to SportsMax channels!",
+    "payment_confirmation_button_text": "OK"
+    }
+}]
