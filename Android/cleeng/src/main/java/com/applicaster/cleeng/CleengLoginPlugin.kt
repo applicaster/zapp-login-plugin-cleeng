@@ -2,12 +2,21 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import android.support.v4.app.Fragment
+import com.applicaster.cleeng.network.Error
+import com.applicaster.cleeng.network.NetworkService
+import com.applicaster.cleeng.network.Result
+import com.applicaster.cleeng.network.response.RegisterResponce
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.Serializable
 import java.util.HashMap
+import kotlin.coroutines.CoroutineContext
 
 class CleengLoginPlugin : LoginContract, PluginScreen {
 
@@ -16,7 +25,20 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val job = Job()
+        val coroutineContext: CoroutineContext = Dispatchers.IO + job
+        val scope = CoroutineScope(coroutineContext)
+        scope.launch {
+            val response = NetworkService.login("", "")
+            when (val result = NetworkService.handleResponse(response)) {
+                is Result.Success -> {
+                    val body: List<RegisterResponce>? = result.value
+                }
+                is Result.Failure -> {
+                    val error: Error? = result.error
+                }
+            }
+        }
     }
 
     override fun login(
