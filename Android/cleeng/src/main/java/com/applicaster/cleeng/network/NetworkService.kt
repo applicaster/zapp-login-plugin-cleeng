@@ -56,28 +56,4 @@ object NetworkService {
 
     suspend fun subscribe(request: SubscribeRequest): Response<Unit> =
         retrofitService.subscribe(request)
-
-
-    fun<V> handleResponse(response: Response<V>): Result<V, Error> {
-        return when {
-            response.isSuccessful -> {
-                Result.Success(response.body())
-            }
-            response.code() == 400 -> {
-                Result.Failure(ErrorUtil.parseError(response))
-            }
-            response.code() == 401 -> {
-                Result.Failure(ErrorUtil.parseError(response))
-            }
-            response.code() == 422 -> {
-                Result.Failure(ErrorUtil.parseError(response))
-            }
-            response.code() == 500 -> {
-                Result.Failure(ErrorUtil.parseError(response))
-            }
-            else -> {
-                Result.Failure(ErrorUtil.parseError(response))
-            }
-        }
-    }
 }

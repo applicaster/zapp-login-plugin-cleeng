@@ -1,12 +1,14 @@
-package com.applicaster.cleeng.network
+package com.applicaster.cleeng.network.error
 
+import com.applicaster.cleeng.network.ServiceGenerator
 import retrofit2.Response
 import java.io.IOException
 
 class ErrorUtil {
     companion object {
         fun parseError(response: Response<*>): ResponseError {
-            val converter = ServiceGenerator.retrofit.responseBodyConverter<ResponseError>(ResponseError::class.java, arrayOfNulls<Annotation>(0))
+            val converter = ServiceGenerator.retrofit.responseBodyConverter<ResponseError>(
+                ResponseError::class.java, arrayOfNulls<Annotation>(0))
 
             val error: ResponseError
 

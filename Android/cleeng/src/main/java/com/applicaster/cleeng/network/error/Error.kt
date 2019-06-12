@@ -1,4 +1,4 @@
-package com.applicaster.cleeng.network
+package com.applicaster.cleeng.network.error
 
 interface Error {
     fun code(): String

@@ -1,8 +1,10 @@
 package com.applicaster.cleeng.network
 
-sealed class Result<out V, out E: Error> {
+import com.applicaster.cleeng.network.error.Error
 
-    data class Success<out V>(val value: V?) : Result<V, Nothing>()
+sealed class Result<out R, out E: Error> {
 
-    data class Failure<out E: Error>(val error: E?) : Result<Nothing, E>()
+    data class Success<out R>(val value: R?) : Result<R, Nothing>()
+
+    data class Failure<out E: Error>(val value: E?) : Result<Nothing, E>()
 }
