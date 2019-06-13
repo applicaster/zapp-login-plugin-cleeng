@@ -8,17 +8,21 @@ class PublisherInfoInterceptor(private val publisherId: String) : Interceptor {
 
     private val TAG = PublisherInfoInterceptor::class.java.canonicalName
 
+    // supported media types
+    private val FORM_URL_ENCODED = "application/x-www-form-urlencoded"
+    private val APPLICATION_JSON_UTF8 = "application/json; charset=UTF-8"
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest: Request = chain.request()
         val contentType = originalRequest.body()?.contentType()
 
         val newRequest = when (contentType) {
-            MediaType.get("application/x-www-form-urlencoded") -> {
+            MediaType.get(FORM_URL_ENCODED) -> {
                 val newRequestBody = "${originalRequest.body().bodyToString()}&publisherId=$publisherId"
                 originalRequest.newBuilder().post(RequestBody.create(contentType, newRequestBody)).build()
             }
 
-            MediaType.get("application/json; charset=UTF-8") -> {
+            MediaType.get(APPLICATION_JSON_UTF8) -> {
                 val newRequestBody = originalRequest.body().bodyToString()
                 val gson = Gson().fromJson(newRequestBody, Map::class.java)
                 val gsonMap: MutableMap<Any?, Any?> = gson.toMutableMap()
