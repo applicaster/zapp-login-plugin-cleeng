@@ -1,5 +1,6 @@
 package com.applicaster.cleeng.network
 
+import com.applicaster.cleeng.network.interceptor.PublisherInfoInterceptor
 import com.applicaster.cleeng.network.request.RegisterRequest
 import com.applicaster.cleeng.network.request.SubscribeRequest
 import com.applicaster.cleeng.network.request.SubscriptionsRequest
@@ -10,7 +11,10 @@ import retrofit2.Response
 
 object NetworkService {
 
-    private val retrofitService by lazy { ServiceGenerator.createRetrofitService(RestService::class.java) }
+    private val retrofitService by lazy {
+        ServiceGenerator.setCustomInterceptor(PublisherInfoInterceptor("obtained publisher id"))
+        ServiceGenerator.createRetrofitService(RestService::class.java)
+    }
 
     suspend fun register(request: RegisterRequest): Response<List<RegisterResponce>> =
         with(request) {

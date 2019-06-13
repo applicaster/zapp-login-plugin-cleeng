@@ -2,11 +2,8 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import android.support.v4.app.Fragment
+import com.applicaster.cleeng.network.*
 import com.applicaster.cleeng.network.error.Error
-import com.applicaster.cleeng.network.NetworkService
-import com.applicaster.cleeng.network.Result
-import com.applicaster.cleeng.network.handleResponse
-import com.applicaster.cleeng.network.launchRequest
 import com.applicaster.cleeng.network.response.RegisterResponce
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
@@ -22,18 +19,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        //TODO: test call! Should be removed later!
-        launchRequest {
-            val response = NetworkService.login("", "")
-            when (val result = handleResponse(response)) {
-                is Result.Success -> {
-                    val body: List<RegisterResponce>? = result.value
-                }
-                is Result.Failure -> {
-                    val error: Error? = result.value
-                }
-            }
-        }
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun login(

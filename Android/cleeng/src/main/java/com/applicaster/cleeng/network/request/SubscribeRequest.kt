@@ -8,8 +8,6 @@ data class SubscribeRequest(
     val authId: String?,
     @SerializedName("offer_id")
     val offerId: String?,
-    @SerializedName("publisher_id")
-    val publisherId: String?,
     @SerializedName("receipt")
     val receipt: Receipt?,
     @SerializedName("token")

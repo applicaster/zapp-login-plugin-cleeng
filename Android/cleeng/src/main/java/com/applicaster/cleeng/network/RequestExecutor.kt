@@ -17,7 +17,7 @@ private val scope by lazy {
     CoroutineScope(coroutineContext)
 }
 
-fun launchRequest(request: suspend () -> Unit) {
+fun executeRequest(request: suspend () -> Unit) {
     scope.launch {
         request()
     }

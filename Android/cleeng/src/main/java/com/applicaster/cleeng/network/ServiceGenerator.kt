@@ -1,12 +1,13 @@
 package com.applicaster.cleeng.network
 
 import com.google.gson.GsonBuilder
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
+
 class ServiceGenerator {
     companion object {
 
@@ -18,12 +19,13 @@ class ServiceGenerator {
         private val gson = GsonBuilder().create()
         private var retrofitBuilder: Retrofit.Builder = Retrofit.Builder()
 
+        private val customInterceptorList: ArrayList<Interceptor> = arrayListOf()
+
         fun <S> createRetrofitService(serviceClass: Class<S>): S {
             retrofit = retrofitBuilder.apply {
                 baseUrl(baseUrl)
                 addConverterFactory(GsonConverterFactory.create(gson))
                 client(getHttpClient())
-                setPublisherId()
             }.build()
             return retrofit.create(serviceClass)
         }
@@ -31,32 +33,19 @@ class ServiceGenerator {
         private fun getHttpClient(): OkHttpClient {
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-            httpClient.addInterceptor(loggingInterceptor)
+            httpClient.apply {
+                customInterceptorList.forEach { addInterceptor(it) }
+                addInterceptor(loggingInterceptor)
+            }
             return httpClient.build()
         }
 
-        private fun setPublisherId() {
-            httpClient.addInterceptor { chain ->
-                val request: Request = chain.request()
-                val requestBody: RequestBody? = request.body()
-                val publisherId = ""
-                val requestBuilder: Request.Builder = request.newBuilder()
-                requestBuilder.post(
-                    RequestBody.create(
-                        requestBody?.contentType(),
-                        "${requestBody?.bodyToString()}&publisherId=$publisherId"
-                    )
-                ).build()
-                chain.proceed(request)
-            }
+        fun setCustomInterceptor(interceptor: Interceptor) {
+            customInterceptorList.add(interceptor)
         }
 
-        private fun RequestBody?.bodyToString(): String {
-            return this?.run {
-                val buffer = okio.Buffer()
-                writeTo(buffer)
-                buffer.readUtf8()
-            } ?: ""
+        fun clearCustomInterseptors() {
+            customInterceptorList.clear()
         }
     }
 }
