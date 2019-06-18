@@ -9,26 +9,27 @@ class PublisherInfoInterceptor(private val publisherId: String) : Interceptor {
     private val TAG = PublisherInfoInterceptor::class.java.canonicalName
 
     // supported media types
-    private val FORM_URL_ENCODED = "application/x-www-form-urlencoded"
-    private val APPLICATION_JSON_UTF8 = "application/json; charset=UTF-8"
+    private val MEDIA_TYPE_FORM_URL_ENCODED = "application/x-www-form-urlencoded"
+    private val MEDIA_TYPE_APPLICATION_JSON_UTF8 = "application/json; charset=UTF-8"
+
+    private val KEY_PUBLISHER_ID = "publisherId"
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest: Request = chain.request()
-        val contentType = originalRequest.body()?.contentType()
 
-        val newRequest = when (contentType) {
-            MediaType.get(FORM_URL_ENCODED) -> {
-                val newRequestBody = "${originalRequest.body().bodyToString()}&publisherId=$publisherId"
+        val newRequest = when (val contentType = originalRequest.body()?.contentType()) {
+            MediaType.get(MEDIA_TYPE_FORM_URL_ENCODED) -> {
+                val newRequestBody = "${originalRequest.body().bodyToString()}&$KEY_PUBLISHER_ID=$publisherId"
                 originalRequest.newBuilder().post(RequestBody.create(contentType, newRequestBody)).build()
             }
 
-            MediaType.get(APPLICATION_JSON_UTF8) -> {
-                val newRequestBody = originalRequest.body().bodyToString()
-                val gson = Gson().fromJson(newRequestBody, Map::class.java)
-                val gsonMap: MutableMap<Any?, Any?> = gson.toMutableMap()
-                gsonMap["publisherId"] = publisherId
-                val body: ByteString = Gson().toJson(gsonMap).stringToByteString()
-                originalRequest.newBuilder().post(RequestBody.create(contentType, body)).build()
+            MediaType.get(MEDIA_TYPE_APPLICATION_JSON_UTF8) -> {
+                val originalRequestBody = originalRequest.body().bodyToString()
+                val json = Gson().fromJson(originalRequestBody, Map::class.java)
+                val jsonMap: MutableMap<Any?, Any?> = json.toMutableMap()
+                jsonMap[KEY_PUBLISHER_ID] = publisherId
+                val newRequestBody: ByteString = Gson().toJson(jsonMap).stringToByteString()
+                originalRequest.newBuilder().post(RequestBody.create(contentType, newRequestBody)).build()
             }
 
             else -> {
