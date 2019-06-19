@@ -19,7 +19,14 @@ class PublisherInfoInterceptor(private val publisherId: String) : Interceptor {
 
         val newRequest = when (val contentType = originalRequest.body()?.contentType()) {
             MediaType.get(MEDIA_TYPE_FORM_URL_ENCODED) -> {
-                val newRequestBody = "${originalRequest.body().bodyToString()}&$KEY_PUBLISHER_ID=$publisherId"
+                val newRequestBody: String = StringBuffer(
+                    originalRequest.body().bodyToString()
+                ).apply {
+                    append("&")
+                    append(KEY_PUBLISHER_ID)
+                    append("=")
+                    append(publisherId)
+                }.toString()
                 originalRequest.newBuilder().post(RequestBody.create(contentType, newRequestBody)).build()
             }
 
