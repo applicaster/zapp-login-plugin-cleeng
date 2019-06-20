@@ -10,14 +10,13 @@ import ZappLoginPluginsSDK
 import ApplicasterSDK
 import CAM
 
-@objc public class ZappCleengLogin : NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol {
+@objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol {
     
     /// Cleeng publisher identifier. **Required**
     private var publisherId = ""
     private var contentAccessManager: ContentAccessManager?
     private var networkAdapter: CleengNetworkHandler!
     public var configurationJSON: NSDictionary?
-    
     
     public required override init() {
         super.init()
@@ -33,9 +32,10 @@ import CAM
         networkAdapter = CleengNetworkHandler(publisherID: publisherId)
     }
     
-    //MARK: - ZPAppLoadingHookProtocol
+    // MARK: - ZPAppLoadingHookProtocol
     
-    public func executeAfterAppRootPresentation(displayViewController: UIViewController?, completion: (() -> Swift.Void)?) {
+    public func executeAfterAppRootPresentation(displayViewController: UIViewController?,
+                                                completion: (() -> Swift.Void)?) {
         guard let startOnAppLaunch = configurationJSON?["cleeng_login_start_on_app_launch"] else {
             completion?()
             return
@@ -54,22 +54,24 @@ import CAM
                 completion?()
                 return
             }
-            contentAccessManager = ContentAccessManager(rootViewController: controller, camDelegate: self, completion: { [weak self] _ in
+            contentAccessManager = ContentAccessManager(rootViewController: controller,
+                                                        camDelegate: self,
+                                                        completion: { [weak self] _ in
                 self?.contentAccessManager = nil
                 completion?()
             })
             contentAccessManager?.startFlow()
         }
     }
-    
    
-    //MARK: - ZPLoginProviderUserDataProtocol`
+    // MARK: - ZPLoginProviderUserDataProtocol`
  
-    public func isUserComply(policies: [String : NSObject], completion: @escaping (Bool) -> ()) {
+    public func isUserComply(policies: [String: NSObject], completion: @escaping (Bool) -> Void) {
         completion(false)
     }
     
-    public func login(_ additionalParameters: [String : Any]?, completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
+    public func login(_ additionalParameters: [String: Any]?,
+                      completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
         completion(.completedSuccessfully)
     }
     
@@ -82,10 +84,8 @@ import CAM
     }
     
     public func isPerformingAuthorizationFlow() -> Bool {
-        if let _ = contentAccessManager {
-            return true
-        }
-        return false
+        return (contentAccessManager != nil) ? true : false
+
     }
     
     public func getUserToken() -> String {
@@ -93,12 +93,12 @@ import CAM
     }
 }
 
-//MARK: - CAMDelegate
+// MARK: - CAMDelegate
 
 extension ZappCleengLogin: CAMDelegate {
     
-    public func getPluginConfig() -> [String : String] {
-        if let config = configurationJSON as? [String : String] {
+    public func getPluginConfig() -> [String: String] {
+        if let config = configurationJSON as? [String: String] {
             return config
         }
         return [String: String]()

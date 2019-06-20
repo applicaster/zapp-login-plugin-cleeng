@@ -101,8 +101,8 @@ class MyConnector: NSObject, ZAAppDelegateConnectorLayoutsStylesProtocol, ZAAppD
                 ]
             default:
                 return [
-                    "font" : UIFont(name: "HelveticaNeue-Light", size: 12)!,
-                    "color" : UIColor.black
+                    "font": UIFont(name: "HelveticaNeue-Light", size: 12)!,
+                    "color": UIColor.black
                 ]
             }
         } else {
