@@ -61,7 +61,7 @@ PODS:
     - ZappPlugins
 
 DEPENDENCIES:
-  - CAM (from `https://github.com/applicaster/applicaster-cam-framework`)
+  - CAM (from `../Submodules/CAM/CAM.podspec`)
   - CleengLogin (from `../CleengLogin.podspec`)
 
 SPEC REPOS:
@@ -91,14 +91,9 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   CAM:
-    :git: https://github.com/applicaster/applicaster-cam-framework
+    :path: "../Submodules/CAM/CAM.podspec"
   CleengLogin:
     :path: "../CleengLogin.podspec"
-
-CHECKOUT OPTIONS:
-  CAM:
-    :commit: 196938539cd221955d38177bb0c7cb89b59b19ab
-    :git: https://github.com/applicaster/applicaster-cam-framework
 
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
@@ -123,6 +118,6 @@ SPEC CHECKSUMS:
   ZappPlugins: 22fad1f8afba01d35de8ca4b1a132bde12a07cf5
   ZappPushPluginsSDK: 6784337a1037be3fb43a084adced71423c868042
 
-PODFILE CHECKSUM: e67017bb3f21d48e7a720026db033c8b9b2a9160
+PODFILE CHECKSUM: 54918f8c5e11308fe0604f0a8307efd5b1f3d275
 
 COCOAPODS: 1.7.1
