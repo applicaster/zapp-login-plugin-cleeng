@@ -1,0 +1,3 @@
+[submodule "Submodules/CAM"]
+	path = Submodules/CAM
+	url = https://github.com/applicaster/applicaster-cam-framework

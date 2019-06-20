@@ -12,5 +12,5 @@ source 'https://github.com/applicaster/applicaster-cam-framework'
 
 target 'CleengLoginPlugin' do
   pod 'CleengLogin', :path => '../CleengLogin.podspec'
-  pod 'CAM', :git => 'https://github.com/applicaster/applicaster-cam-framework'
+  pod 'CAM', :path => '../Submodules/CAM/CAM.podspec'
 end
