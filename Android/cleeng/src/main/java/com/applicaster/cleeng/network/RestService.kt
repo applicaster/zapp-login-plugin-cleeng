@@ -3,7 +3,7 @@ package com.applicaster.cleeng.network
 import com.applicaster.cleeng.network.request.SubscribeRequest
 import com.applicaster.cleeng.network.request.SubscriptionsRequest
 import com.applicaster.cleeng.network.response.OfferResponse
-import com.applicaster.cleeng.network.response.RegisterResponce
+import com.applicaster.cleeng.network.response.AuthResponse
 import com.applicaster.cleeng.network.response.ResetPasswordResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -15,13 +15,13 @@ interface RestService {
 
     @FormUrlEncoded
     @POST("register")
-    suspend fun register(
+    suspend fun registerEmail(
         @Field("email") email: String,
         @Field("password") password: String,
         @Field("country") country: String,
         @Field("locale") locale: String,
         @Field("currency") currency: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponse>>
 
     @FormUrlEncoded
     @POST("register")
@@ -31,21 +31,21 @@ interface RestService {
         @Field("country") country: String,
         @Field("locale") locale: String,
         @Field("currency") currency: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponse>>
 
     @FormUrlEncoded
     @POST("login")
-    suspend fun login(
+    suspend fun loginEmail(
        @Field("email") email: String,
        @Field("password") password: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponse>>
 
     @FormUrlEncoded
     @POST("login")
     suspend fun loginFacebook(
         @Field("email") email: String,
         @Field("FacebookId") facebookId: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponse>>
 
     @FormUrlEncoded
     @POST("passwordReset")
@@ -57,7 +57,7 @@ interface RestService {
     @POST("extendToken")
     suspend fun extendToken(
         @Field("token") token: String
-    ): Response<RegisterResponce>
+    ): Response<AuthResponse>
 
     @POST("subscriptions")
     suspend fun requestSubscriptions(
@@ -68,5 +68,4 @@ interface RestService {
     suspend fun subscribe(
         @Body subscribeRequest: SubscribeRequest
     ): Response<Unit>
-
 }

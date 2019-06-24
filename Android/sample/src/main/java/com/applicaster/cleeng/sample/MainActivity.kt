@@ -9,7 +9,7 @@ import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.handleResponse
 import com.applicaster.cleeng.network.request.SubscriptionsRequest
 import com.applicaster.cleeng.network.response.OfferResponse
-import com.applicaster.cleeng.network.response.RegisterResponce
+import com.applicaster.cleeng.network.response.AuthResponse
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
             val response = networkHelper.login("user email", "password")
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseResult: List<RegisterResponce>? = result.value
+                    val responseResult: List<AuthResponse>? = result.value
                     subscriptions(responseResult?.get(0)?.token ?: "")
                 }
                 is Result.Failure -> {

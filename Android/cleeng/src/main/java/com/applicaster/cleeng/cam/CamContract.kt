@@ -1,8 +1,13 @@
 package com.applicaster.cleeng.cam
 
 import com.applicaster.cam.*
+import com.applicaster.cleeng.CleengService
+import com.applicaster.cleeng.network.Result
+import com.applicaster.cleeng.network.executeRequest
+import com.applicaster.cleeng.network.handleResponse
+import com.applicaster.cleeng.network.response.AuthResponse
 
-class CamContract: ICamContract {
+class CamContract(var cleengService: CleengService) : ICamContract {
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -24,7 +29,24 @@ class CamContract: ICamContract {
     }
 
     override fun login(authFieldsInput: HashMap<String, String>, callback: LoginCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        executeRequest {
+            val response = cleengService.networkHelper.login(
+                authFieldsInput["email"].orEmpty(),
+                authFieldsInput["password"].orEmpty()
+            )
+            when (val result = handleResponse(response)) {
+                is Result.Success -> {
+                    val responseResult: List<AuthResponse>? = result.value
+//                    TODO("save token")
+//                    cleengService.saveUserToken(context, responseResult?.token.orEmpty())
+                    callback.onSuccess()
+                }
+
+                is Result.Failure -> {
+                    callback.onFailure(result.value?.message().orEmpty())
+                }
+            }
+        }
     }
 
     override fun loginWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
