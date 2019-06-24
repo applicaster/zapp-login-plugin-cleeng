@@ -15,6 +15,10 @@ import java.util.HashMap
 
 class CleengLoginPlugin : LoginContract, PluginScreen {
 
+    private val cleengService: CleengService by lazy { CleengService() }
+    private val camContract: CamContract by lazy { CamContract() }
+    private var pluginConfig: Map<String, String>? = mapOf()
+
     override fun login(
         context: Context?,
         additionalParams: MutableMap<Any?, Any?>?,
@@ -32,28 +36,50 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun isTokenValid(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun isTokenValid(): Boolean = !cleengService.getUser().token.isNullOrEmpty()
 
     override fun setToken(token: String?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun isItemLocked(model: Any?): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return cleengService.isItemLocked(model)
+    }
+
+    override fun isItemLocked(context: Context?, model: Any?, callback: LoginContract.Callback?) {
+        cleengService.isItemLocked(model) { result ->
+            callback?.onResult(result)
+        }
     }
 
     override fun executeOnStartup(context: Context?, listener: HookListener?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        executeRequest {
+            val response = cleengService.networkHelper.extendToken(cleengService.getUser().token.orEmpty())
+            when (val result = handleResponse(response)) {
+                is Result.Success -> {
+                    val responseResult: RegisterResponce? = result.value
+                    // save token to prefs?
+                    cleengService.saveUserToken(context, responseResult?.token.orEmpty())
+                    // finish hook
+                    listener?.onHookFinished()
+                }
+
+                is Result.Failure -> {
+                    // handle error and open login or sign up screen
+                    context?.let { ContentAccessManager.onProcessStarted(camContract, it) }
+                }
+            }
+        }
+        TODO("Go to the network and get available subscriptions and tokens?")
     }
 
-    override fun getToken(): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getToken(): String = cleengService.getUser().token.orEmpty()
 
     override fun setPluginConfigurationParams(params: MutableMap<Any?, Any?>?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //transform MutableMap<Any?, Any?>? to Map<String, String>?
+        pluginConfig = params?.entries?.associate { entry ->
+            entry.key.toString() to entry.value.toString()
+        }
     }
 
     override fun handlePluginScheme(context: Context?, data: MutableMap<String, String>?): Boolean {
