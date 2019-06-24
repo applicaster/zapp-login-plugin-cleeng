@@ -2,8 +2,9 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import android.support.v4.app.Fragment
+import com.applicaster.cam.ContentAccessManager
+import com.applicaster.cleeng.cam.CamContract
 import com.applicaster.cleeng.network.*
-import com.applicaster.cleeng.network.error.Error
 import com.applicaster.cleeng.network.response.RegisterResponce
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
@@ -60,7 +61,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
     }
 
     override fun executeOnApplicationReady(context: Context?, listener: HookListener?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        listener?.onHookFinished()
     }
 
     override fun logout(

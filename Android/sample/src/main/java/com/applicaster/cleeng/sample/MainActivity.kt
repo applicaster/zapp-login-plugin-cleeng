@@ -2,7 +2,7 @@ package com.applicaster.cleeng.sample
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import com.applicaster.cleeng.network.NetworkService
+import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.Error
 import com.applicaster.cleeng.network.executeRequest
@@ -13,6 +13,8 @@ import com.applicaster.cleeng.network.response.RegisterResponce
 
 class MainActivity : AppCompatActivity() {
 
+    private val networkHelper: NetworkHelper by lazy { NetworkHelper("") }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -22,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun login() {
         executeRequest {
-            val response = NetworkService.login("user email", "password")
+            val response = networkHelper.login("user email", "password")
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
                     val responseResult: List<RegisterResponce>? = result.value
@@ -44,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         )
 
         executeRequest {
-            val responce = NetworkService.requestSubscriptions(request)
-            when (val result = handleResponse(responce)) {
+            val response = networkHelper.requestSubscriptions(request)
+            when (val result = handleResponse(response)) {
                 is Result.Success -> {
                     val responseResult: List<OfferResponse>? = result.value
                     //response handling logic
