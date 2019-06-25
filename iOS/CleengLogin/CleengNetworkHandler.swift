@@ -62,7 +62,6 @@ class CleengNetworkHandler {
     
     func performRequest(api: CleengAPI, completion: @escaping (CleengResult) -> Void) {
         Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { (response) in
-            print(String(data: response.data!, encoding: .utf8))
             switch response.result {
             case .success:
                 guard let code = response.response?.statusCode, let data = response.data else {

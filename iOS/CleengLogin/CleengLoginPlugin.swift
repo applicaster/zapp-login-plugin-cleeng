@@ -12,7 +12,9 @@ import CAM
 
 @objc public class ZappCleengLogin : NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol {
     
-    /// Cleeng publisher identifier. **Required**
+    private var userToken: String?
+    private var userPermissionTokens = [String: String]()
+    
     private var publisherId = ""
     private var contentAccessManager: ContentAccessManager?
     private var networkAdapter: CleengNetworkHandler!
@@ -21,10 +23,6 @@ import CAM
     public required override init() {
         super.init()
         networkAdapter = CleengNetworkHandler(publisherID: "")
-    }
-    
-    private func parseAuthTokensResponse(json: Data) {
-        
     }
     
     public required init(configurationJSON: NSDictionary?) {
@@ -81,7 +79,7 @@ import CAM
     }
     
     public func isAuthenticated() -> Bool {
-        return false
+        return userToken != nil
     }
     
     public func isPerformingAuthorizationFlow() -> Bool {
@@ -92,7 +90,26 @@ import CAM
     }
     
     public func getUserToken() -> String {
-        return ""
+        return userToken ?? ""
+    }
+    
+    //MARK: - Private
+    
+    private func parseAuthTokensResponse(json: Data, completion: (Bool) -> ()) {
+        if let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) {
+            for item in cleengTokens {
+                if item.offerID.isEmpty {
+                    userToken = item.token // if offerID empty than we retrieve user token
+                } else {
+                    if let authID = item.authID {
+                        userPermissionTokens[authID] = item.token // if offerID !empty put subscription token in dicrionary by authId
+                    }
+                }
+            }
+            completion(true)
+        } else {
+            completion(false)
+        }
     }
 }
 
