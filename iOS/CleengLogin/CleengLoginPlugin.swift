@@ -14,7 +14,6 @@ import CAM
     
     /// Cleeng publisher identifier. **Required**
     private var publisherId = ""
-    private var contentAccessManager: ContentAccessManager?
     private var networkAdapter: CleengNetworkHandler!
     public var configurationJSON: NSDictionary?
     
@@ -30,6 +29,39 @@ import CAM
             publisherId = id
         }
         networkAdapter = CleengNetworkHandler(publisherID: publisherId)
+    }
+    
+    // MARK: - Private methods
+    
+    private func parsePlayableItems(from dictionary: [String: Any]?) -> [ZPPlayable] {
+        let playableItemsKey = "playable_items"
+        let playableItems = dictionary?[playableItemsKey] as? [ZPPlayable] ?? []
+        return playableItems
+    }
+    
+    private func parseFlow(from playableItems: [ZPPlayable]) -> CAMFlow {
+        // In general we assume only one item comes to plugin
+        guard let item = playableItems.first else {
+            assert(false)
+            return .no
+        }
+        
+        let authKey = "requires_authentication"
+        let entitlementsKey = "ds_product_ids"
+        
+        let isAuthRequired = item.extensionsDictionary?[authKey] as? Bool ?? false
+        let entitlements = item.extensionsDictionary?[entitlementsKey] as? [String] ?? []
+        
+        switch (isAuthRequired, entitlements.isEmpty) {
+        case (true, true):
+            return .authentication
+        case (true, false):
+            return .authAndStorefront
+        case (false, false):
+            return .storefront
+        case (false, true):
+            return .no
+        }
     }
     
     // MARK: - ZPAppLoadingHookProtocol
@@ -54,13 +86,11 @@ import CAM
                 completion?()
                 return
             }
-            contentAccessManager = ContentAccessManager(rootViewController: controller,
-                                                        camDelegate: self,
-                                                        completion: { [weak self] _ in
-                self?.contentAccessManager = nil
-                completion?()
-            })
-            contentAccessManager?.startFlow()
+            let contentAccessManager = ContentAccessManager(rootViewController: controller,
+                                                            camDelegate: self,
+                                                            camFlow: .authentication,
+                                                            completion: { _ in completion?() })
+            contentAccessManager.startFlow()
         }
     }
    
@@ -72,7 +102,21 @@ import CAM
     
     public func login(_ additionalParameters: [String: Any]?,
                       completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
-        completion(.completedSuccessfully)
+    
+        guard let controller = UIViewController.topmostViewController() else {
+            assert(false, "No topmost controller")
+            completion(.failed)
+        }
+        
+        let playableItems = parsePlayableItems(from: additionalParameters)
+        let flow = parseFlow(from: playableItems)
+        
+        let contentAccessManager = ContentAccessManager(rootViewController: controller,
+                                                        camDelegate: self,
+                                                        camFlow: flow) { (isCompleted) in
+            (isCompleted == true) ? completion(.completedSuccessfully) : completion(.failed)
+        }
+        contentAccessManager.startFlow()
     }
     
     public func logout(_ completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
@@ -84,7 +128,8 @@ import CAM
     }
     
     public func isPerformingAuthorizationFlow() -> Bool {
-        return (contentAccessManager != nil) ? true : false
+        // TODO: Fix it
+        return false
 
     }
     
