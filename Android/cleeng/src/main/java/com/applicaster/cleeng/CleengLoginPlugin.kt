@@ -74,7 +74,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        cleengService.logout()
     }
 
     override fun generateFragment(screenMap: HashMap<String, Any>?, dataSource: Serializable?): Fragment {

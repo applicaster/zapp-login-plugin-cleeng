@@ -24,7 +24,7 @@ fun executeRequest(request: suspend () -> Unit) {
 }
 
 fun cancelCurrentJob() {
-    if (job.isActive)
+    if (::job.isInitialized && job.isActive)
         job.cancel()
 }
 

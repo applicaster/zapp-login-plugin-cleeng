@@ -2,6 +2,7 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import com.applicaster.app.APProperties
+import com.applicaster.app.CustomApplication
 import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
@@ -20,15 +21,17 @@ import com.applicaster.model.APModel
 import com.applicaster.model.APVodItem
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.util.AppData
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CleengService {
 
     val networkHelper: NetworkHelper by lazy { NetworkHelper(publisherId) }
     private val camContract: CamContract by lazy { CamContract(this@CleengService) }
+    private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
 
     private val KEY_AUTHORIZATION_PROVIDERS_IDS = "authorization_providers_ids"
     private var publisherId: String = ""
-    private var preferences: SharedPreferencesUtil? = null
 
     fun handleStartupHook(context: Context, listener: HookListener?) {
         executeRequest {
@@ -37,7 +40,7 @@ class CleengService {
                 is Result.Success -> {
                     val responseResult: AuthResponse? = result.value
                     // save token to prefs?
-                    saveUserToken(context, responseResult?.token.orEmpty())
+                    saveUserToken(responseResult?.token.orEmpty())
                     // finish hook
                     listener?.onHookFinished()
                 }
@@ -161,21 +164,11 @@ class CleengService {
 
     private fun matchAuthFlowValues(extensionsData: Pair<Boolean, Option>): CamFlow {
         return when (extensionsData) {
-            (true to Option.None) -> {
-                CamFlow.Authentication
-            }
-            (true to Option.Some) -> {
-                CamFlow.AuthAndStorefront
-            }
-            (false to Option.Some) -> {
-                CamFlow.Storefront
-            }
-            (false to Option.None) -> {
-                CamFlow.Empty
-            }
-            else -> {
-                CamFlow.Authentication
-            }
+            (true to Option.None) -> { CamFlow.Authentication }
+            (true to Option.Some) -> { CamFlow.AuthAndStorefront }
+            (false to Option.Some) -> { CamFlow.Storefront }
+            (false to Option.None) -> { CamFlow.Empty }
+            else -> { CamFlow.Authentication }
         }
     }
 
@@ -183,13 +176,12 @@ class CleengService {
         TODO("should be returned from shared preferences?")
     }
 
-    fun saveUserToken(context: Context?, token: String) {
-        if (preferences == null) {
-            preferences = SharedPreferencesUtil(context)
-            preferences?.saveUserToken(token)
-        } else {
-            preferences?.saveUserToken(token)
-        }
+    fun saveUserToken(token: String) {
+        preferences.saveUserToken(token)
+    }
+
+    fun logout() {
+        preferences.removeUserToken()
     }
 
     private enum class Option {

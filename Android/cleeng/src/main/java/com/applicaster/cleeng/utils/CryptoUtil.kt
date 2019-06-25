@@ -1,9 +1,9 @@
 package com.applicaster.cleeng.utils
 
+import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import com.applicaster.cleeng.BuildConfig
-import com.google.firebase.iid.FirebaseInstanceId
 import java.lang.Exception
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
@@ -12,6 +12,8 @@ import javax.crypto.*
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.PBEParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import com.applicaster.app.CustomApplication
+
 
 class CryptoUtil {
     private val TAG = CryptoUtil::class.java.canonicalName
@@ -21,11 +23,13 @@ class CryptoUtil {
     private val IV_BITS_MAX = 16
     private val ITERATIONS = 64
     private val skfAlgorithm = "PBKDF2WithHmacSHA1"
-    private val transformation = "AES/GCM/NoPadding"
+    private val transformation = "PBEWithHmacSHA256AndAES_128"
     private val sksAlgorithm = "AES"
 
     // lazy generate and get instanceId string
-    private val instanceId: String by lazy { FirebaseInstanceId.getInstance().id }
+    private val instanceId: String by lazy {
+       Settings.Secure.getString(CustomApplication.getApplication().contentResolver, Settings.Secure.ANDROID_ID)
+    }
 
     fun encode(value: String): String {
         return Base64.encodeToString(value.toByteArray(), Base64.DEFAULT).trim()
@@ -56,7 +60,7 @@ class CryptoUtil {
         try {
             decryptedData = decrypt(key, decodedToken)
         } catch (e: Exception) {
-
+            Log.e(CryptoUtil::class.java.simpleName, e.message)
         }
         return decryptedData
     }

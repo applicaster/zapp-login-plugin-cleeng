@@ -2,6 +2,7 @@ package com.applicaster.cleeng.sample
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.Error
@@ -10,6 +11,7 @@ import com.applicaster.cleeng.network.handleResponse
 import com.applicaster.cleeng.network.request.SubscriptionsRequest
 import com.applicaster.cleeng.network.response.OfferResponse
 import com.applicaster.cleeng.network.response.AuthResponse
+import com.applicaster.cleeng.utils.SharedPreferencesUtil
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,7 +21,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //TODO: test call! Should be removed later!
+        val prefs = SharedPreferencesUtil()
+        prefs.saveUserToken("my-custom-token")
         login()
+        val token = prefs.getUserToken()
+        Log.w(MainActivity::class.java.simpleName, token)
     }
 
     private fun login() {
