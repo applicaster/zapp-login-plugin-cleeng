@@ -49,17 +49,17 @@ import CAM
         let authKey = "requires_authentication"
         let entitlementsKey = "ds_product_ids"
         
-        let isAuthRequired = item.extensionsDictionary?[authKey] as? Bool
-        let entitlements = item.extensionsDictionary?[entitlementsKey] as? [String]
+        let isAuthRequired = item.extensionsDictionary?[authKey] as? Bool ?? false
+        let entitlements = item.extensionsDictionary?[entitlementsKey] as? [String] ?? []
         
-        switch (isAuthRequired, entitlements) {
-        case (.some, nil):
+        switch (isAuthRequired, entitlements.isEmpty) {
+        case (true, true):
             return .authentication
-        case (.some, .some):
+        case (true, false):
             return .authAndStorefront
-        case (nil, .some):
+        case (false, false):
             return .storefront
-        case (nil, nil):
+        case (false, true):
             return .no
         }
     }
