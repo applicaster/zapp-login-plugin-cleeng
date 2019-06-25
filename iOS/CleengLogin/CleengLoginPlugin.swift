@@ -1,6 +1,6 @@
 //
 //  CleengLoginPlugin.swift
-//  Alamofire
+//  CleengLogin
 //
 //  Created by Egor Brel on 6/3/19.
 //
@@ -12,7 +12,9 @@ import CAM
 
 @objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol {
     
-    /// Cleeng publisher identifier. **Required**
+    private var userToken: String?
+    private var userPermissionTokens = [String: String]()
+    
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
     public var configurationJSON: NSDictionary?
@@ -124,7 +126,7 @@ import CAM
     }
     
     public func isAuthenticated() -> Bool {
-        return false
+        return userToken != nil
     }
     
     public func isPerformingAuthorizationFlow() -> Bool {
@@ -134,7 +136,26 @@ import CAM
     }
     
     public func getUserToken() -> String {
-        return ""
+        return userToken ?? ""
+    }
+    
+    //MARK: - Private
+    
+    private func parseAuthTokensResponse(json: Data, completion: (Bool) -> ()) {
+        if let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) {
+            for item in cleengTokens {
+                if item.offerID.isEmpty {
+                    userToken = item.token // if offerID empty than we retrieve user token
+                } else {
+                    if let authID = item.authID {
+                        userPermissionTokens[authID] = item.token // if offerID !empty put subscription token in dicrionary by authId
+                    }
+                }
+            }
+            completion(true)
+        } else {
+            completion(false)
+        }
     }
 }
 
@@ -158,25 +179,118 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func facebookLogin(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        
+        networkAdapter.loginWithFacebook(email: userData.email, facebookId: userData.userId, completion: { (result) in
+            switch result {
+            case .success(let data):
+                completion(.success)
+            case .failure(let error):
+                switch error {
+                case .serverError:
+                    completion(.failure(description: "Server Error"))
+                case .requestError(let data):
+                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
+                        completion(.failure(description: serverError.message))
+                        return
+                    } else {
+                        completion(.failure(description: "Server Error"))
+                    }
+                case .networkError(let error):
+                    completion(.failure(description: error.localizedDescription))
+                }
+            }
+        })
     }
     
     public func facebookSignUp(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        
+        networkAdapter.loginWithFacebook(email: userData.email, facebookId: userData.userId, completion: { (result) in
+            switch result {
+            case .success(let data):
+                completion(.success)
+            case .failure(let error):
+                switch error {
+                case .serverError:
+                    completion(.failure(description: "Server Error"))
+                case .requestError(let data):
+                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
+                        completion(.failure(description: serverError.message))
+                        return
+                    } else {
+                        completion(.failure(description: "Server Error"))
+                    }
+                case .networkError(let error):
+                    completion(.failure(description: error.localizedDescription))
+                }
+            }
+        })
     }
     
     public func login(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        networkAdapter.login(authData: authData, completion: { (_) in
-            
+        networkAdapter.login(authData: authData, completion: { (result) in
+            switch result {
+            case .success(let data):
+                completion(.success)
+            case .failure(let error):
+                switch error {
+                case .serverError:
+                    completion(.failure(description: "Server Error"))
+                case .requestError(let data):
+                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
+                        completion(.failure(description: serverError.message))
+                        return
+                    } else {
+                        completion(.failure(description: "Server Error"))
+                    }
+                case .networkError(let error):
+                    completion(.failure(description: error.localizedDescription))
+                }
+            }
         })
     }
     
     public func signUp(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        
+        networkAdapter.register(authData: authData, completion: { (result) in
+            switch result {
+            case .success(let data):
+                completion(.success)
+            case .failure(let error):
+                switch error {
+                case .serverError:
+                    completion(.failure(description: "Server Error"))
+                case .requestError(let data):
+                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
+                        completion(.failure(description: serverError.message))
+                        return
+                    } else {
+                        completion(.failure(description: "Server Error"))
+                    }
+                case .networkError(let error):
+                    completion(.failure(description: error.localizedDescription))
+                }
+            }
+        })
     }
     
     public func resetPassword(data: [String: String], completion: @escaping (CAMResult) -> Void) {
-        
+        networkAdapter.resetPassword(data: data, completion: { (result) in
+            switch result {
+            case .success:
+                completion(.success)
+            case .failure(let error):
+                switch error {
+                case .serverError:
+                    completion(.failure(description: "Server Error"))
+                case .requestError(let data):
+                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
+                        completion(.failure(description: serverError.message))
+                        return
+                    } else {
+                        completion(.failure(description: "Server Error"))
+                    }
+                case .networkError(let error):
+                    completion(.failure(description: error.localizedDescription))
+                }
+            }
+        })
     }
     
     public func itemPurchased(item: SKProduct) {

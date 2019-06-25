@@ -1,6 +1,6 @@
 //
 //  CleengNetworkHandler.swift
-//  Alamofire
+//  CleengLogin
 //
 //  Created by Egor Brel on 6/6/19.
 //
@@ -16,62 +16,69 @@ class CleengNetworkHandler {
         self.publisherID = publisherID
     }
     
-    func login(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
+    func login(authData: [String: String], completion: @escaping (CleengResult) -> Void) {
         let api = CleengAPI.login(publisherID: publisherID, email: authData["email"], password: authData["password"])
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
-        }
+        performRequest(api: api, completion: completion)
     }
     
-    func loginWithFacebook(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.loginWithFacebook(publisherID: publisherID, email: authData["email"],
-                                              facebookId: authData["facebookId"])
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
-        }
+    func loginWithFacebook(email: String, facebookId: String, completion: @escaping (CleengResult) -> Void) {
+        let api = CleengAPI.loginWithFacebook(publisherID: publisherID, email: email,
+                                              facebookId: facebookId)
+        performRequest(api: api, completion: completion)
     }
     
-    func register(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
+    func register(authData: [String: String], completion: @escaping (CleengResult) -> Void) {
         let api = CleengAPI.register(publisherID: publisherID, email: authData["email"], password: authData["password"])
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
-        }
+        performRequest(api: api, completion: completion)
     }
     
-    func registerWithFacebook(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.registerWithFacebook(publisherID: publisherID, email: authData["email"],
-                                                 facebookId: authData["facebookId"])
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
-        }
+    func registerWithFacebook(email: String, facebookId: String, completion: @escaping (CleengResult) -> Void) {
+        let api = CleengAPI.registerWithFacebook(publisherID: publisherID, email: email,
+                                                 facebookId: facebookId)
+        performRequest(api: api, completion: completion)
     }
     
-    func resetPassword(data: [String: String], completion: @escaping (CAMResult) -> Void) {
+    func resetPassword(data: [String: String], completion: @escaping (CleengResult) -> Void) {
         let api = CleengAPI.resetPassword(publisherID: publisherID, email: data["email"])
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
-        }
+        performRequest(api: api, completion: completion)
     }
     
-    func extendToken(token: String) {
+    func extendToken(token: String, completion: @escaping (CleengResult) -> Void) {
         let api = CleengAPI.extendToken(publisherID: publisherID, token: token)
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
-        }
+        performRequest(api: api, completion: completion)
     }
     
-    func subscriptions(token: String?, byAuthId: Int, offers: [String]?) { //0 - by offers, 1 by auth ids
+    func subscriptions(token: String?, byAuthId: Int, offers: [String]?, completion: @escaping (CleengResult) -> Void) { //0 - by offers, 1 by auth ids
         let api = CleengAPI.subscriptions(publisherID: publisherID, token: token, byAuthId: byAuthId, offers: offers)
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
-        }
+        performRequest(api: api, completion: completion)
     }
     
-    func subscription(transactionId: String?, receiptData: String?, token: String?, offerId: String?, isRestored: Bool, couponCode: String?) {
+    func subscription(transactionId: String?, receiptData: String?, token: String?, offerId: String?,
+                      isRestored: Bool, couponCode: String?, completion: @escaping (CleengResult) -> Void) {
         let api = CleengAPI.subscription(publisherID: publisherID, transactionId: transactionId,
                                          receiptData: receiptData, token: token, offerId: offerId, isRestored: isRestored, couponCode: couponCode)
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { response in
-            print(response)
+        performRequest(api: api, completion: completion)
+    }
+    
+    func performRequest(api: CleengAPI, completion: @escaping (CleengResult) -> Void) {
+        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { (response) in
+            switch response.result {
+            case .success:
+                guard let code = response.response?.statusCode, let data = response.data else {
+                    completion(.failure(.serverError))
+                    return
+                }
+                switch code {
+                case 200..<300:
+                    completion(.success(data))
+                default:
+                    completion(.failure(.requestError(data)))
+                }
+            case .failure(let error):
+                if let error = error as? AFError {
+                    completion(.failure(.networkError(error)))
+                }
+            }
         }
     }
 }

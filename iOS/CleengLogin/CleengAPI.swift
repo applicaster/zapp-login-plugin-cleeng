@@ -1,6 +1,6 @@
 //
 //  CleengAPI.swift
-//  Alamofire
+//  CleengLogin
 //
 //  Created by Egor Brel on 6/6/19.
 //
