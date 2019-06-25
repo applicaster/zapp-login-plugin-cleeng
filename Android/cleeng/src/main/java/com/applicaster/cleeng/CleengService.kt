@@ -2,7 +2,6 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import com.applicaster.app.APProperties
-import com.applicaster.app.CustomApplication
 import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
@@ -21,17 +20,16 @@ import com.applicaster.model.APModel
 import com.applicaster.model.APVodItem
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.util.AppData
-import java.util.*
 import kotlin.collections.ArrayList
 
 class CleengService {
 
+    private var publisherId: String = ""
     val networkHelper: NetworkHelper by lazy { NetworkHelper(publisherId) }
     private val camContract: CamContract by lazy { CamContract(this@CleengService) }
     private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
 
     private val KEY_AUTHORIZATION_PROVIDERS_IDS = "authorization_providers_ids"
-    private var publisherId: String = ""
 
     fun handleStartupHook(context: Context, listener: HookListener?) {
         executeRequest {
