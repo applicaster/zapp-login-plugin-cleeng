@@ -7,5 +7,7 @@ data class AuthResponse(
     @SerializedName("offerId")
     val offerId: String?,
     @SerializedName("token")
-    val token: String?
+    val token: String?,
+    @SerializedName("authId")
+    val authId: String?
 )

@@ -13,6 +13,7 @@ import javax.crypto.*
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.PBEParameterSpec
 import com.applicaster.app.CustomApplication
+import java.util.*
 
 
 @SuppressLint("HardwareIds")
@@ -28,7 +29,9 @@ class CryptoUtil {
 
     // lazy generate and get instanceId string
     private val instanceId: String by lazy {
-       Settings.Secure.getString(CustomApplication.getApplication().contentResolver, Settings.Secure.ANDROID_ID)
+        val id =
+            Settings.Secure.getString(CustomApplication.getApplication().contentResolver, Settings.Secure.ANDROID_ID)
+        UUID.nameUUIDFromBytes(id.toByteArray()).toString()
     }
 
     fun encode(value: String): String {
@@ -60,7 +63,7 @@ class CryptoUtil {
         try {
             decryptedData = decrypt(key, decodedToken)
         } catch (e: Exception) {
-            Log.e(CryptoUtil::class.java.simpleName, e.message)
+            Log.e(TAG, e.message)
         }
         return decryptedData
     }
