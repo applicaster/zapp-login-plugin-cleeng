@@ -85,6 +85,19 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         })
     }
     
+    private func authorize(api: CleengAPI, completion: @escaping (CAMResult) -> Void) {
+        networkAdapter.authorize(apiRequest: api, completion: { (result) in
+            switch result {
+            case .success(let data):
+                self.parseAuthTokensResponse(json: data, completion: { (result) in
+                    result ? completion(.success) : completion(.failure(description: "Server Error"))
+                })
+            case .failure(let error):
+                self.camErrorWrapper(error: error, completion: completion)
+            }
+        })
+    }
+    
     // MARK: - ZPAppLoadingHookProtocol
     
     public func executeAfterAppRootPresentation(displayViewController: UIViewController?,
@@ -101,7 +114,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     }
     
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
-                                         completion: (() -> Swift.Void)?) {
+                                                     completion: (() -> Swift.Void)?) {
         guard let startOnAppLaunch = configurationJSON?["cleeng_login_start_on_app_launch"] else {
             completion?()
             return
@@ -162,8 +175,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     }
     
     public func isPerformingAuthorizationFlow() -> Bool {
-        // TODO: Fix it
-        return false
+        return networkAdapter.isPerformingAuthorizationFlow
 
     }
     
@@ -174,30 +186,29 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     // MARK: - JSON Response parsing
     
     private func parseAuthTokensResponse(json: Data, completion: (Bool) -> Void) {
-        if let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) {
-            for item in cleengTokens {
-                if item.offerID.isEmpty {
-                    userToken = item.token // if offerID empty than we retrieve user token
-                    UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
-                } else {
-                    if let authID = item.authID {
-                        userPermissionEntitlementsIds.insert(authID) // if offerID !empty put subscription token in dicrionary by authId
-                    }
+        guard let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) else {
+            completion(false)
+            return
+        }
+        for item in cleengTokens {
+            if item.offerID.isEmpty {
+                userToken = item.token // if offerID empty than we retrieve user token
+                UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
+            } else {
+                if let authID = item.authID {
+                    userPermissionEntitlementsIds.insert(authID) // if offerID !empty put subscription token in dicrionary by authId
                 }
             }
-            completion(true)
-        } else {
-            completion(false)
         }
+        completion(true)
     }
     
     private func parseErrorResponse(json: Data, completion: (ServerError?) -> Void) {
-        if let serverError = try? JSONDecoder().decode(ServerError.self, from: json) {
-            completion(serverError)
-            return
-        } else {
+        guard let serverError = try? JSONDecoder().decode(ServerError.self, from: json) else {
             completion(nil)
+            return
         }
+        completion(serverError)
     }
     
     private func camErrorWrapper(error: CleengError, completion: @escaping (CAMResult) -> Void) {
@@ -238,55 +249,27 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func facebookLogin(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        networkAdapter.loginWithFacebook(email: userData.email, facebookId: userData.userId, completion: { (result) in
-            switch result {
-            case .success(let data):
-                self.parseAuthTokensResponse(json: data, completion: { (result) in
-                    result ? completion(.success) : completion(.failure(description: "Server Error"))
-                })
-            case .failure(let error):
-                self.camErrorWrapper(error: error, completion: completion)
-            }
-        })
+        let api = CleengAPI.loginWithFacebook(publisherID: publisherId, email: userData.email,
+                                              facebookId: userData.userId)
+        authorize(api: api, completion: completion)
     }
     
     public func facebookSignUp(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        networkAdapter.registerWithFacebook(email: userData.email, facebookId: userData.userId, completion: { (result) in
-            switch result {
-            case .success(let data):
-                self.parseAuthTokensResponse(json: data, completion: { (result) in
-                    result ? completion(.success) : completion(.failure(description: "Server Error"))
-                })
-            case .failure(let error):
-                self.camErrorWrapper(error: error, completion: completion)
-            }
-        })
+        let api = CleengAPI.registerWithFacebook(publisherID: publisherId, email: userData.email,
+                                                 facebookId: userData.userId)
+        authorize(api: api, completion: completion)
     }
     
     public func login(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        networkAdapter.login(authData: authData, completion: { (result) in
-            switch result {
-            case .success(let data):
-                self.parseAuthTokensResponse(json: data, completion: { (result) in
-                    result ? completion(.success) : completion(.failure(description: "Server Error"))
-                })
-            case .failure(let error):
-                self.camErrorWrapper(error: error, completion: completion)
-            }
-        })
+        let api = CleengAPI.login(publisherID: publisherId, email: authData["email"] ?? "",
+                                  password: authData["password"] ?? "")
+        authorize(api: api, completion: completion)
     }
     
     public func signUp(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        networkAdapter.register(authData: authData, completion: { (result) in
-            switch result {
-            case .success(let data):
-                self.parseAuthTokensResponse(json: data, completion: { (result) in
-                    result ? completion(.success) : completion(.failure(description: "Server Error"))
-                })
-            case .failure(let error):
-                self.camErrorWrapper(error: error, completion: completion)
-            }
-        })
+        let api = CleengAPI.register(publisherID: publisherId, email: authData["email"] ?? "",
+                                     password: authData["password"] ?? "")
+        authorize(api: api, completion: completion)
     }
     
     public func resetPassword(data: [String: String], completion: @escaping (CAMResult) -> Void) {
