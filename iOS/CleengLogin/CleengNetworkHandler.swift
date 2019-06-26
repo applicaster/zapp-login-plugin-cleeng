@@ -16,51 +16,51 @@ class CleengNetworkHandler {
         self.publisherID = publisherID
     }
     
-    func login(authData: [String: String], completion: @escaping (CleengResult) -> Void) {
+    func login(authData: [String: String], completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.login(publisherID: publisherID, email: authData["email"], password: authData["password"])
         performRequest(api: api, completion: completion)
     }
     
-    func loginWithFacebook(email: String, facebookId: String, completion: @escaping (CleengResult) -> Void) {
+    func loginWithFacebook(email: String, facebookId: String, completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.loginWithFacebook(publisherID: publisherID, email: email,
                                               facebookId: facebookId)
         performRequest(api: api, completion: completion)
     }
     
-    func register(authData: [String: String], completion: @escaping (CleengResult) -> Void) {
+    func register(authData: [String: String], completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.register(publisherID: publisherID, email: authData["email"], password: authData["password"])
         performRequest(api: api, completion: completion)
     }
     
-    func registerWithFacebook(email: String, facebookId: String, completion: @escaping (CleengResult) -> Void) {
+    func registerWithFacebook(email: String, facebookId: String, completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.registerWithFacebook(publisherID: publisherID, email: email,
                                                  facebookId: facebookId)
         performRequest(api: api, completion: completion)
     }
     
-    func resetPassword(data: [String: String], completion: @escaping (CleengResult) -> Void) {
+    func resetPassword(data: [String: String], completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.resetPassword(publisherID: publisherID, email: data["email"])
         performRequest(api: api, completion: completion)
     }
     
-    func extendToken(token: String, completion: @escaping (CleengResult) -> Void) {
+    func extendToken(token: String, completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.extendToken(publisherID: publisherID, token: token)
         performRequest(api: api, completion: completion)
     }
     
-    func subscriptions(token: String?, byAuthId: Int, offers: [String]?, completion: @escaping (CleengResult) -> Void) { //0 - by offers, 1 by auth ids
+    func subscriptions(token: String?, byAuthId: Int, offers: [String]?, completion: @escaping (CleengAPIResult) -> Void) { //0 - by offers, 1 by auth ids
         let api = CleengAPI.subscriptions(publisherID: publisherID, token: token, byAuthId: byAuthId, offers: offers)
         performRequest(api: api, completion: completion)
     }
     
     func subscription(transactionId: String?, receiptData: String?, token: String?, offerId: String?,
-                      isRestored: Bool, couponCode: String?, completion: @escaping (CleengResult) -> Void) {
+                      isRestored: Bool, couponCode: String?, completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.subscription(publisherID: publisherID, transactionId: transactionId,
                                          receiptData: receiptData, token: token, offerId: offerId, isRestored: isRestored, couponCode: couponCode)
         performRequest(api: api, completion: completion)
     }
     
-    func performRequest(api: CleengAPI, completion: @escaping (CleengResult) -> Void) {
+    func performRequest(api: CleengAPI, completion: @escaping (CleengAPIResult) -> Void) {
         Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { (response) in
             switch response.result {
             case .success:
