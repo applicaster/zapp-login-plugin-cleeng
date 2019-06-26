@@ -14,9 +14,9 @@ enum CleengError: Error {
     case serverError
 }
 
-enum Result<Success> {
+enum Result<Success, Failure> {
     case success(Success)
-    case failure(CleengError)
+    case failure(Failure)
 }
 
 extension Result where Success == Void {
@@ -25,4 +25,11 @@ extension Result where Success == Void {
     }
 }
 
-typealias CleengResult = Result<Data>
+extension Result where Failure == Void {
+    static var failure: Result {
+        return .failure(())
+    }
+}
+
+typealias CleengAPIResult = Result<Data, CleengError>
+typealias SilentLoginResult = Result<Void, Void>

@@ -10,10 +10,12 @@ import ZappLoginPluginsSDK
 import ApplicasterSDK
 import CAM
 
+private let kCleengUserLoginToken = "CleengUserLoginToken"
+
 @objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol {
     
     private var userToken: String?
-    private var userPermissionTokens = [String: String]()
+    private var userPermissionEntitlementsIds = Set<String>()
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
@@ -66,10 +68,40 @@ import CAM
         }
     }
     
+    private func silentAuthorization(completion: @escaping (SilentLoginResult) -> Void) {
+        guard let savedLoginToken = UserDefaults.standard.string(forKey: kCleengUserLoginToken) else {
+            completion(.failure)
+            return
+        }
+        networkAdapter.extendToken(token: savedLoginToken, completion: { (result) in
+            switch result {
+            case .success(let data):
+                self.parseAuthTokensResponse(json: data, completion: { (result) in
+                    result ? completion(.success) : completion(.failure)
+                })
+            case .failure:
+                completion(.failure)
+            }
+        })
+    }
+    
     // MARK: - ZPAppLoadingHookProtocol
     
     public func executeAfterAppRootPresentation(displayViewController: UIViewController?,
                                                 completion: (() -> Swift.Void)?) {
+        silentAuthorization(completion: { (result) in
+            switch result {
+            case .success:
+                completion?()
+            case .failure:
+                self.executeAfterAppRootPresentationFlow(displayViewController: displayViewController,
+                                                         completion: completion)
+            }
+        })
+    }
+    
+    private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
+                                         completion: (() -> Swift.Void)?) {
         guard let startOnAppLaunch = configurationJSON?["cleeng_login_start_on_app_launch"] else {
             completion?()
             return
@@ -95,7 +127,7 @@ import CAM
             contentAccessManager.startFlow()
         }
     }
-   
+    
     // MARK: - ZPLoginProviderUserDataProtocol`
  
     public func isUserComply(policies: [String: NSObject], completion: @escaping (Bool) -> Void) {
@@ -139,22 +171,49 @@ import CAM
         return userToken ?? ""
     }
     
-    //MARK: - Private
+    // MARK: - JSON Response parsing
     
-    private func parseAuthTokensResponse(json: Data, completion: (Bool) -> ()) {
+    private func parseAuthTokensResponse(json: Data, completion: (Bool) -> Void) {
         if let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) {
             for item in cleengTokens {
                 if item.offerID.isEmpty {
                     userToken = item.token // if offerID empty than we retrieve user token
+                    UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
                 } else {
                     if let authID = item.authID {
-                        userPermissionTokens[authID] = item.token // if offerID !empty put subscription token in dicrionary by authId
+                        userPermissionEntitlementsIds.insert(authID) // if offerID !empty put subscription token in dicrionary by authId
                     }
                 }
             }
             completion(true)
         } else {
             completion(false)
+        }
+    }
+    
+    private func parseErrorResponse(json: Data, completion: (ServerError?) -> Void) {
+        if let serverError = try? JSONDecoder().decode(ServerError.self, from: json) {
+            completion(serverError)
+            return
+        } else {
+            completion(nil)
+        }
+    }
+    
+    private func camErrorWrapper(error: CleengError, completion: @escaping (CAMResult) -> Void) {
+        switch error {
+        case .serverError:
+            completion(.failure(description: "Server Error"))
+        case .requestError(let data):
+            self.parseErrorResponse(json: data, completion: { (error) in
+                guard let error = error else {
+                    completion(.failure(description: "Server Error"))
+                    return
+                }
+                completion(.failure(description: error.message))
+            })
+        case .networkError(let error):
+            completion(.failure(description: error.localizedDescription))
         }
     }
 }
@@ -182,44 +241,24 @@ extension ZappCleengLogin: CAMDelegate {
         networkAdapter.loginWithFacebook(email: userData.email, facebookId: userData.userId, completion: { (result) in
             switch result {
             case .success(let data):
-                completion(.success)
+                self.parseAuthTokensResponse(json: data, completion: { (result) in
+                    result ? completion(.success) : completion(.failure(description: "Server Error"))
+                })
             case .failure(let error):
-                switch error {
-                case .serverError:
-                    completion(.failure(description: "Server Error"))
-                case .requestError(let data):
-                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
-                        completion(.failure(description: serverError.message))
-                        return
-                    } else {
-                        completion(.failure(description: "Server Error"))
-                    }
-                case .networkError(let error):
-                    completion(.failure(description: error.localizedDescription))
-                }
+                self.camErrorWrapper(error: error, completion: completion)
             }
         })
     }
     
     public func facebookSignUp(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        networkAdapter.loginWithFacebook(email: userData.email, facebookId: userData.userId, completion: { (result) in
+        networkAdapter.registerWithFacebook(email: userData.email, facebookId: userData.userId, completion: { (result) in
             switch result {
             case .success(let data):
-                completion(.success)
+                self.parseAuthTokensResponse(json: data, completion: { (result) in
+                    result ? completion(.success) : completion(.failure(description: "Server Error"))
+                })
             case .failure(let error):
-                switch error {
-                case .serverError:
-                    completion(.failure(description: "Server Error"))
-                case .requestError(let data):
-                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
-                        completion(.failure(description: serverError.message))
-                        return
-                    } else {
-                        completion(.failure(description: "Server Error"))
-                    }
-                case .networkError(let error):
-                    completion(.failure(description: error.localizedDescription))
-                }
+                self.camErrorWrapper(error: error, completion: completion)
             }
         })
     }
@@ -228,21 +267,11 @@ extension ZappCleengLogin: CAMDelegate {
         networkAdapter.login(authData: authData, completion: { (result) in
             switch result {
             case .success(let data):
-                completion(.success)
+                self.parseAuthTokensResponse(json: data, completion: { (result) in
+                    result ? completion(.success) : completion(.failure(description: "Server Error"))
+                })
             case .failure(let error):
-                switch error {
-                case .serverError:
-                    completion(.failure(description: "Server Error"))
-                case .requestError(let data):
-                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
-                        completion(.failure(description: serverError.message))
-                        return
-                    } else {
-                        completion(.failure(description: "Server Error"))
-                    }
-                case .networkError(let error):
-                    completion(.failure(description: error.localizedDescription))
-                }
+                self.camErrorWrapper(error: error, completion: completion)
             }
         })
     }
@@ -251,21 +280,11 @@ extension ZappCleengLogin: CAMDelegate {
         networkAdapter.register(authData: authData, completion: { (result) in
             switch result {
             case .success(let data):
-                completion(.success)
+                self.parseAuthTokensResponse(json: data, completion: { (result) in
+                    result ? completion(.success) : completion(.failure(description: "Server Error"))
+                })
             case .failure(let error):
-                switch error {
-                case .serverError:
-                    completion(.failure(description: "Server Error"))
-                case .requestError(let data):
-                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
-                        completion(.failure(description: serverError.message))
-                        return
-                    } else {
-                        completion(.failure(description: "Server Error"))
-                    }
-                case .networkError(let error):
-                    completion(.failure(description: error.localizedDescription))
-                }
+                self.camErrorWrapper(error: error, completion: completion)
             }
         })
     }
@@ -276,19 +295,7 @@ extension ZappCleengLogin: CAMDelegate {
             case .success:
                 completion(.success)
             case .failure(let error):
-                switch error {
-                case .serverError:
-                    completion(.failure(description: "Server Error"))
-                case .requestError(let data):
-                    if let serverError = try? JSONDecoder().decode(ServerError.self, from: data) {
-                        completion(.failure(description: serverError.message))
-                        return
-                    } else {
-                        completion(.failure(description: "Server Error"))
-                    }
-                case .networkError(let error):
-                    completion(.failure(description: error.localizedDescription))
-                }
+                self.camErrorWrapper(error: error, completion: completion)
             }
         })
     }
