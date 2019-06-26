@@ -10,32 +10,25 @@ import CAM
 import Alamofire
 
 class CleengNetworkHandler {
-    var publisherID = ""
+    var isPerformingAuthorizationFlow = false
+    let publisherID: String
     
     init(publisherID: String) {
         self.publisherID = publisherID
     }
     
-    func login(authData: [String: String], completion: @escaping (CleengAPIResult) -> Void) {
-        let api = CleengAPI.login(publisherID: publisherID, email: authData["email"], password: authData["password"])
-        performRequest(api: api, completion: completion)
-    }
-    
-    func loginWithFacebook(email: String, facebookId: String, completion: @escaping (CleengAPIResult) -> Void) {
-        let api = CleengAPI.loginWithFacebook(publisherID: publisherID, email: email,
-                                              facebookId: facebookId)
-        performRequest(api: api, completion: completion)
-    }
-    
-    func register(authData: [String: String], completion: @escaping (CleengAPIResult) -> Void) {
-        let api = CleengAPI.register(publisherID: publisherID, email: authData["email"], password: authData["password"])
-        performRequest(api: api, completion: completion)
-    }
-    
-    func registerWithFacebook(email: String, facebookId: String, completion: @escaping (CleengAPIResult) -> Void) {
-        let api = CleengAPI.registerWithFacebook(publisherID: publisherID, email: email,
-                                                 facebookId: facebookId)
-        performRequest(api: api, completion: completion)
+    func authorize(apiRequest: CleengAPI, completion: @escaping (CleengAPIResult) -> Void) {
+        isPerformingAuthorizationFlow = true
+        let authorizationCompletion: (CleengAPIResult) -> Void = { result in
+            self.isPerformingAuthorizationFlow = false
+            completion(result)
+        }
+        switch apiRequest {
+        case .login, .loginWithFacebook, .register, .registerWithFacebook:
+            performRequest(api: apiRequest, completion: authorizationCompletion)
+        default:
+            assert(false, "Wrong API passed to authorize")
+        }
     }
     
     func resetPassword(data: [String: String], completion: @escaping (CleengAPIResult) -> Void) {
@@ -44,11 +37,17 @@ class CleengNetworkHandler {
     }
     
     func extendToken(token: String, completion: @escaping (CleengAPIResult) -> Void) {
+        isPerformingAuthorizationFlow = true
+        let extendTokenCompletion: (CleengAPIResult) -> Void = { result in
+            self.isPerformingAuthorizationFlow = false
+            completion(result)
+        }
         let api = CleengAPI.extendToken(publisherID: publisherID, token: token)
-        performRequest(api: api, completion: completion)
+        performRequest(api: api, completion: extendTokenCompletion)
     }
     
-    func subscriptions(token: String?, byAuthId: Int, offers: [String]?, completion: @escaping (CleengAPIResult) -> Void) { //0 - by offers, 1 by auth ids
+    func subscriptions(token: String?, byAuthId: Int, offers: [String]?,
+                       completion: @escaping (CleengAPIResult) -> Void) { //0 - by offers, 1 by auth ids
         let api = CleengAPI.subscriptions(publisherID: publisherID, token: token, byAuthId: byAuthId, offers: offers)
         performRequest(api: api, completion: completion)
     }
@@ -56,7 +55,8 @@ class CleengNetworkHandler {
     func subscription(transactionId: String?, receiptData: String?, token: String?, offerId: String?,
                       isRestored: Bool, couponCode: String?, completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.subscription(publisherID: publisherID, transactionId: transactionId,
-                                         receiptData: receiptData, token: token, offerId: offerId, isRestored: isRestored, couponCode: couponCode)
+                                         receiptData: receiptData, token: token, offerId: offerId,
+                                         isRestored: isRestored, couponCode: couponCode)
         performRequest(api: api, completion: completion)
     }
     
