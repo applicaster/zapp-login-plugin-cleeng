@@ -8,6 +8,7 @@ import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.handleResponse
 import com.applicaster.cleeng.network.request.RegisterRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
+import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 
 class CamContract(var cleengService: CleengService) : ICamContract {
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
@@ -147,8 +148,24 @@ class CamContract(var cleengService: CleengService) : ICamContract {
     }
 
     override fun resetPassword(authFieldsInput: HashMap<String, String>, callback: PasswordResetCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        executeRequest {
+            val response = cleengService.networkHelper.resetPassword(
+                authFieldsInput["email"].orEmpty()
+            )
+            when (val result = handleResponse(response)) {
+                is Result.Success -> {
+                    val responseDataResult: ResetPasswordResponseData? = result.value
+                    if (responseDataResult?.success == true)
+                        callback.onSuccess()
+                    else
+                        callback.onFailure("Error") //TODO: replace with separated error
+
+                }
+
+                is Result.Failure -> {
+                    callback.onFailure(result.value?.message().orEmpty())
+                }
+            }
+        }
     }
-
-
 }
