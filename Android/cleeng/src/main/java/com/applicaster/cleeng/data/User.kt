@@ -1,7 +1,5 @@
 package com.applicaster.cleeng.data
 
-import com.applicaster.cam.params.billing.Offer
-
 data class User(
     val email: String? = null,
     val password: String? = null,

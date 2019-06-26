@@ -2,6 +2,7 @@ package com.applicaster.cleeng.cam
 
 import com.applicaster.cam.*
 import com.applicaster.cleeng.CleengService
+import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.handleResponse
@@ -37,8 +38,8 @@ class CamContract(var cleengService: CleengService) : ICamContract {
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
                     val responseResult: List<AuthResponse>? = result.value
-//                    TODO("save token")
-//                    cleengService.saveUserToken(context, responseResult?.token.orEmpty())
+                    if (!responseResult.isNullOrEmpty())
+                        parseAuthResponse(responseResult)
                     callback.onSuccess()
                 }
 
@@ -50,7 +51,64 @@ class CamContract(var cleengService: CleengService) : ICamContract {
     }
 
     override fun loginWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
+        executeRequest {
+            val response = cleengService.networkHelper.loginFacebook(
+                email,
+                id
+            )
+            when (val result = handleResponse(response)) {
+                is Result.Success -> {
+                    val responseResult: List<AuthResponse>? = result.value
+                    if (!responseResult.isNullOrEmpty())
+                        parseAuthResponse(responseResult)
+                    callback.onSuccess()
+                }
+
+                is Result.Failure -> {
+                    callback.onFailure(result.value?.message().orEmpty())
+                }
+            }
+        }
+    }
+
+    override fun signUp(authFieldsInput: HashMap<String, String>, callback: SignUpCallback) {
+//        executeRequest {
+//            val response = cleengService.networkHelper.register(
+//                authFieldsInput["email"].orEmpty(),
+//                authFieldsInput["password"].orEmpty(),
+//                cleengService.getUser().country,
+//
+//
+//            )
+//            when (val result = handleResponse(response)) {
+//                is Result.Success -> {
+//                    val responseResult: List<AuthResponse>? = result.value
+//                    if (!responseResult.isNullOrEmpty())
+//                        parseAuthResponse(responseResult)
+//                    callback.onSuccess()
+//                }
+//
+//                is Result.Failure -> {
+//                    callback.onFailure(result.value?.message().orEmpty())
+//                }
+//            }
+//        }
+    }
+
+    override fun signupWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    private fun parseAuthResponse(responseResult: List<AuthResponse>) {
+        val offers  = arrayListOf<Offer>()
+        for (authData in responseResult) {
+            if (authData.offerId.isNullOrEmpty()) { //parse user data
+                cleengService.saveUserToken(authData.token.orEmpty())
+            } else {//parse owned offers
+                offers.add(Offer(authData.offerId, authData.token, authData.authId))
+            }
+        }
+        cleengService.setUserOffers(offers)
     }
 
     override fun onItemPurchased() {
@@ -65,11 +123,5 @@ class CamContract(var cleengService: CleengService) : ICamContract {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun signUp(authFieldsInput: HashMap<String, String>, callback: SignUpCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
-    override fun signupWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 }

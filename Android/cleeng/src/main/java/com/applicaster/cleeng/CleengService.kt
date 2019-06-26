@@ -5,6 +5,7 @@ import com.applicaster.app.APProperties
 import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
+import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.data.User
 import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
@@ -24,11 +25,15 @@ import kotlin.collections.ArrayList
 
 class CleengService {
 
-    private var publisherId: String = ""
     val networkHelper: NetworkHelper by lazy { NetworkHelper(publisherId) }
+
     private val camContract: CamContract by lazy { CamContract(this@CleengService) }
     private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
 
+    private var publisherId: String = ""
+    private val user: User = User()
+
+    //TODO: move key handling to separated class
     private val KEY_AUTHORIZATION_PROVIDERS_IDS = "authorization_providers_ids"
 
     fun handleStartupHook(context: Context, listener: HookListener?) {
@@ -125,8 +130,8 @@ class CleengService {
 
     private fun isUserOffersComply(providerId: String): Boolean {
         val offersList = getUser().userOffers
-        offersList.forEach { offer ->
-            if (offer.productId.isNotEmpty() && offer.productId == providerId)
+        offersList?.forEach { offer ->
+            if (offer.authId.isNullOrEmpty() && offer.authId == providerId)
                 return true
         }
         return false
@@ -170,9 +175,7 @@ class CleengService {
         }
     }
 
-    fun getUser(): User {
-        TODO("should be returned from shared preferences?")
-    }
+    fun getUser() = user
 
     fun saveUserToken(token: String) {
         preferences.saveUserToken(token)
@@ -180,6 +183,10 @@ class CleengService {
 
     fun logout() {
         preferences.removeUserToken()
+    }
+
+    fun setUserOffers(offers: ArrayList<Offer>) {
+        user.userOffers = offers
     }
 
     private enum class Option {
