@@ -168,4 +168,8 @@ class CamContract(var cleengService: CleengService) : ICamContract {
             }
         }
     }
+
+    override fun isRedeemActivated(): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

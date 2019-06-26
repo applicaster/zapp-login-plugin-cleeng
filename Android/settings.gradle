@@ -1,1 +1,1 @@
-include ':sample', ':cleeng'
+include ':sample', ':cleeng', ':cam'
