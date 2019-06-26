@@ -39,8 +39,14 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     
     private func parsePlayableItems(from dictionary: [String: Any]?) -> [ZPPlayable] {
         let playableItemsKey = "playable_items"
-        let playableItems = dictionary?[playableItemsKey] as? [ZPPlayable] ?? []
-        return playableItems
+        let vodItemsKey = "vod_item_id"
+        
+        var playableItems = dictionary?[playableItemsKey] as? [ZPPlayable]
+        if playableItems == nil {
+            playableItems = dictionary?[vodItemsKey] as? [ZPPlayable]
+        }
+        
+        return playableItems ?? []
     }
     
     private func parseFlow(from playableItems: [ZPPlayable]) -> CAMFlow {
@@ -66,6 +72,11 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         case (false, true):
             return .no
         }
+    }
+    
+    private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
+        let entitlementsKey = "ds_product_ids"
+        return playableItems.first?.extensionsDictionary?[entitlementsKey] as? [String] ?? []
     }
     
     private func silentAuthorization(completion: @escaping (SilentLoginResult) -> Void) {
@@ -141,11 +152,40 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         }
     }
     
-    // MARK: - ZPLoginProviderUserDataProtocol`
+    // MARK: - ZPLoginProviderUserDataProtocol
+    
+    public func isUserComply(policies: [String: NSObject]) -> Bool {
+        let playableItems = parsePlayableItems(from: policies)
+        let flow = parseFlow(from: playableItems)
+        
+        assert(playableItems.count == 1, "It is assumed only one item comes in this method.")
+        
+        var isComply = false
+        
+        switch flow {
+        case .authentication:
+            isComply = isAuthenticated()
+        case .storefront:
+            let entitlements = parseEntitlements(from: playableItems)
+            isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
+        case .authAndStorefront:
+            if isAuthenticated() == true {
+                let entitlements = parseEntitlements(from: playableItems)
+                isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
+            }
+        case .no:
+            isComply = true
+        }
+        
+        return isComply
+    }
  
     public func isUserComply(policies: [String: NSObject], completion: @escaping (Bool) -> Void) {
-        completion(false)
+        let result = isUserComply(policies: policies)
+        completion(result)
     }
+    
+    // MARK: - ZPLoginProviderProtocol
     
     public func login(_ additionalParameters: [String: Any]?,
                       completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
