@@ -11,7 +11,7 @@ import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.handleResponse
-import com.applicaster.cleeng.network.response.AuthResponse
+import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.utils.CleengAsyncTaskListener
 import com.applicaster.cleeng.utils.SharedPreferencesUtil
 import com.applicaster.loader.json.APChannelLoader
@@ -41,9 +41,9 @@ class CleengService {
             val response = networkHelper.extendToken(getUser().token.orEmpty())
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseResult: AuthResponse? = result.value
+                    val responseDataResult: AuthResponseData? = result.value
                     // save token to prefs?
-                    saveUserToken(responseResult?.token.orEmpty())
+                    saveUserToken(responseDataResult?.token.orEmpty())
                     // finish hook
                     listener?.onHookFinished()
                 }

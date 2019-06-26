@@ -3,7 +3,7 @@ package com.applicaster.cleeng.network.response
 
 import com.google.gson.annotations.SerializedName
 
-data class AuthResponse(
+data class AuthResponseData(
     @SerializedName("offerId")
     val offerId: String?,
     @SerializedName("token")

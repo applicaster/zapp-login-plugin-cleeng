@@ -6,7 +6,8 @@ import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.handleResponse
-import com.applicaster.cleeng.network.response.AuthResponse
+import com.applicaster.cleeng.network.request.RegisterRequestData
+import com.applicaster.cleeng.network.response.AuthResponseData
 
 class CamContract(var cleengService: CleengService) : ICamContract {
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
@@ -37,9 +38,9 @@ class CamContract(var cleengService: CleengService) : ICamContract {
             )
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseResult: List<AuthResponse>? = result.value
-                    if (!responseResult.isNullOrEmpty())
-                        parseAuthResponse(responseResult)
+                    val responseDataResult: List<AuthResponseData>? = result.value
+                    if (!responseDataResult.isNullOrEmpty())
+                        parseAuthResponse(responseDataResult)
                     callback.onSuccess()
                 }
 
@@ -58,9 +59,9 @@ class CamContract(var cleengService: CleengService) : ICamContract {
             )
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseResult: List<AuthResponse>? = result.value
-                    if (!responseResult.isNullOrEmpty())
-                        parseAuthResponse(responseResult)
+                    val responseDataResult: List<AuthResponseData>? = result.value
+                    if (!responseDataResult.isNullOrEmpty())
+                        parseAuthResponse(responseDataResult)
                     callback.onSuccess()
                 }
 
@@ -72,36 +73,62 @@ class CamContract(var cleengService: CleengService) : ICamContract {
     }
 
     override fun signUp(authFieldsInput: HashMap<String, String>, callback: SignUpCallback) {
-//        executeRequest {
-//            val response = cleengService.networkHelper.register(
-//                authFieldsInput["email"].orEmpty(),
-//                authFieldsInput["password"].orEmpty(),
-//                cleengService.getUser().country,
-//
-//
-//            )
-//            when (val result = handleResponse(response)) {
-//                is Result.Success -> {
-//                    val responseResult: List<AuthResponse>? = result.value
-//                    if (!responseResult.isNullOrEmpty())
-//                        parseAuthResponse(responseResult)
-//                    callback.onSuccess()
-//                }
-//
-//                is Result.Failure -> {
-//                    callback.onFailure(result.value?.message().orEmpty())
-//                }
-//            }
-//        }
+        executeRequest {
+            val response = cleengService.networkHelper.register(
+                RegisterRequestData(
+                    authFieldsInput["email"].orEmpty(),
+                    authFieldsInput["password"].orEmpty(),
+                    null,
+                    cleengService.getUser().country,
+                    cleengService.getUser().currency,
+                    cleengService.getUser().locale
+                )
+            )
+            when (val result = handleResponse(response)) {
+                is Result.Success -> {
+                    val responseDataResult: List<AuthResponseData>? = result.value
+                    if (!responseDataResult.isNullOrEmpty())
+                        parseAuthResponse(responseDataResult)
+                    callback.onSuccess()
+                }
+
+                is Result.Failure -> {
+                    callback.onFailure(result.value?.message().orEmpty())
+                }
+            }
+        }
     }
 
     override fun signupWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        executeRequest {
+            val response = cleengService.networkHelper.register(
+                RegisterRequestData(
+                    email,
+                    null,
+                    id,
+                    cleengService.getUser().country,
+                    cleengService.getUser().currency,
+                    cleengService.getUser().locale
+                )
+            )
+            when (val result = handleResponse(response)) {
+                is Result.Success -> {
+                    val responseDataResult: List<AuthResponseData>? = result.value
+                    if (!responseDataResult.isNullOrEmpty())
+                        parseAuthResponse(responseDataResult)
+                    callback.onSuccess()
+                }
+
+                is Result.Failure -> {
+                    callback.onFailure(result.value?.message().orEmpty())
+                }
+            }
+        }
     }
 
-    private fun parseAuthResponse(responseResult: List<AuthResponse>) {
-        val offers  = arrayListOf<Offer>()
-        for (authData in responseResult) {
+    private fun parseAuthResponse(responseDataResult: List<AuthResponseData>) {
+        val offers = arrayListOf<Offer>()
+        for (authData in responseDataResult) {
             if (authData.offerId.isNullOrEmpty()) { //parse user data
                 cleengService.saveUserToken(authData.token.orEmpty())
             } else {//parse owned offers

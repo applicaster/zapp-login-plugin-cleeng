@@ -8,9 +8,9 @@ import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.Error
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.handleResponse
-import com.applicaster.cleeng.network.request.SubscriptionsRequest
-import com.applicaster.cleeng.network.response.OfferResponse
-import com.applicaster.cleeng.network.response.AuthResponse
+import com.applicaster.cleeng.network.request.SubscriptionsRequestData
+import com.applicaster.cleeng.network.response.OfferResponseData
+import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.utils.SharedPreferencesUtil
 
 class MainActivity : AppCompatActivity() {
@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity() {
             val response = networkHelper.login("user email", "password")
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseResult: List<AuthResponse>? = result.value
-                    subscriptions(responseResult?.get(0)?.token ?: "")
+                    val responseDataResult: List<AuthResponseData>? = result.value
+                    subscriptions(responseDataResult?.get(0)?.token ?: "")
                 }
                 is Result.Failure -> {
                     val error: Error? = result.value
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun subscriptions(token: String) {
-        val request = SubscriptionsRequest(
+        val request = SubscriptionsRequestData(
             1,
             arrayListOf(),
             token
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
             val response = networkHelper.requestSubscriptions(request)
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseResult: List<OfferResponse>? = result.value
+                    val responseDataResult: List<OfferResponseData>? = result.value
                     //response handling logic
                 }
 

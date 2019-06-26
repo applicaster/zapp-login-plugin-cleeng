@@ -1,12 +1,12 @@
 package com.applicaster.cleeng.network
 
 import com.applicaster.cleeng.network.interceptor.PublisherInfoInterceptor
-import com.applicaster.cleeng.network.request.RegisterRequest
-import com.applicaster.cleeng.network.request.SubscribeRequest
-import com.applicaster.cleeng.network.request.SubscriptionsRequest
-import com.applicaster.cleeng.network.response.OfferResponse
-import com.applicaster.cleeng.network.response.AuthResponse
-import com.applicaster.cleeng.network.response.ResetPasswordResponse
+import com.applicaster.cleeng.network.request.RegisterRequestData
+import com.applicaster.cleeng.network.request.SubscribeRequestData
+import com.applicaster.cleeng.network.request.SubscriptionsRequestData
+import com.applicaster.cleeng.network.response.OfferResponseData
+import com.applicaster.cleeng.network.response.AuthResponseData
+import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import retrofit2.Response
 
 class NetworkHelper(private val publisherId: String) {
@@ -16,8 +16,8 @@ class NetworkHelper(private val publisherId: String) {
         ServiceGenerator.createRetrofitService(RestService::class.java)
     }
 
-    suspend fun register(request: RegisterRequest): Response<List<AuthResponse>> =
-        with(request) {
+    suspend fun register(requestData: RegisterRequestData): Response<List<AuthResponseData>> =
+        with(requestData) {
             retrofitService.registerEmail(
                 email,
                 password ?: "",
@@ -27,8 +27,8 @@ class NetworkHelper(private val publisherId: String) {
             )
         }
 
-    suspend fun registerFacebook(request: RegisterRequest): Response<List<AuthResponse>> =
-        with(request) {
+    suspend fun registerFacebook(requestData: RegisterRequestData): Response<List<AuthResponseData>> =
+        with(requestData) {
             retrofitService.registerFacebook(
                 email,
                 facebookId ?: "",
@@ -38,21 +38,21 @@ class NetworkHelper(private val publisherId: String) {
             )
         }
 
-    suspend fun login(email: String, password: String): Response<List<AuthResponse>> =
+    suspend fun login(email: String, password: String): Response<List<AuthResponseData>> =
         retrofitService.loginEmail(email, password)
 
-    suspend fun loginFacebook(email: String, facebookId: String): Response<List<AuthResponse>> =
+    suspend fun loginFacebook(email: String, facebookId: String): Response<List<AuthResponseData>> =
         retrofitService.loginFacebook(email, facebookId)
 
-    suspend fun resetPassword(email: String): Response<ResetPasswordResponse> =
+    suspend fun resetPassword(email: String): Response<ResetPasswordResponseData> =
         retrofitService.resetPassword(email)
 
-    suspend fun extendToken(token: String): Response<AuthResponse> =
+    suspend fun extendToken(token: String): Response<AuthResponseData> =
         retrofitService.extendToken(token)
 
-    suspend fun requestSubscriptions(request: SubscriptionsRequest): Response<List<OfferResponse>> =
-        retrofitService.requestSubscriptions(request)
+    suspend fun requestSubscriptions(requestData: SubscriptionsRequestData): Response<List<OfferResponseData>> =
+        retrofitService.requestSubscriptions(requestData)
 
-    suspend fun subscribe(request: SubscribeRequest): Response<Unit> =
-        retrofitService.subscribe(request)
+    suspend fun subscribe(requestData: SubscribeRequestData): Response<Unit> =
+        retrofitService.subscribe(requestData)
 }

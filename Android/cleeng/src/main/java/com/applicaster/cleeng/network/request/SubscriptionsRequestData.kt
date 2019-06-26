@@ -1,9 +1,8 @@
 package com.applicaster.cleeng.network.request
 
-
 import com.google.gson.annotations.SerializedName
 
-data class SubscriptionsRequest(
+data class SubscriptionsRequestData(
     @SerializedName("byAuthIds")
     val byAuthIds: Int,
     @SerializedName("offers")
