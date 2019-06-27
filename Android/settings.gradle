@@ -1,1 +1,2 @@
 include ':sample', ':cleeng', ':cam'
+project(':cam').projectDir = new File('../Submodules/CAM/Android/cam')
