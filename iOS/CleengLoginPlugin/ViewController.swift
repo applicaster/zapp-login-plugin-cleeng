@@ -22,7 +22,10 @@ class ViewController: UIViewController {
     }
 
     @IBAction private func start() {
-        let item = TestableAPPurchasableItem(authIds: ["48"])
+        let authKey = "requires_authentication"
+        let entitlementsKey = "ds_product_ids"
+        let item = Playable()
+        item.extensionsDictionary = [authKey: true, entitlementsKey: ["48"]]
         let login = ZPLoginManager.sharedInstance.createWithUserData()
         pluggableLogin = login
         if let login = login {
@@ -36,20 +39,4 @@ class ViewController: UIViewController {
         
     }
 
-}
-
-class TestableAPPurchasableItem: APPurchasableItem {
-    private var authIds: [String] = []
-    convenience init(authIds: [String]) {
-        self.init()
-        self.authIds = authIds
-    }
-    
-    override var authorizationProvidersIDs: NSArray! {
-        return authIds as NSArray
-    }
-    
-    override func isLoaded() -> Bool {
-        return true
-    }
 }
