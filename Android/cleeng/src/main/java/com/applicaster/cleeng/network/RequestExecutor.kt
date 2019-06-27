@@ -13,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 private lateinit var job: Job
 private val scope by lazy {
     job = Job()
-    val coroutineContext: CoroutineContext = Dispatchers.IO + job
+    val coroutineContext: CoroutineContext = Dispatchers.Main + job
     CoroutineScope(coroutineContext)
 }
 

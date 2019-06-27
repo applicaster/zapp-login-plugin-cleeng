@@ -10,25 +10,22 @@ import com.applicaster.cleeng.network.request.RegisterRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 
-class CamContract(var cleengService: CleengService) : ICamContract {
+class CamContract(private val cleengService: CleengService) : ICamContract {
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getPluginConfig(): Map<String, String> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getPluginConfig() =
+        cleengService.getPluginConfigurationParams()
 
-    override fun isPurchaseRequired(entitlements: List<String>): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun isPurchaseRequired(entitlements: List<String>) = true //TODO: dummy. add proper handling
 
     override fun isUserLogged(): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun loadEntitlements(callback: EntitlementsLoadCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun login(authFieldsInput: HashMap<String, String>, callback: LoginCallback) {
@@ -169,7 +166,5 @@ class CamContract(var cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun isRedeemActivated(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun isRedeemActivated(): Boolean  = false //TODO: dummy. add proper handling
 }

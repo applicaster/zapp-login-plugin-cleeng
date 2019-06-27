@@ -11,8 +11,18 @@ import java.util.HashMap
 
 class CleengLoginPlugin : LoginContract, PluginScreen {
 
-    private val cleengService: CleengService by lazy { CleengService() }
+    private val cleengService: CleengService by lazy { CleengService(this@CleengLoginPlugin) }
     private var pluginConfig: Map<String, String>? = mapOf()
+
+    //TODO: Test mock call that should emulate flow after click on video
+    fun mockStartProcess(
+        context: Context,
+        mockPluginConfiguration: Map<String, String>
+    ) {
+        if (pluginConfig.isNullOrEmpty())
+            pluginConfig = mockPluginConfiguration
+        cleengService.mockStart(context)
+    }
 
     override fun login(
         context: Context?,
@@ -60,6 +70,8 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
             entry.key.toString() to entry.value.toString()
         }
     }
+
+    fun getPluginConfigurationParams() = pluginConfig.orEmpty()
 
     override fun handlePluginScheme(context: Context?, data: MutableMap<String, String>?): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

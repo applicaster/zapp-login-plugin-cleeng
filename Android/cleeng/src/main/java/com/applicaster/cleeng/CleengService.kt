@@ -23,18 +23,22 @@ import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.util.AppData
 import kotlin.collections.ArrayList
 
-class CleengService {
-
+class CleengService(private val cleengLoginPlugin: CleengLoginPlugin) {
+    private var publisherId: String = "5b3cc7c2fed4fa00149037d6"
     val networkHelper: NetworkHelper by lazy { NetworkHelper(publisherId) }
 
     private val camContract: CamContract by lazy { CamContract(this@CleengService) }
     private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
 
-    private var publisherId: String = ""
+
     private val user: User = User()
 
     //TODO: move key handling to separated class
     private val KEY_AUTHORIZATION_PROVIDERS_IDS = "authorization_providers_ids"
+
+    fun mockStart(context: Context) {
+        ContentAccessManager.onProcessStarted(camContract, context)
+    }
 
     fun handleStartupHook(context: Context, listener: HookListener?) {
         executeRequest {
@@ -188,6 +192,8 @@ class CleengService {
     fun setUserOffers(offers: ArrayList<Offer>) {
         user.userOffers = offers
     }
+
+    fun getPluginConfigurationParams() = cleengLoginPlugin.getPluginConfigurationParams()
 
     private enum class Option {
         Some,
