@@ -12,7 +12,7 @@ import CAM
 
 private let kCleengUserLoginToken = "CleengUserLoginToken"
 
-@objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol {
+@objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
     
     private var userToken: String?
     private var userPermissionEntitlementsIds = Set<String>()
@@ -20,6 +20,8 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
     public var configurationJSON: NSDictionary?
+    
+    private var flow: CAMFlow = .no
     
     public required override init() {
         super.init()
@@ -33,6 +35,17 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
             publisherId = id
         }
         networkAdapter = CleengNetworkHandler(publisherID: publisherId)
+    }
+    
+    public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
+        
+    }
+    
+    public required init?(pluginModel: ZPPluginModel, dataSourceModel: NSObject?) {
+        super.init()
+        
+        let playableItems = dataSourceModel as? [ZPPlayable] ?? []
+        flow = parseFlow(from: playableItems)
     }
     
     // MARK: - Private methods
@@ -266,6 +279,28 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         case .networkError(let error):
             completion(.failure(description: error.localizedDescription))
         }
+    }
+    
+    // MARK: - ZPScreenHookAdapterProtocol
+    
+    public func executeHook(presentationIndex: NSInteger,
+                            dataDict: [String: Any]?,
+                            taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
+        guard let controller = UIViewController.topmostViewController() else {
+            assert(false, "No topmost controller")
+            taskFinishedWithCompletion(false, nil, nil)
+            return
+        }
+        
+        let camFlowResult: (Bool) -> Void = { isFlowSucceded in
+            taskFinishedWithCompletion(isFlowSucceded, nil, nil)
+        }
+        
+        let cam = ContentAccessManager(rootViewController: controller,
+                                       camDelegate: self,
+                                       camFlow: flow,
+                                       completion: camFlowResult)
+        cam.startFlow()
     }
 }
 
