@@ -203,20 +203,20 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     public func login(_ additionalParameters: [String: Any]?,
                       completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
     
-        guard let controller = UIViewController.topmostViewController() else {
-            assert(false, "No topmost controller")
-            completion(.failed)
-        }
-        
-        let playableItems = parsePlayableItems(from: additionalParameters)
-        let flow = parseFlow(from: playableItems)
-        
-        let contentAccessManager = ContentAccessManager(rootViewController: controller,
-                                                        camDelegate: self,
-                                                        camFlow: flow) { (isCompleted) in
-            (isCompleted == true) ? completion(.completedSuccessfully) : completion(.failed)
-        }
-        contentAccessManager.startFlow()
+//        guard let controller = UIViewController.topmostViewController() else {
+//            assert(false, "No topmost controller")
+//            completion(.failed)
+//        }
+//
+//        let playableItems = parsePlayableItems(from: additionalParameters)
+//        let flow = parseFlow(from: playableItems)
+//
+//        let contentAccessManager = ContentAccessManager(rootViewController: controller,
+//                                                        camDelegate: self,
+//                                                        camFlow: flow) { (isCompleted) in
+//            (isCompleted == true) ? completion(.completedSuccessfully) : completion(.failed)
+//        }
+//        contentAccessManager.startFlow()
     }
     
     public func logout(_ completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
