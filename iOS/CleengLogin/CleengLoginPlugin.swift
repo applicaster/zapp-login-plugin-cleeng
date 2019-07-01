@@ -45,47 +45,10 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         super.init()
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
-        flow = parseFlow(from: playableItems)
+        flow = FlowParser().parseFlow(from: playableItems)
     }
     
     // MARK: - Private methods
-    
-    private func parsePlayableItems(from dictionary: [String: Any]?) -> [ZPPlayable] {
-        let playableItemsKey = "playable_items"
-        let vodItemsKey = "vod_item_id"
-        
-        var playableItems = dictionary?[playableItemsKey] as? [ZPPlayable]
-        if playableItems == nil {
-            playableItems = dictionary?[vodItemsKey] as? [ZPPlayable]
-        }
-        
-        return playableItems ?? []
-    }
-    
-    private func parseFlow(from playableItems: [ZPPlayable]) -> CAMFlow {
-        // In general we assume only one item comes to plugin
-        guard let item = playableItems.first else {
-            assert(false)
-            return .no
-        }
-        
-        let authKey = "requires_authentication"
-        let entitlementsKey = "ds_product_ids"
-        
-        let isAuthRequired = item.extensionsDictionary?[authKey] as? Bool ?? false
-        let entitlements = item.extensionsDictionary?[entitlementsKey] as? [String] ?? []
-        
-        switch (isAuthRequired, entitlements.isEmpty) {
-        case (true, true):
-            return .authentication
-        case (true, false):
-            return .authAndStorefront
-        case (false, false):
-            return .storefront
-        case (false, true):
-            return .no
-        }
-    }
     
     private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
         let entitlementsKey = "ds_product_ids"
@@ -168,8 +131,9 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     // MARK: - ZPLoginProviderUserDataProtocol
     
     public func isUserComply(policies: [String: NSObject]) -> Bool {
-        let playableItems = parsePlayableItems(from: policies)
-        let flow = parseFlow(from: playableItems)
+        let parser = FlowParser()
+        let playableItems = parser.parsePlayableItems(from: policies)
+        let flow = parser.parseFlow(from: playableItems)
         
         assert(playableItems.count == 1, "It is assumed only one item comes in this method.")
         
