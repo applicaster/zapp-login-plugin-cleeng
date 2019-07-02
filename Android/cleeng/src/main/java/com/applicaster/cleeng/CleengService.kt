@@ -13,6 +13,7 @@ import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.handleResponse
 import com.applicaster.cleeng.network.response.AuthResponseData
+import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.CleengAsyncTaskListener
 import com.applicaster.cleeng.utils.SharedPreferencesUtil
 import com.applicaster.loader.json.APChannelLoader
@@ -41,7 +42,7 @@ class CleengService {
 
     fun handleStartupHook(context: Context, listener: HookListener?) {
         executeRequest {
-            val response = networkHelper.extendToken(getUser().token.orEmpty())
+            val response = networkHelper.extendToken(getUserToken())
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
@@ -194,7 +195,15 @@ class CleengService {
     fun getUser() = user
 
     fun saveUserToken(token: String) {
+        user.token = token
         preferences.saveUserToken(token)
+    }
+
+    fun getUserToken(): String {
+        if (user.token.isNullOrEmpty()) {
+            return preferences.getUserToken()
+        }
+        return user.token.orEmpty()
     }
 
     fun logout() {
@@ -211,8 +220,9 @@ class CleengService {
 
     fun getPluginConfigurationParams() = pluginConfigurator?.getPluginConfig().orEmpty()
 
-    fun isAccessGranted(): Boolean {
-        return false
+    fun isAccessGranted(subscriptionData: SubscriptionsResponseData): Boolean {
+//        save current authId if access granted
+        return subscriptionData.accessGranted ?: false
     }
 
     private enum class Option {

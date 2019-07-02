@@ -20,18 +20,10 @@ import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity() {
 
-    private val networkHelper: NetworkHelper by lazy { NetworkHelper("") }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         button_mock_start.setOnClickListener { CleengLoginPlugin().mockStartProcess(this, getMockPluginConfiguration()) }
-//        //TODO: test call! Should be removed later!
-//        val prefs = SharedPreferencesUtil()
-//        prefs.saveUserToken("my-custom-token")
-//        login()
-//        val token = prefs.getUserToken()
-//        Log.w(MainActivity::class.java.simpleName, token)
     }
 
     private fun getMockPluginConfiguration(): Map<String, String> =
@@ -56,44 +48,5 @@ class MainActivity : AppCompatActivity() {
         }
 
         return json
-    }
-
-    private fun login() {
-        executeRequest {
-            val response = networkHelper.login("user email", "password")
-            when (val result = handleResponse(response)) {
-                is Result.Success -> {
-                    val responseResult: List<AuthResponseData>? = result.value
-                    subscriptions(responseResult?.get(0)?.token ?: "")
-                }
-                is Result.Failure -> {
-                    val error: Error? = result.value
-                    //error handling logic
-                }
-            }
-        }
-    }
-
-    private fun subscriptions(token: String) {
-        val request = SubscriptionsRequestData(
-            1,
-            arrayListOf(),
-            token
-        )
-
-        executeRequest {
-            val response = networkHelper.requestSubscriptions(request)
-            when (val result = handleResponse(response)) {
-                is Result.Success -> {
-                    val responseDataResult: List<SubscriptionsResponseData>? = result.value
-                    //response handling logic
-                }
-
-                is Result.Failure -> {
-                    val error: Error? = result.value
-                    //error handling logic
-                }
-            }
-        }
     }
 }

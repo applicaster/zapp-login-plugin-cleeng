@@ -36,8 +36,8 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     override fun loadEntitlements(callback: EntitlementsLoadCallback) {
         val requestData = SubscriptionsRequestData(
             1,
-            cleengService.getUser().userOffers?.map { it.offerId.orEmpty() }.orEmpty(),
-            cleengService.getUser().token.orEmpty()
+            cleengService.getUser().userOffers?.map { it.authId.orEmpty() }.orEmpty(),
+            cleengService.getUserToken()
         )
         executeRequest {
             val response = cleengService.networkHelper.requestSubscriptions(requestData)
@@ -160,7 +160,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun onItemPurchased(purchase: Purchase, authId: String) {
+    override fun onItemPurchased(purchase: Purchase, offerId: String) {
         if (!cleengService.getUser().token.isNullOrEmpty()) {
 
         }
@@ -177,7 +177,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
         val subscribeRequestData = SubscribeRequestData(
             null,
-            authId,
+            offerId,
             receipt,
             cleengService.getUser().token
         )
@@ -186,9 +186,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             val response = cleengService.networkHelper.subscribe(subscribeRequestData)
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    // subscriptions call
-                    // extend token flow
-
+                    finishPurchaseFlow(offerId)
                 }
 
                 is Result.Failure -> {
@@ -198,10 +196,10 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    private fun finishPurchaseFlow() {
+    private fun finishPurchaseFlow(offerId: String) {
         val requestData = SubscriptionsRequestData(
             null,
-            cleengService.getUser().userOffers?.map { it.offerId.orEmpty() }.orEmpty(),
+            listOf(offerId),
             cleengService.getUser().token.orEmpty()
         )
 
@@ -210,20 +208,14 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
-                    val billingOfferList: ArrayList<BillingOffer> = arrayListOf()
                     responseDataResult?.forEach {
-                        val billingOffer = BillingOffer(
-                            it.authId.orEmpty(),
-                            it.androidProductId.orEmpty(),
-                            if (it.period.isNullOrEmpty()) ProductType.INAPP else ProductType.SUBS
-                        )
-                        billingOfferList.add(billingOffer)
+                        cleengService.isAccessGranted(it)
                     }
                 }
 
                 is Result.Failure -> {
                     val error: Error? = result.value
-                    //error handling logic
+                    Log.e(TAG, error?.message())
                 }
             }
         }
