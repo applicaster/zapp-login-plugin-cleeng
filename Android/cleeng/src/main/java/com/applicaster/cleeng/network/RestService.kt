@@ -2,9 +2,9 @@ package com.applicaster.cleeng.network
 
 import com.applicaster.cleeng.network.request.SubscribeRequestData
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
-import com.applicaster.cleeng.network.response.OfferResponseData
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
+import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -57,12 +57,12 @@ interface RestService {
     @POST("extendToken")
     suspend fun extendToken(
         @Field("token") token: String
-    ): Response<AuthResponseData>
+    ): Response<List<AuthResponseData>>
 
     @POST("subscriptions")
     suspend fun requestSubscriptions(
         @Body subscriptionsRequestData: SubscriptionsRequestData
-    ): Response<List<OfferResponseData>>
+    ): Response<List<SubscriptionsResponseData>>
 
     @POST("subscription")
     suspend fun subscribe(

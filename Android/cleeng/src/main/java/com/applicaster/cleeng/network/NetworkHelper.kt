@@ -4,9 +4,9 @@ import com.applicaster.cleeng.network.interceptor.PublisherInfoInterceptor
 import com.applicaster.cleeng.network.request.RegisterRequestData
 import com.applicaster.cleeng.network.request.SubscribeRequestData
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
-import com.applicaster.cleeng.network.response.OfferResponseData
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
+import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import retrofit2.Response
 
 class NetworkHelper(private val publisherId: String) {
@@ -47,10 +47,10 @@ class NetworkHelper(private val publisherId: String) {
     suspend fun resetPassword(email: String): Response<ResetPasswordResponseData> =
         retrofitService.resetPassword(email)
 
-    suspend fun extendToken(token: String): Response<AuthResponseData> =
+    suspend fun extendToken(token: String): Response<List<AuthResponseData>> =
         retrofitService.extendToken(token)
 
-    suspend fun requestSubscriptions(requestData: SubscriptionsRequestData): Response<List<OfferResponseData>> =
+    suspend fun requestSubscriptions(requestData: SubscriptionsRequestData): Response<List<SubscriptionsResponseData>> =
         retrofitService.requestSubscriptions(requestData)
 
     suspend fun subscribe(requestData: SubscribeRequestData): Response<Unit> =

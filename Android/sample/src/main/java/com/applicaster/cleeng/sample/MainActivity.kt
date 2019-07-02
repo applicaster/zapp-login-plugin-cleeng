@@ -12,6 +12,7 @@ import com.applicaster.cleeng.network.handleResponse
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.OfferResponseData
+import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
@@ -62,8 +63,8 @@ class MainActivity : AppCompatActivity() {
             val response = networkHelper.login("user email", "password")
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseDataResult: List<AuthResponseData>? = result.value
-                    subscriptions(responseDataResult?.get(0)?.token ?: "")
+                    val responseResult: List<AuthResponseData>? = result.value
+                    subscriptions(responseResult?.get(0)?.token ?: "")
                 }
                 is Result.Failure -> {
                     val error: Error? = result.value
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             val response = networkHelper.requestSubscriptions(request)
             when (val result = handleResponse(response)) {
                 is Result.Success -> {
-                    val responseDataResult: List<OfferResponseData>? = result.value
+                    val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     //response handling logic
                 }
 

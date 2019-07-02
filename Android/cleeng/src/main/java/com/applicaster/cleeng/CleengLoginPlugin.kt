@@ -2,17 +2,24 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import android.support.v4.app.Fragment
+import com.applicaster.atom.model.APAtomEntry
+import com.applicaster.cam.ContentAccessManager
+import com.applicaster.hook_screen.HookScreen
+import com.applicaster.hook_screen.HookScreenListener
+import com.applicaster.hook_screen.HookScreenManager
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
 import java.io.Serializable
-import java.util.HashMap
+import kotlin.collections.HashMap
 
-class CleengLoginPlugin : LoginContract, PluginScreen {
+class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
 
     private val cleengService: CleengService by lazy { CleengService(this@CleengLoginPlugin) }
     private var pluginConfig: Map<String, String>? = mapOf()
+
+    private lateinit var hookListener: HookScreenListener
 
     //TODO: Test mock call that should emulate flow after click on video
     fun mockStartProcess(
@@ -29,7 +36,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // Empty body
     }
 
     override fun login(
@@ -38,13 +45,18 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        context?.let {
+            cleengService.fetchFeedData(playable)
+            if (!isTokenValid) {
+                ContentAccessManager.onProcessStarted(cleengService.camContract, it)
+            }
+        }
     }
 
     override fun isTokenValid(): Boolean = !cleengService.getUser().token.isNullOrEmpty()
 
     override fun setToken(token: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // Empty body
     }
 
     override fun isItemLocked(model: Any?): Boolean {
@@ -73,9 +85,8 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
 
     fun getPluginConfigurationParams() = pluginConfig.orEmpty()
 
-    override fun handlePluginScheme(context: Context?, data: MutableMap<String, String>?): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun handlePluginScheme(context: Context?, data: MutableMap<String, String>?): Boolean =
+        false
 
     override fun executeOnApplicationReady(context: Context?, listener: HookListener?) {
         listener?.onHookFinished()
@@ -89,9 +100,8 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         cleengService.logout()
     }
 
-    override fun generateFragment(screenMap: HashMap<String, Any>?, dataSource: Serializable?): Fragment {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun generateFragment(screenMap: HashMap<String, Any>?, dataSource: Serializable?): Fragment? =
+        null
 
     override fun present(
         context: Context?,
@@ -99,6 +109,33 @@ class CleengLoginPlugin : LoginContract, PluginScreen {
         dataSource: Serializable?,
         isActivity: Boolean
     ) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO: Empty body?
     }
+
+    override var hook: HashMap<String, String?> = hashMapOf()
+        get() = field
+        set(value) { field = value }
+
+    override fun executeHook(
+        context: Context,
+        hookListener: HookScreenListener,
+        hookProps: Map<String, Any>?
+    ) {
+        this.hookListener = hookListener
+        val playable = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY) as? APAtomEntry.APAtomEntryPlayable
+        login(context, playable, mutableMapOf()) {}
+    }
+
+    override fun getListener(): HookScreenListener =
+        hookListener
+
+    override fun hookDismissed() {
+        //TODO: Empty body?
+    }
+
+    override fun isFlowBlocker(): Boolean = true
+
+    override fun isRecurringHook(): Boolean = true
+
+    override fun shouldPresent(): Boolean = true
 }
