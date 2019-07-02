@@ -16,6 +16,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     
     private var userToken: String?
     private var userPermissionEntitlementsIds = Set<String>()
+    private var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
@@ -49,6 +50,15 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     }
     
     // MARK: - Private methods
+    
+    private func setCurrentVideoItemsData(additionalParameters: [String: Any]?) {
+        currentVideoEntitlementsIds.removeAll()
+        let playableItems = FlowParser().parsePlayableItems(from: additionalParameters)
+        playableItems.forEach {
+            let entitlementIds = $0.extensionsDictionary?[FlowParserKeys.entitlements.rawValue] as? [String] ?? []
+            currentVideoEntitlementsIds.append(contentsOf: entitlementIds)
+        }
+    }
     
     private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
         let entitlementsKey = "ds_product_ids"
@@ -172,6 +182,8 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
             completion(.failed)
         }
         
+        setCurrentVideoItemsData(additionalParameters: additionalParameters)
+        
         var flow = self.flow
         
         if additionalParameters != nil {
@@ -204,6 +216,14 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     }
     
     // MARK: - JSON Response parsing
+    
+    private func parseCleengOffersResponse(json: Data, completion: (CleengOffers) -> Void) {
+        guard let cleengOffers = try? JSONDecoder().decode(CleengOffers.self, from: json) else {
+            completion([])
+            return
+        }
+        completion(cleengOffers)
+    }
     
     private func parseAuthTokensResponse(json: Data, completion: (Bool) -> Void) {
         guard let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) else {
@@ -276,7 +296,7 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func isUserLogged() -> Bool {
-        return false
+        return isAuthenticated()
     }
     
     public func isPurchaseNeeded() -> Bool {
@@ -318,15 +338,30 @@ extension ZappCleengLogin: CAMDelegate {
         })
     }
     
-    public func itemPurchased(item: SKProduct) {
+    public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (ProductPurchaseResult) -> Void) {
         
     }
     
-    public func itemsRestored(items: [SKPaymentTransaction]) {
+    public func itemsRestored(purchasedItem: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
         
     }
     
-    public func availableProducts() -> [Product] {
-        return [Product]()
+    public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
+        networkAdapter.subscriptions(token: userToken, byAuthId: 1, offers: currentVideoEntitlementsIds, completion: { (result) in
+            switch result {
+            case .success(let data):
+                self.parseCleengOffersResponse(json: data, completion: { (offers) in
+                    let availableProducts = offers.map { (item) -> AvailableProduct in
+                        let availableProduct = AvailableProduct(offerID: item.id,
+                                                                appleStoreID: item.appleProductID,
+                                                                entitlementID: item.authID)
+                        return availableProduct
+                    }
+                    completion(.success(products: availableProducts))
+                })
+            case .failure(let error):
+                var fixit = error
+            }
+        })
     }
 }

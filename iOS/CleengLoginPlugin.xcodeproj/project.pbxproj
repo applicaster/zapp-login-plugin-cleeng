@@ -13,7 +13,6 @@
 		B60A1DCC22A5313000A440E1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B60A1DCA22A5313000A440E1 /* Main.storyboard */; };
 		B60A1DCE22A5313200A440E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B60A1DCD22A5313200A440E1 /* Assets.xcassets */; };
 		B60A1DD122A5313200A440E1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B60A1DCF22A5313200A440E1 /* LaunchScreen.storyboard */; };
-		B62E8FF722A803AE00562B56 /* ZAAppConnector+Local.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62E8FF622A803AE00562B56 /* ZAAppConnector+Local.swift */; };
 		B633C10322C4BDFA0083E7A3 /* Playable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B633C10222C4BDFA0083E7A3 /* Playable.swift */; };
 /* End PBXBuildFile section */
 
@@ -27,7 +26,6 @@
 		B60A1DCD22A5313200A440E1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B60A1DD022A5313200A440E1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B60A1DD222A5313200A440E1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B62E8FF622A803AE00562B56 /* ZAAppConnector+Local.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ZAAppConnector+Local.swift"; sourceTree = "<group>"; };
 		B633C10222C4BDFA0083E7A3 /* Playable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playable.swift; sourceTree = "<group>"; };
 		E257A7245940F221D61FFD48 /* Pods-CleengLoginPlugin.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CleengLoginPlugin.release.xcconfig"; path = "Target Support Files/Pods-CleengLoginPlugin/Pods-CleengLoginPlugin.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -76,7 +74,6 @@
 			children = (
 				B60A1DC622A5313000A440E1 /* AppDelegate.swift */,
 				B60A1DC822A5313000A440E1 /* ViewController.swift */,
-				B62E8FF622A803AE00562B56 /* ZAAppConnector+Local.swift */,
 				B633C10222C4BDFA0083E7A3 /* Playable.swift */,
 				B60A1DCA22A5313000A440E1 /* Main.storyboard */,
 				B60A1DCD22A5313200A440E1 /* Assets.xcassets */,
@@ -267,7 +264,6 @@
 			files = (
 				B60A1DC922A5313000A440E1 /* ViewController.swift in Sources */,
 				B60A1DC722A5313000A440E1 /* AppDelegate.swift in Sources */,
-				B62E8FF722A803AE00562B56 /* ZAAppConnector+Local.swift in Sources */,
 				B633C10322C4BDFA0083E7A3 /* Playable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

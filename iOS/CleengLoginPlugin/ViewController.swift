@@ -15,7 +15,6 @@ import ApplicasterSDK
 class ViewController: UIViewController {
 
     private var pluggableLogin: ZPLoginProviderProtocol?
-    private let myConnectot = MyConnector()
     
     override func viewDidLoad() {
         super.viewDidLoad()
