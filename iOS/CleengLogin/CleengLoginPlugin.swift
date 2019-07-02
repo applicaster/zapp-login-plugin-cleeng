@@ -167,20 +167,23 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     public func login(_ additionalParameters: [String: Any]?,
                       completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
     
-//        guard let controller = UIViewController.topmostViewController() else {
-//            assert(false, "No topmost controller")
-//            completion(.failed)
-//        }
-//
-//        let playableItems = parsePlayableItems(from: additionalParameters)
-//        let flow = parseFlow(from: playableItems)
-//
-//        let contentAccessManager = ContentAccessManager(rootViewController: controller,
-//                                                        camDelegate: self,
-//                                                        camFlow: flow) { (isCompleted) in
-//            (isCompleted == true) ? completion(.completedSuccessfully) : completion(.failed)
-//        }
-//        contentAccessManager.startFlow()
+        guard let controller = UIViewController.topmostViewController() else {
+            assert(false, "No topmost controller")
+            completion(.failed)
+        }
+        
+        var flow = self.flow
+        
+        if additionalParameters != nil {
+            flow = FlowParser().parseFlow(from: additionalParameters)
+        }
+        
+        let contentAccessManager = ContentAccessManager(rootViewController: controller,
+                                                        camDelegate: self,
+                                                        camFlow: flow) { (isCompleted) in
+            (isCompleted == true) ? completion(.completedSuccessfully) : completion(.failed)
+        }
+        contentAccessManager.startFlow()
     }
     
     public func logout(_ completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
@@ -250,21 +253,14 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     public func executeHook(presentationIndex: NSInteger,
                             dataDict: [String: Any]?,
                             taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
-        guard let controller = UIViewController.topmostViewController() else {
-            assert(false, "No topmost controller")
-            taskFinishedWithCompletion(false, nil, nil)
-            return
+        login(nil) { (operationStatus) in
+            switch operationStatus {
+            case .completedSuccessfully:
+                taskFinishedWithCompletion(true, nil, nil)
+            case .failed, .cancelled:
+                taskFinishedWithCompletion(false, nil, nil)
+            }
         }
-        
-        let camFlowResult: (Bool) -> Void = { isFlowSucceded in
-            taskFinishedWithCompletion(isFlowSucceded, nil, nil)
-        }
-        
-        let cam = ContentAccessManager(rootViewController: controller,
-                                       camDelegate: self,
-                                       camFlow: flow,
-                                       completion: camFlowResult)
-        cam.startFlow()
     }
 }
 

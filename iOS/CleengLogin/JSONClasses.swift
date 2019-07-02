@@ -24,4 +24,3 @@ struct CleengToken: Codable {
 }
 
 typealias CleengTokens = [CleengToken]
-
