@@ -9,7 +9,7 @@ import Foundation
 import CAM
 import ZappPlugins
 
-enum FlowParserKeys: String {
+private enum FlowParserKeys: String {
     case auth = "requires_authentication"
     case entitlements = "ds_product_ids"
     case playableItems = "playable_items"

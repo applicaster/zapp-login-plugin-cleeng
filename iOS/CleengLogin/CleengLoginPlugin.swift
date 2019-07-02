@@ -55,7 +55,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         currentVideoEntitlementsIds.removeAll()
         let playableItems = FlowParser().parsePlayableItems(from: additionalParameters)
         playableItems.forEach {
-            let entitlementIds = $0.extensionsDictionary?[FlowParserKeys.entitlements.rawValue] as? [String] ?? []
+            let entitlementIds = $0.extensionsDictionary?["ds_product_ids"] as? [String] ?? []
             currentVideoEntitlementsIds.append(contentsOf: entitlementIds)
         }
     }
@@ -347,7 +347,8 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
-        networkAdapter.subscriptions(token: userToken, byAuthId: 1, offers: currentVideoEntitlementsIds, completion: { (result) in
+        networkAdapter.subscriptions(token: userToken, byAuthId: 1,
+                                     offers: currentVideoEntitlementsIds, completion: { (result) in
             switch result {
             case .success(let data):
                 self.parseCleengOffersResponse(json: data, completion: { (offers) in
