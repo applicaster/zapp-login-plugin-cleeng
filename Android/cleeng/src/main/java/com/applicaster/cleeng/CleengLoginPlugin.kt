@@ -16,8 +16,7 @@ import kotlin.collections.HashMap
 
 class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
 
-    private val cleengService: CleengService by lazy { CleengService(this@CleengLoginPlugin) }
-    private var pluginConfig: Map<String, String>? = mapOf()
+    private val cleengService: CleengService by lazy { CleengService() }
 
     private lateinit var hookListener: HookScreenListener
 
@@ -26,8 +25,8 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         context: Context,
         mockPluginConfiguration: Map<String, String>
     ) {
-        if (pluginConfig.isNullOrEmpty())
-            pluginConfig = mockPluginConfiguration
+        if (cleengService.getPluginConfigurationParams().isNullOrEmpty())
+            cleengService.setPluginConfigurator(PluginConfigurator(mockPluginConfiguration))
         cleengService.mockStart(context)
     }
 
@@ -78,12 +77,12 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
 
     override fun setPluginConfigurationParams(params: MutableMap<Any?, Any?>?) {
         //transform MutableMap<Any?, Any?>? to Map<String, String>?
-        pluginConfig = params?.entries?.associate { entry ->
+        val pluginConfig = params?.entries?.associate { entry ->
             entry.key.toString() to entry.value.toString()
         }
+        if (pluginConfig != null)
+            cleengService.setPluginConfigurator(PluginConfigurator(pluginConfig))
     }
-
-    fun getPluginConfigurationParams() = pluginConfig.orEmpty()
 
     override fun handlePluginScheme(context: Context?, data: MutableMap<String, String>?): Boolean =
         false

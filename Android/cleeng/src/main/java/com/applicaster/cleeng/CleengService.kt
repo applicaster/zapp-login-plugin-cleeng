@@ -17,20 +17,20 @@ import com.applicaster.cleeng.utils.CleengAsyncTaskListener
 import com.applicaster.cleeng.utils.SharedPreferencesUtil
 import com.applicaster.loader.json.APChannelLoader
 import com.applicaster.loader.json.APVodItemLoader
-import com.applicaster.model.*
+import com.applicaster.model.APChannel
+import com.applicaster.model.APModel
+import com.applicaster.model.APVodItem
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.util.AppData
-import retrofit2.http.OPTIONS
-import kotlin.collections.ArrayList
 
-class CleengService(private val cleengLoginPlugin: CleengLoginPlugin) {
-    private var publisherId: String = "5b3cc7c2fed4fa00149037d6"
-    val networkHelper: NetworkHelper by lazy { NetworkHelper(publisherId) }
+class CleengService {
+
+    val networkHelper: NetworkHelper by lazy { NetworkHelper(pluginConfigurator?.getPublisherId().orEmpty()) }
     val camContract: CamContract by lazy { CamContract(this@CleengService) }
 
+    private var pluginConfigurator: PluginConfigurator? = null
     private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
-
 
     private val user: User = User()
     private var productIds: ArrayList<String>? = arrayListOf()
@@ -51,7 +51,7 @@ class CleengService(private val cleengLoginPlugin: CleengLoginPlugin) {
 
                 is Result.Failure -> {
                     // handle error and open loginEmail or sign up screen
-                    if (!camContract.getPluginConfig()["trigger_on_app_launch"].isNullOrEmpty())
+                    if (pluginConfigurator?.isTriggerOnAppLaunch() == true)
                         ContentAccessManager.onProcessStarted(camContract, context)
                 }
             }
@@ -205,7 +205,11 @@ class CleengService(private val cleengLoginPlugin: CleengLoginPlugin) {
         user.userOffers = offers
     }
 
-    fun getPluginConfigurationParams() = cleengLoginPlugin.getPluginConfigurationParams()
+    fun setPluginConfigurator(pluginConfigurator: PluginConfigurator) {
+        this@CleengService.pluginConfigurator = pluginConfigurator
+    }
+
+    fun getPluginConfigurationParams() = pluginConfigurator?.getPluginConfig().orEmpty()
 
     fun isAccessGranted(): Boolean {
         return false

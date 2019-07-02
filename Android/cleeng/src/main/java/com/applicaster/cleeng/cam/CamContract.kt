@@ -6,7 +6,6 @@ import com.applicaster.cam.*
 import com.applicaster.cam.params.billing.BillingOffer
 import com.applicaster.cam.params.billing.ProductType
 import com.applicaster.cleeng.CleengService
-import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.Error
 import com.applicaster.cleeng.network.executeRequest
@@ -256,7 +255,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun isRedeemActivated(): Boolean  = false //TODO: dummy. add proper handling
+    override fun isRedeemActivated(): Boolean = false //TODO: dummy. add proper handling
 
     // TODO: dummy. Uncomment "camFlow" line and remove hardcoded CamFlow enum value
     override fun getCamFlow(): CamFlow = /*camFlow*/CamFlow.AUTH_AND_STOREFRONT
