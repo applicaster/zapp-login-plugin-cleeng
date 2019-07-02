@@ -217,12 +217,11 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     
     // MARK: - JSON Response parsing
     
-    private func parseCleengOffersResponse(json: Data, completion: (CleengOffers) -> Void) {
+    private func parseCleengOffersResponse(json: Data) -> CleengOffers {
         guard let cleengOffers = try? JSONDecoder().decode(CleengOffers.self, from: json) else {
-            completion([])
-            return
+            return []
         }
-        completion(cleengOffers)
+        return cleengOffers
     }
     
     private func parseAuthTokensResponse(json: Data, completion: (Bool) -> Void) {
@@ -351,15 +350,11 @@ extension ZappCleengLogin: CAMDelegate {
                                      offers: currentVideoEntitlementsIds, completion: { (result) in
             switch result {
             case .success(let data):
-                self.parseCleengOffersResponse(json: data, completion: { (offers) in
-                    let availableProducts = offers.map { (item) -> AvailableProduct in
-                        let availableProduct = AvailableProduct(offerID: item.id,
-                                                                appleStoreID: item.appleProductID,
-                                                                entitlementID: item.authID)
-                        return availableProduct
-                    }
-                    completion(.success(products: availableProducts))
-                })
+                let offers = self.parseCleengOffersResponse(json: data)
+                let products = offers.map { (item) -> AvailableOffer in
+                    return AvailableOffer(entitlementID: item.id, appleStoreID: item.appleProductID)
+                }
+                completion(.success(products: products))
             case .failure(let error):
                 var fixit = error
             }
