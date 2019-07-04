@@ -341,7 +341,7 @@ extension ZappCleengLogin: CAMDelegate {
         
     }
     
-    public func itemsRestored(purchasedItem: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
+    public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
         
     }
     
@@ -351,12 +351,12 @@ extension ZappCleengLogin: CAMDelegate {
             switch result {
             case .success(let data):
                 let offers = self.parseCleengOffersResponse(json: data)
-                let products = offers.map { (item) -> AvailableOffer in
-                    return AvailableOffer(entitlementID: item.id, appleStoreID: item.appleProductID)
+                let products = offers.map { (item) -> String in
+                    return item.appleProductID
                 }
                 completion(.success(products: products))
             case .failure(let error):
-                var fixit = error
+                return
             }
         })
     }

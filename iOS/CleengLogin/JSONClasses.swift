@@ -26,11 +26,11 @@ struct CleengToken: Codable {
 typealias CleengTokens = [CleengToken]
 
 struct CleengOffer: Codable {
-    let id, appleProductID, authID: String
-    let accessGranted: Bool
+    let offerID, appleProductID, authID: String
+    let accessGranted: Bool?
     
     enum CodingKeys: String, CodingKey {
-        case id
+        case offerID = "id"
         case appleProductID = "appleProductId"
         case authID = "authId"
         case accessGranted
