@@ -17,6 +17,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     private var userToken: String?
     private var userPermissionEntitlementsIds = Set<String>()
     private var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
+    private var currentAvailableOfferIDs = [String: String]() // offerStoreID: CleengOffer
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
@@ -91,6 +92,45 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
                 })
             case .failure(let error):
                 self.camErrorWrapper(error: error, completion: completion)
+            }
+        })
+    }
+    
+    private func purchaseItem(token: String, offerId: String,
+                              transactionId: String, receiptData: String,
+                              isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
+        networkAdapter.purchaseItem(token: userToken, offerId: offerId,
+                                    transactionId: transactionId, receiptData: receiptData,
+                                    isRestored: false) { (result) in
+            switch result {
+            case .success:
+                self.verifyOnCleeng(offerId: offerId, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+                return
+            }
+        }
+    }
+    
+    private func verifyOnCleeng(offerId: String, completion: @escaping (ItemPurchasingResult) -> Void) {
+        networkAdapter.subscriptions(token: userToken, byAuthId: 0,
+                                     offers: [offerId], completion: { (result) in
+            switch result {
+            case .success(let data):
+                let offer = self.parseCleengOffersResponse(json: data)
+                guard let verifiedOffer = offer.first else {
+                    completion(.failure(.serverError))
+                    return
+                }
+                guard let _ = verifiedOffer.accessGranted else {
+                    completion(.failure(.serverError))
+                    return
+                }
+                self.userPermissionEntitlementsIds.insert(verifiedOffer.authID)
+                completion(.success)
+            case .failure(let error):
+                completion(.failure(error))
+                return
             }
         })
     }
@@ -294,14 +334,6 @@ extension ZappCleengLogin: CAMDelegate {
         return [String: String]()
     }
     
-    public func isUserLogged() -> Bool {
-        return isAuthenticated()
-    }
-    
-    public func isPurchaseNeeded() -> Bool {
-        return true
-    }
-    
     public func facebookLogin(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
         let api = CleengAPI.loginWithFacebook(publisherID: publisherId, email: userData.email,
                                               facebookId: userData.userId)
@@ -337,27 +369,69 @@ extension ZappCleengLogin: CAMDelegate {
         })
     }
     
-    public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (ProductPurchaseResult) -> Void) {
-        
-    }
-    
-    public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
-        
-    }
-    
     public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
         networkAdapter.subscriptions(token: userToken, byAuthId: 1,
                                      offers: currentVideoEntitlementsIds, completion: { (result) in
             switch result {
             case .success(let data):
                 let offers = self.parseCleengOffersResponse(json: data)
-                let products = offers.map { (item) -> String in
-                    return item.appleProductID
+                self.currentAvailableOfferIDs = offers.reduce([String: String]()) { (dict, item) -> [String: String] in
+                    var dict = dict
+                    dict[item.appleProductID] = item.offerID
+                    return dict
                 }
-                completion(.success(products: products))
+                let storeIDs = Array(self.currentAvailableOfferIDs.keys)
+                completion(.success(products: storeIDs))
             case .failure(let error):
                 return
             }
         })
+    }
+    
+    public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (ProductPurchaseResult) -> Void) {
+        guard let storeId = purchasedItem.product?.productIdentifier,
+            let offerId = currentAvailableOfferIDs[storeId] else {
+                return
+        }
+        let transactionId = purchasedItem.transaction?.transactionIdentifier
+        self.purchaseItem(token: userToken ?? "", offerId: offerId, transactionId: transactionId ?? "",
+                          receiptData: purchasedItem.receipt ?? "", isRestored: false) { (result) in
+            switch result {
+            case .success:
+                completion(.success)
+            case .failure(let error):
+                return
+            }
+        }
+    }
+    
+    public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
+        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]()) { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
+            var array = array
+            guard let storeId = item.transaction?.payment.productIdentifier,
+                let offerId = currentAvailableOfferIDs[storeId] else {
+                    return array
+            }
+            array.append((offerId: offerId, restoredItem: item))
+            return array
+        }
+        let dispatchGroup = DispatchGroup()
+        var hasAccess = false
+        restoredOffers.forEach { (item) in
+            dispatchGroup.enter()
+            self.purchaseItem(token: userToken ?? "", offerId: item.offerId, transactionId: item.restoredItem.transaction?.transactionIdentifier ?? "",
+                              receiptData: item.restoredItem.receipt ?? "", isRestored: true) { (result) in
+                switch result {
+                case .success:
+                    hasAccess = true
+                    dispatchGroup.leave()
+                case .failure(let error):
+                    dispatchGroup.leave()
+                }
+            }
+        }
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            hasAccess == true ? completion(.success) : completion(.failure(description: nil))
+        }
     }
 }

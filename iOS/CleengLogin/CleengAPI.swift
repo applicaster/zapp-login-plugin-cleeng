@@ -17,8 +17,11 @@ enum CleengAPI {
     case resetPassword(publisherID: String, email: String?)
     case extendToken(publisherID: String, token: String?)
     case subscriptions(publisherID: String, token: String?, byAuthId: Int, offers: [String]?)
-    case subscription(publisherID: String, transactionId: String?, receiptData: String?, token: String?, offerId: String?, isRestored: Bool, couponCode: String?)
+    case purchaseItem(publisherID: String, offerId: String, token: String, transactionId: String,
+                      receiptData: String, isRestored: Bool)
+    case purchaseItemUsingCode(publisherID: String, offerId: String, token: String, reedeemCode: String)
 }
+    
 
 extension CleengAPI {
     var baseLink: String {
@@ -37,7 +40,7 @@ extension CleengAPI {
             return "extendToken"
         case .subscriptions:
             return "subscriptions"
-        case .subscription:
+        case .purchaseItem, .purchaseItemUsingCode:
             return "subscription"
         }
     }
@@ -79,21 +82,28 @@ extension CleengAPI {
         case .subscriptions(let publisherID, let token, let byAuthId, let offers):
             return ["publisherId": publisherID, "token": token ?? "", "byAuthId": byAuthId,
                     "offers": offers ?? [String]()]
-        case .subscription(let publisherID, let transactionId, let receiptData, let token, let offerId, let isRestored, let couponCode):
+        case .purchaseItem(let publisherID, let transactionId, let receiptData, let token, let offerId, let isRestored):
             let receiptInfo: [String: Any] = [
-                "transactionId": transactionId ?? "",
-                "receiptData": receiptData ?? ""
+                "transactionId": transactionId,
+                "receiptData": receiptData
             ]
             let params: [String: Any] = [
-                "publisherID": publisherID,
+                "publisherId": publisherID,
                 "appType": "ios",
                 "receipt": receiptInfo,
-                "offerId": offerId ?? "",
-                "token": token ?? "",
-                "isRestored": isRestored,
-                "couponCode": couponCode ?? ""
+                "offerId": offerId,
+                "token": token,
+                "isRestored": isRestored
             ]
             return params
+        case .purchaseItemUsingCode(let publisherID, let token, let offerId, let couponCode):
+            return [
+                "publisherId": publisherID,
+                "appType": "ios",
+                "offerId": offerId,
+                "token": token,
+                "couponCode": couponCode
+            ]
         }
     }
 }
