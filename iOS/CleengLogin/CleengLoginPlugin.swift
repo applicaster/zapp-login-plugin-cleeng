@@ -12,10 +12,14 @@ import CAM
 
 private let kCleengUserLoginToken = "CleengUserLoginToken"
 
+typealias StoreID = String
+typealias OfferID = String
 @objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
     
     private var userToken: String?
     private var userPermissionEntitlementsIds = Set<String>()
+    private var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
+    private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
@@ -50,6 +54,26 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     
     // MARK: - Private methods
     
+    private func setCurrentVideoItemsData(additionalParameters: [String: Any]?) {
+        currentVideoEntitlementsIds.removeAll()
+        let playableItems = FlowParser().parsePlayableItems(from: additionalParameters)
+        playableItems.forEach {
+            let entitlementIds = $0.extensionsDictionary?["ds_product_ids"] as? [String] ?? []
+            currentVideoEntitlementsIds.append(contentsOf: entitlementIds)
+        }
+    }
+    
+    private func getModifiedDspFlow(camFlow: CAMFlow) -> CAMFlow {
+        switch camFlow {
+        case .authentication:
+            return isAuthenticated() ? .no : .authentication
+        case .authAndStorefront:
+            return isAuthenticated() ? .storefront : .authAndStorefront
+        default:
+            return camFlow
+        }
+    }
+    
     private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
         let entitlementsKey = "ds_product_ids"
         return playableItems.first?.extensionsDictionary?[entitlementsKey] as? [String] ?? []
@@ -81,6 +105,50 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
                 })
             case .failure(let error):
                 self.camErrorWrapper(error: error, completion: completion)
+            }
+        })
+    }
+    
+    private func purchaseItem(token: String,
+                              offerId: String,
+                              transactionId: String,
+                              receiptData: String,
+                              isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
+        networkAdapter.purchaseItem(token: userToken, offerId: offerId,
+                                    transactionId: transactionId, receiptData: receiptData,
+                                    isRestored: false) { (result) in
+            switch result {
+            case .success:
+                self.verifyOnCleeng(offerId: offerId, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+                return
+            }
+        }
+    }
+    
+    private func verifyOnCleeng(offerId: String, completion: @escaping (ItemPurchasingResult) -> Void) {
+        networkAdapter.subscriptions(token: userToken,
+                                     byAuthId: 0,
+                                     offers: [offerId],
+                                     completion: { (result) in
+            switch result {
+            case .success(let data):
+                let offer = self.parseCleengOffersResponse(json: data)
+                guard let verifiedOffer = offer.first else {
+                    completion(.failure(.serverError))
+                    return
+                }
+                if let access = verifiedOffer.accessGranted, access {
+                    self.userPermissionEntitlementsIds.insert(verifiedOffer.authID)
+                    completion(.success)
+                } else {
+                    completion(.failure(.serverError))
+                    return
+                }
+            case .failure(let error):
+                completion(.failure(error))
+                return
             }
         })
     }
@@ -172,11 +240,15 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
             completion(.failed)
         }
         
+        setCurrentVideoItemsData(additionalParameters: additionalParameters)
+        
         var flow = self.flow
         
         if additionalParameters != nil {
             flow = FlowParser().parseFlow(from: additionalParameters)
         }
+        
+        flow = getModifiedDspFlow(camFlow: flow)
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
                                                         camDelegate: self,
@@ -205,6 +277,13 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     
     // MARK: - JSON Response parsing
     
+    private func parseCleengOffersResponse(json: Data) -> CleengOffers {
+        guard let cleengOffers = try? JSONDecoder().decode(CleengOffers.self, from: json) else {
+            return []
+        }
+        return cleengOffers
+    }
+    
     private func parseAuthTokensResponse(json: Data, completion: (Bool) -> Void) {
         guard let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) else {
             completion(false)
@@ -216,7 +295,8 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
                 UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
             } else {
                 if let authID = item.authID {
-                    userPermissionEntitlementsIds.insert(authID) // if offerID !empty put subscription token in dicrionary by authId
+                    userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
+                                                                 //subscription token in dicrionary by authId
                 }
             }
         }
@@ -266,7 +346,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
 
 // MARK: - CAMDelegate
 
-extension ZappCleengLogin: CAMDelegate {    
+extension ZappCleengLogin: CAMDelegate {
     
     public func getPluginConfig() -> [String: String] {
         if let config = configurationJSON as? [String: String] {
@@ -275,34 +355,34 @@ extension ZappCleengLogin: CAMDelegate {
         return [String: String]()
     }
     
-    public func isUserLogged() -> Bool {
-        return false
-    }
-    
     public func isPurchaseNeeded() -> Bool {
-        return true
+        return userPermissionEntitlementsIds.isDisjoint(with: currentVideoEntitlementsIds)
     }
     
     public func facebookLogin(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.loginWithFacebook(publisherID: publisherId, email: userData.email,
+        let api = CleengAPI.loginWithFacebook(publisherID: publisherId,
+                                              email: userData.email,
                                               facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
     public func facebookSignUp(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.registerWithFacebook(publisherID: publisherId, email: userData.email,
+        let api = CleengAPI.registerWithFacebook(publisherID: publisherId,
+                                                 email: userData.email,
                                                  facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
     public func login(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.login(publisherID: publisherId, email: authData["email"] ?? "",
+        let api = CleengAPI.login(publisherID: publisherId,
+                                  email: authData["email"] ?? "",
                                   password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
     
     public func signUp(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.register(publisherID: publisherId, email: authData["email"] ?? "",
+        let api = CleengAPI.register(publisherID: publisherId,
+                                     email: authData["email"] ?? "",
                                      password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
@@ -319,14 +399,75 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
-        completion(.success(products: []))
+        networkAdapter.subscriptions(token: userToken, byAuthId: 1,
+                                     offers: currentVideoEntitlementsIds, completion: { (result) in
+            switch result {
+            case .success(let data):
+                let offers = self.parseCleengOffersResponse(json: data)
+                self.currentAvailableOfferIDs = offers.reduce([String: String]()) { (dict, item) -> [String: String] in
+                    var dict = dict
+                    dict[item.appleProductID] = item.offerID
+                    return dict
+                }
+                let storeIDs = Array(self.currentAvailableOfferIDs.keys)
+                completion(.success(products: storeIDs))
+            case .failure(let error):
+                return
+            }
+        })
     }
     
     public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (ProductPurchaseResult) -> Void) {
-        
+        guard let storeId = purchasedItem.product?.productIdentifier,
+            let offerId = currentAvailableOfferIDs[storeId] else {
+                return
+        }
+        let transactionId = purchasedItem.transaction?.transactionIdentifier
+        self.purchaseItem(token: userToken ?? "",
+                          offerId: offerId,
+                          transactionId: transactionId ?? "",
+                          receiptData: purchasedItem.receipt ?? "",
+                          isRestored: false) { (result) in
+            switch result {
+            case .success:
+                completion(.success)
+            case .failure(let error):
+                return
+            }
+        }
     }
     
     public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
-        
+        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]()) {
+            (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
+            var array = array
+            guard let storeId = item.transaction?.payment.productIdentifier,
+                let offerId = currentAvailableOfferIDs[storeId] else {
+                    return array
+            }
+            array.append((offerId: offerId, restoredItem: item))
+            return array
+        }
+        let dispatchGroup = DispatchGroup()
+        var hasAccess = false
+        restoredOffers.forEach { (item) in
+            dispatchGroup.enter()
+            self.purchaseItem(token: userToken ?? "",
+                              offerId: item.offerId,
+                              transactionId: item.restoredItem.transaction?.transactionIdentifier ?? "",
+                              receiptData: item.restoredItem.receipt ?? "",
+                              isRestored: true) { (result) in
+                switch result {
+                case .success:
+                    hasAccess = true
+                    dispatchGroup.leave()
+                case .failure(let error):
+                    dispatchGroup.leave()
+                }
+            }
+        }
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            hasAccess == true ? completion(.success) : completion(.failure(description: nil))
+        }
     }
 }

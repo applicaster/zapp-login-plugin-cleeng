@@ -46,7 +46,7 @@ class Playable: NSObject, ZPPlayable {
         return publicPageURL
     }
     
-    func analyticsParams() -> [AnyHashable : Any]! {
+    func analyticsParams() -> [AnyHashable: Any]! {
         return [:]
     }
     
