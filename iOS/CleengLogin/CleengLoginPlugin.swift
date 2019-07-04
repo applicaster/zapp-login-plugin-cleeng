@@ -266,7 +266,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
 
 // MARK: - CAMDelegate
 
-extension ZappCleengLogin: CAMDelegate {
+extension ZappCleengLogin: CAMDelegate {    
     
     public func getPluginConfig() -> [String: String] {
         if let config = configurationJSON as? [String: String] {
@@ -318,15 +318,15 @@ extension ZappCleengLogin: CAMDelegate {
         })
     }
     
-    public func itemPurchased(item: SKProduct) {
+    public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
+        completion(.success(products: []))
+    }
+    
+    public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (ProductPurchaseResult) -> Void) {
         
     }
     
-    public func itemsRestored(items: [SKPaymentTransaction]) {
+    public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
         
-    }
-    
-    public func availableProducts() -> [Product] {
-        return [Product]()
     }
 }
