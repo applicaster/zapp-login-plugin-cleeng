@@ -12,12 +12,14 @@ import CAM
 
 private let kCleengUserLoginToken = "CleengUserLoginToken"
 
+typealias StoreID = String
+typealias OfferID = String
 @objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
     
     private var userToken: String?
     private var userPermissionEntitlementsIds = Set<String>()
     private var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
-    private var currentAvailableOfferIDs = [String: String]() // offerStoreID: CleengOffer
+    private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
