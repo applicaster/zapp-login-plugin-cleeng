@@ -80,7 +80,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
                     result ? completion(.success) : completion(.failure(description: "Server Error"))
                 })
             case .failure(let error):
-                self.camErrorWrapper(error: error, completion: completion)
+                completion(.failure(description: error.description))
             }
         })
     }
@@ -223,31 +223,6 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         completion(true)
     }
     
-    private func parseErrorResponse(json: Data, completion: (ServerError?) -> Void) {
-        guard let serverError = try? JSONDecoder().decode(ServerError.self, from: json) else {
-            completion(nil)
-            return
-        }
-        completion(serverError)
-    }
-    
-    private func camErrorWrapper(error: CleengError, completion: @escaping (CAMResult) -> Void) {
-        switch error {
-        case .serverError:
-            completion(.failure(description: "Server Error"))
-        case .requestError(let data):
-            self.parseErrorResponse(json: data, completion: { (error) in
-                guard let error = error else {
-                    completion(.failure(description: "Server Error"))
-                    return
-                }
-                completion(.failure(description: error.message))
-            })
-        case .networkError(let error):
-            completion(.failure(description: error.localizedDescription))
-        }
-    }
-    
     // MARK: - ZPScreenHookAdapterProtocol
     
     public func executeHook(presentationIndex: NSInteger,
@@ -313,7 +288,7 @@ extension ZappCleengLogin: CAMDelegate {
             case .success:
                 completion(.success)
             case .failure(let error):
-                self.camErrorWrapper(error: error, completion: completion)
+                completion(.failure(description: error.description))
             }
         })
     }
@@ -322,11 +297,13 @@ extension ZappCleengLogin: CAMDelegate {
         completion(.success(products: []))
     }
     
-    public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (ProductPurchaseResult) -> Void) {
+    public func itemPurchased(purchasedItem: PurchasedProduct,
+                              completion: @escaping (ProductPurchaseResult) -> Void) {
         
     }
     
-    public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
+    public func itemsRestored(restoredItems: [PurchasedProduct],
+                              completion: @escaping (ProductPurchaseResult) -> Void) {
         
     }
 }
