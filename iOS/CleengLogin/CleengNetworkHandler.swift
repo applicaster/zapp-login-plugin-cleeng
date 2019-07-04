@@ -48,15 +48,21 @@ class CleengNetworkHandler {
     
     func subscriptions(token: String?, byAuthId: Int, offers: [String]?,
                        completion: @escaping (CleengAPIResult) -> Void) { //0 - by offers, 1 by auth ids
-        let api = CleengAPI.subscriptions(publisherID: publisherID, token: token, byAuthId: byAuthId, offers: offers)
+        let api = CleengAPI.subscriptions(publisherID: publisherID,
+                                          token: token,
+                                          byAuthId: byAuthId,
+                                          offers: offers)
         performRequest(api: api, completion: completion)
     }
     
     func purchaseItem(token: String?, offerId: String, transactionId: String? = nil, receiptData: String? = nil,
                       isRestored: Bool, completion: @escaping (CleengAPIResult) -> Void) {
-        let api = CleengAPI.purchaseItem(publisherID: publisherID, offerId: offerId,
-                                         token: token ?? "", transactionId: transactionId ?? "",
-                                         receiptData: receiptData ?? "", isRestored: isRestored)
+        let api = CleengAPI.purchaseItem(publisherID: publisherID,
+                                         offerId: offerId,
+                                         token: token ?? "",
+                                         transactionId: transactionId ?? "",
+                                         receiptData: receiptData ?? "",
+                                         isRestored: isRestored)
         performRequest(api: api, completion: completion)
     }
     

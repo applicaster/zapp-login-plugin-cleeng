@@ -107,8 +107,10 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         })
     }
     
-    private func purchaseItem(token: String, offerId: String,
-                              transactionId: String, receiptData: String,
+    private func purchaseItem(token: String,
+                              offerId: String,
+                              transactionId: String,
+                              receiptData: String,
                               isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
         networkAdapter.purchaseItem(token: userToken, offerId: offerId,
                                     transactionId: transactionId, receiptData: receiptData,
@@ -124,8 +126,10 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     }
     
     private func verifyOnCleeng(offerId: String, completion: @escaping (ItemPurchasingResult) -> Void) {
-        networkAdapter.subscriptions(token: userToken, byAuthId: 0,
-                                     offers: [offerId], completion: { (result) in
+        networkAdapter.subscriptions(token: userToken,
+                                     byAuthId: 0,
+                                     offers: [offerId],
+                                     completion: { (result) in
             switch result {
             case .success(let data):
                 let offer = self.parseCleengOffersResponse(json: data)
@@ -354,25 +358,29 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func facebookLogin(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.loginWithFacebook(publisherID: publisherId, email: userData.email,
+        let api = CleengAPI.loginWithFacebook(publisherID: publisherId,
+                                              email: userData.email,
                                               facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
     public func facebookSignUp(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.registerWithFacebook(publisherID: publisherId, email: userData.email,
+        let api = CleengAPI.registerWithFacebook(publisherID: publisherId,
+                                                 email: userData.email,
                                                  facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
     public func login(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.login(publisherID: publisherId, email: authData["email"] ?? "",
+        let api = CleengAPI.login(publisherID: publisherId,
+                                  email: authData["email"] ?? "",
                                   password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
     
     public func signUp(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.register(publisherID: publisherId, email: authData["email"] ?? "",
+        let api = CleengAPI.register(publisherID: publisherId,
+                                     email: authData["email"] ?? "",
                                      password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
@@ -413,8 +421,11 @@ extension ZappCleengLogin: CAMDelegate {
                 return
         }
         let transactionId = purchasedItem.transaction?.transactionIdentifier
-        self.purchaseItem(token: userToken ?? "", offerId: offerId, transactionId: transactionId ?? "",
-                          receiptData: purchasedItem.receipt ?? "", isRestored: false) { (result) in
+        self.purchaseItem(token: userToken ?? "",
+                          offerId: offerId,
+                          transactionId: transactionId ?? "",
+                          receiptData: purchasedItem.receipt ?? "",
+                          isRestored: false) { (result) in
             switch result {
             case .success:
                 completion(.success)
@@ -425,8 +436,8 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
-        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]())
-        { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
+        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]()) {
+            (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
             var array = array
             guard let storeId = item.transaction?.payment.productIdentifier,
                 let offerId = currentAvailableOfferIDs[storeId] else {
@@ -439,9 +450,11 @@ extension ZappCleengLogin: CAMDelegate {
         var hasAccess = false
         restoredOffers.forEach { (item) in
             dispatchGroup.enter()
-            self.purchaseItem(token: userToken ?? "", offerId: item.offerId,
+            self.purchaseItem(token: userToken ?? "",
+                              offerId: item.offerId,
                               transactionId: item.restoredItem.transaction?.transactionIdentifier ?? "",
-                              receiptData: item.restoredItem.receipt ?? "", isRestored: true) { (result) in
+                              receiptData: item.restoredItem.receipt ?? "",
+                              isRestored: true) { (result) in
                 switch result {
                 case .success:
                     hasAccess = true

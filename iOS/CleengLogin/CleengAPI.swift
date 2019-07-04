@@ -56,7 +56,9 @@ extension CleengAPI {
         switch self {
         case .login(let publisherID, let email, let password):
             return ["publisherId": publisherID, "email": email ?? "", "password": password ?? ""]
-        case .loginWithFacebook(let publisherID, let email, let facebookId):
+        case .loginWithFacebook(let publisherID,
+                                let email,
+                                let facebookId):
             return ["publisherId": publisherID, "email": email ?? "", "facebookId": facebookId ?? ""]
         case .register(let publisherID, let email, let password):
             let locale = Locale.current
@@ -64,22 +66,32 @@ extension CleengAPI {
             if let countryCode = (locale as NSLocale).object(forKey: .countryCode) as? String {
                 country = countryCode
             }
-            return ["publisherId": publisherID, "email": email ?? "", "password": password ?? "",
-                    "country": country, "locale": "en_US", "currency": "USD"]
+            return ["publisherId": publisherID,
+                    "email": email ?? "",
+                    "password": password ?? "",
+                    "country": country,
+                    "locale": "en_US",
+                    "currency": "USD"]
         case .registerWithFacebook(let publisherID, let email, let facebookId):
             let locale = Locale.current
             var country = ""
             if let countryCode = (locale as NSLocale).object(forKey: .countryCode) as? String {
                 country = countryCode
             }
-            return ["publisherId": publisherID, "email": email ?? "", "facebookId": facebookId ?? "",
-                    "country": country, "locale": "en_US", "currency": "USD"]
+            return ["publisherId": publisherID,
+                    "email": email ?? "",
+                    "facebookId": facebookId ?? "",
+                    "country": country,
+                    "locale": "en_US",
+                    "currency": "USD"]
         case .resetPassword(let publisherID, let email):
             return ["publisherId": publisherID, "email": email ?? ""]
         case .extendToken(let publisherID, let token):
             return ["publisherId": publisherID, "token": token ?? ""]
         case .subscriptions(let publisherID, let token, let byAuthId, let offers):
-            return ["publisherId": publisherID, "token": token ?? "", "byAuthId": byAuthId,
+            return ["publisherId": publisherID,
+                    "token": token ?? "",
+                    "byAuthId": byAuthId,
                     "offers": offers ?? [String]()]
         case .purchaseItem(let publisherID, let transactionId, let receiptData, let token, let offerId, let isRestored):
             let receiptInfo: [String: Any] = [
