@@ -20,7 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             login.executeOnLaunch?(completion: nil)
             if launchOptions == nil {
                 DispatchQueue.main.async {
-                    login.executeAfterAppRootPresentation?(displayViewController: self.window?.rootViewController, completion: nil)
+                    login.executeAfterAppRootPresentation?(displayViewController: self.window?.rootViewController,
+                                                           completion: nil)
                 }
             }
         }

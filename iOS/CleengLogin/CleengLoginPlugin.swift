@@ -61,6 +61,17 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         }
     }
     
+    private func getModifiedDspFlow(camFlow: CAMFlow) -> CAMFlow {
+        switch camFlow {
+        case .authentication:
+            return isAuthenticated() ? .no : .authentication
+        case .authAndStorefront:
+            return isAuthenticated() ? .storefront : .authAndStorefront
+        default:
+            return camFlow
+        }
+    }
+    
     private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
         let entitlementsKey = "ds_product_ids"
         return playableItems.first?.extensionsDictionary?[entitlementsKey] as? [String] ?? []
@@ -122,12 +133,13 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
                     completion(.failure(.serverError))
                     return
                 }
-                guard let _ = verifiedOffer.accessGranted else {
+                if let access = verifiedOffer.accessGranted, access {
+                    self.userPermissionEntitlementsIds.insert(verifiedOffer.authID)
+                    completion(.success)
+                } else {
                     completion(.failure(.serverError))
                     return
                 }
-                self.userPermissionEntitlementsIds.insert(verifiedOffer.authID)
-                completion(.success)
             case .failure(let error):
                 completion(.failure(error))
                 return
@@ -230,6 +242,8 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
             flow = FlowParser().parseFlow(from: additionalParameters)
         }
         
+        flow = getModifiedDspFlow(camFlow: flow)
+        
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
                                                         camDelegate: self,
                                                         camFlow: flow) { (isCompleted) in
@@ -275,7 +289,8 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
                 UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
             } else {
                 if let authID = item.authID {
-                    userPermissionEntitlementsIds.insert(authID) // if offerID !empty put subscription token in dicrionary by authId
+                    userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
+                                                                 //subscription token in dicrionary by authId
                 }
             }
         }
@@ -332,6 +347,10 @@ extension ZappCleengLogin: CAMDelegate {
             return config
         }
         return [String: String]()
+    }
+    
+    public func isPurchaseNeeded() -> Bool {
+        return userPermissionEntitlementsIds.isDisjoint(with: currentVideoEntitlementsIds)
     }
     
     public func facebookLogin(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
@@ -406,7 +425,8 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (ProductPurchaseResult) -> Void) {
-        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]()) { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
+        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]())
+        { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
             var array = array
             guard let storeId = item.transaction?.payment.productIdentifier,
                 let offerId = currentAvailableOfferIDs[storeId] else {
@@ -419,7 +439,8 @@ extension ZappCleengLogin: CAMDelegate {
         var hasAccess = false
         restoredOffers.forEach { (item) in
             dispatchGroup.enter()
-            self.purchaseItem(token: userToken ?? "", offerId: item.offerId, transactionId: item.restoredItem.transaction?.transactionIdentifier ?? "",
+            self.purchaseItem(token: userToken ?? "", offerId: item.offerId,
+                              transactionId: item.restoredItem.transaction?.transactionIdentifier ?? "",
                               receiptData: item.restoredItem.receipt ?? "", isRestored: true) { (result) in
                 switch result {
                 case .success:

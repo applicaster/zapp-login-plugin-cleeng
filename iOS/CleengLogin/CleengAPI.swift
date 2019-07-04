@@ -22,7 +22,6 @@ enum CleengAPI {
     case purchaseItemUsingCode(publisherID: String, offerId: String, token: String, reedeemCode: String)
 }
     
-
 extension CleengAPI {
     var baseLink: String {
         return "https://applicaster-cleeng-sso.herokuapp.com/"

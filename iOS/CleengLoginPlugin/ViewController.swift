@@ -24,7 +24,7 @@ class ViewController: UIViewController {
         let authKey = "requires_authentication"
         let entitlementsKey = "ds_product_ids"
         let item = Playable()
-        item.extensionsDictionary = [authKey: false, entitlementsKey: ["48"]]
+        item.extensionsDictionary = [authKey: true, entitlementsKey: ["48"]]
         let login = ZPLoginManager.sharedInstance.createWithUserData()
         pluggableLogin = login
         if let login = login {
