@@ -15,12 +15,14 @@ class PluginConfigurator(private val pluginConfig: Map<String, String>) {
 
     fun getCleengErrorMessage(webError: WebServiceError): String {
         return when (webError) {
-            WebServiceError.DEFAULT -> getOrEmpty(KEY_ERROR_DEFAULT).orEmpty()
-            WebServiceError.NO_USER_EXISTS -> getOrEmpty(KEY_ERROR_NO_EXISTING_USER).orEmpty()
-            WebServiceError.USER_ALREADY_EXISTS -> getOrEmpty(KEY_ERROR_USER_ALREADY_EXISTS).orEmpty()
-            WebServiceError.INVALID_CREDENTIALS -> getOrEmpty(KEY_ERROR_CREDENTIALS).orEmpty()
+            WebServiceError.DEFAULT -> getOrDefault(KEY_ERROR_DEFAULT)
+            WebServiceError.NO_USER_EXISTS -> getOrDefault(KEY_ERROR_NO_EXISTING_USER)
+            WebServiceError.USER_ALREADY_EXISTS -> getOrDefault(KEY_ERROR_USER_ALREADY_EXISTS)
+            WebServiceError.INVALID_CREDENTIALS -> getOrDefault(KEY_ERROR_CREDENTIALS)
         }
     }
+
+    private fun getOrDefault(key: String) = getOrEmpty(key).orEmpty()
 
     private fun getOrEmpty(key: String): String? {
         return if (key in pluginConfig)
