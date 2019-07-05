@@ -19,6 +19,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     private val TAG = CamContract::class.java.canonicalName
 
     private var camFlow: CamFlow = CamFlow.EMPTY
+    private val currentOffers: HashMap<String, String> = hashMapOf()
 
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -34,7 +35,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     override fun loadEntitlements(callback: EntitlementsLoadCallback) {
         val requestData = SubscriptionsRequestData(
             1,
-            cleengService.getUser().userOffers?.map { it.authId.orEmpty() }.orEmpty(),
+            /*cleengService.getUser().userOffers?.map { it.authId.orEmpty() }.orEmpty()*/listOf("48"),
             cleengService.getUserToken()
         )
         executeRequest {
@@ -43,6 +44,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 is Result.Success -> {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     val billingOfferList: ArrayList<BillingOffer> = arrayListOf()
+                    currentOffers.clear()
                     responseDataResult?.forEach {
                         val billingOffer = BillingOffer(
                             it.authId.orEmpty(),
@@ -50,6 +52,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                             if (it.period.isNullOrEmpty()) ProductType.INAPP else ProductType.SUBS
                         )
                         billingOfferList.add(billingOffer)
+                        if (!it.androidProductId.isNullOrEmpty() && !it.id.isNullOrEmpty()) {
+                            currentOffers[it.androidProductId] = it.id
+                        }
                     }
                     callback.onSuccess(billingOfferList)
                 }
@@ -157,9 +162,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun onItemPurchased(purchase: Purchase, offerId: String) {
-        if (!cleengService.getUser().token.isNullOrEmpty()) {
-
+    override fun onItemPurchased(purchase: Purchase) {
+        val entry = currentOffers.entries.find {
+            purchase.sku == it.key
         }
 
         val receipt = SubscribeRequestData.Receipt(
@@ -174,7 +179,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
         val subscribeRequestData = SubscribeRequestData(
             null,
-            offerId,
+            entry?.value,
             receipt,
             cleengService.getUser().token
         )
@@ -183,7 +188,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             val result = cleengService.networkHelper.subscribe(subscribeRequestData)
             when (result) {
                 is Result.Success -> {
-                    finishPurchaseFlow(offerId)
+                    finishPurchaseFlow(entry?.value.orEmpty())
                 }
 
                 is Result.Failure -> {
@@ -206,7 +211,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 is Result.Success -> {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     responseDataResult?.forEach {
-                        cleengService.isAccessGranted(it)
+                        cleengService.parseAccessGranted(it)
                     }
                 }
 

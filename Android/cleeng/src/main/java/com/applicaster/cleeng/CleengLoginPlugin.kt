@@ -48,11 +48,16 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
             cleengService.fetchFeedData(playable)
             if (!isTokenValid) {
                 ContentAccessManager.onProcessStarted(cleengService.camContract, it)
+            } else {
+                when (cleengService.isAccessGranted()) {
+                    true -> { hookListener.hookCompleted(hashMapOf()) }
+                    else -> { ContentAccessManager.onProcessStarted(cleengService.camContract, it) }
+                }
             }
         }
     }
 
-    override fun isTokenValid(): Boolean = !cleengService.getUser().token.isNullOrEmpty()
+    override fun isTokenValid(): Boolean = cleengService.getUserToken().isNotEmpty()
 
     override fun setToken(token: String?) {
         // Empty body
@@ -73,7 +78,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
             cleengService.handleStartupHook(context, listener)
     }
 
-    override fun getToken(): String = cleengService.getUser().token.orEmpty()
+    override fun getToken(): String = cleengService.getUserToken()
 
     override fun setPluginConfigurationParams(params: MutableMap<Any?, Any?>?) {
         //transform MutableMap<Any?, Any?>? to Map<String, String>?
