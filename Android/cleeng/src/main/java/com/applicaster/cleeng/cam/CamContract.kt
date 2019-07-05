@@ -113,8 +113,8 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     authFieldsInput["password"].orEmpty(),
                     null,
                     cleengService.getUser().country,
-                    cleengService.getUser().currency,
-                    cleengService.getUser().locale
+                    cleengService.getUser().locale,
+                    cleengService.getUser().currency
                 )
             )
             when (result) {
@@ -140,8 +140,8 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     null,
                     id,
                     cleengService.getUser().country,
-                    cleengService.getUser().currency,
-                    cleengService.getUser().locale
+                    cleengService.getUser().locale,
+                    cleengService.getUser().currency
                 )
             )
             when (result) {

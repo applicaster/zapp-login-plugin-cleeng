@@ -21,7 +21,7 @@ class NetworkHelper(private val publisherId: String) {
             val response = with(requestData) {
                 retrofitService.registerEmail(
                     email,
-                    password ?: "",
+                    password.orEmpty(),
                     country,
                     locale,
                     currency
@@ -38,7 +38,7 @@ class NetworkHelper(private val publisherId: String) {
             val response = with(requestData) {
                 retrofitService.registerFacebook(
                     email,
-                    facebookId ?: "",
+                    facebookId.orEmpty(),
                     country,
                     locale,
                     currency
