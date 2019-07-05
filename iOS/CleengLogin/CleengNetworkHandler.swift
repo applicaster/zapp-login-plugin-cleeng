@@ -13,6 +13,8 @@ class CleengNetworkHandler {
     var isPerformingAuthorizationFlow = false
     let publisherID: String
     
+    var errorMessage: (ErrorCodes) -> String = {_ in return ""}
+    
     init(publisherID: String) {
         self.publisherID = publisherID
     }
@@ -72,12 +74,14 @@ class CleengNetworkHandler {
                 case 200..<300:
                     completion(.success(data))
                 default:
-                    completion(.failure(.requestError(data)))
+                    let errorCode = (try? JSONDecoder().decode(ErrorCodes.self, from: data)) ?? .unknown
+                    let errorMessage = self.errorMessage(errorCode)
+                    let error = LoginError(from: errorCode,
+                                           with: errorMessage)
+                    completion(.failure(.requestError(error)))
                 }
             case .failure(let error):
-                if let error = error as? AFError {
-                    completion(.failure(.networkError(error)))
-                }
+                completion(.failure(.networkError(error)))
             }
         }
     }

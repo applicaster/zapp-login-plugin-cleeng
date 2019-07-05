@@ -12,6 +12,10 @@ import CAM
 
 private let kCleengUserLoginToken = "CleengUserLoginToken"
 
+enum CleengErrors: Error {
+    case authTokenNotParsed
+}
+
 @objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
     
     private var userToken: String?
@@ -34,7 +38,9 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
         if let id = configurationJSON?["cleeng_login_publisher_id"] as? String {
             publisherId = id
         }
+        
         networkAdapter = CleengNetworkHandler(publisherID: publisherId)
+        networkAdapter.errorMessage = errorMessage()
     }
     
     public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
@@ -60,29 +66,59 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
             completion(.failure)
             return
         }
+        
         networkAdapter.extendToken(token: savedLoginToken, completion: { (result) in
             switch result {
             case .success(let data):
-                self.parseAuthTokensResponse(json: data, completion: { (result) in
-                    result ? completion(.success) : completion(.failure)
-                })
+                let isParsed = self.parseAuthTokensResponse(json: data)
+                isParsed == true ? completion(.success) : completion(.failure)
             case .failure:
                 completion(.failure)
             }
         })
     }
     
-    private func authorize(api: CleengAPI, completion: @escaping (CAMResult) -> Void) {
+    private func authorize(api: CleengAPI, completion: @escaping (CAM.Result<Void>) -> Void) {
         networkAdapter.authorize(apiRequest: api, completion: { (result) in
             switch result {
             case .success(let data):
-                self.parseAuthTokensResponse(json: data, completion: { (result) in
-                    result ? completion(.success) : completion(.failure(description: "Server Error"))
-                })
+                let isParsed = self.parseAuthTokensResponse(json: data)
+                isParsed == true ? completion(.success(())) : completion(.failure(CleengErrors.authTokenNotParsed))
             case .failure(let error):
-                completion(.failure(description: error.description))
+                completion(.failure(error))
             }
         })
+    }
+    
+    private func errorMessage() -> (ErrorCodes) -> String {
+        let nonexistentAlertKey = "nonexistent_user_alert_text"
+        let existingUserAlertKey = "existing_user_alert_text"
+        let invalidCredentialsAlertKey = "invalid_credentials_alert_text"
+        let defaultAlertKey = "default_alert_text"
+        
+        let nonexistentAlertMessage = configurationJSON?[nonexistentAlertKey] as? String ?? ""
+        let existingUserAlertMessage = configurationJSON?[existingUserAlertKey] as? String ?? ""
+        let invalidCredentialsAlertMessage = configurationJSON?[invalidCredentialsAlertKey] as? String ?? ""
+        let defaultAlertMessage = configurationJSON?[defaultAlertKey] as? String ?? ""
+        
+        let result: (ErrorCodes) -> String = { errorCode in
+            var errorMessage = ""
+            
+            switch errorCode {
+            case .nonexistentUser:
+                errorMessage = nonexistentAlertMessage
+            case .existingUser:
+                errorMessage = existingUserAlertMessage
+            case .invalidCredentials:
+                errorMessage = invalidCredentialsAlertMessage
+            case .unknown:
+                errorMessage = defaultAlertMessage
+            }
+            
+            return errorMessage
+        }
+        
+        return result
     }
     
     // MARK: - ZPAppLoadingHookProtocol
@@ -205,10 +241,9 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
     
     // MARK: - JSON Response parsing
     
-    private func parseAuthTokensResponse(json: Data, completion: (Bool) -> Void) {
+    private func parseAuthTokensResponse(json: Data) -> Bool {
         guard let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) else {
-            completion(false)
-            return
+            return false
         }
         for item in cleengTokens {
             if item.offerID.isEmpty {
@@ -220,7 +255,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
                 }
             }
         }
-        completion(true)
+        return true
     }
     
     // MARK: - ZPScreenHookAdapterProtocol
@@ -258,52 +293,58 @@ extension ZappCleengLogin: CAMDelegate {
         return true
     }
     
-    public func facebookLogin(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
-        let api = CleengAPI.loginWithFacebook(publisherID: publisherId, email: userData.email,
+    public func facebookLogin(userData: (email: String, userId: String),
+                              completion: @escaping (LoginResult) -> Void) {
+        let api = CleengAPI.loginWithFacebook(publisherID: publisherId,
+                                              email: userData.email,
                                               facebookId: userData.userId)
-        authorize(api: api, completion: completion)
+//        authorize(api: api, completion: completion)
+        authorize(api: api) { (result) in
+            
+        }
     }
     
-    public func facebookSignUp(userData: (email: String, userId: String), completion: @escaping (CAMResult) -> Void) {
+    public func facebookSignUp(userData: (email: String, userId: String),
+                               completion: @escaping (SignupResult) -> Void) {
         let api = CleengAPI.registerWithFacebook(publisherID: publisherId, email: userData.email,
                                                  facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
-    public func login(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
+    public func login(authData: [String: String], completion: @escaping (LoginResult) -> Void) {
         let api = CleengAPI.login(publisherID: publisherId, email: authData["email"] ?? "",
                                   password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
     
-    public func signUp(authData: [String: String], completion: @escaping (CAMResult) -> Void) {
+    public func signUp(authData: [String: String], completion: @escaping (SignupResult) -> Void) {
         let api = CleengAPI.register(publisherID: publisherId, email: authData["email"] ?? "",
                                      password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
     
-    public func resetPassword(data: [String: String], completion: @escaping (CAMResult) -> Void) {
+    public func resetPassword(data: [String: String], completion: @escaping (CAM.Result<Void>) -> Void) {
         networkAdapter.resetPassword(data: data, completion: { (result) in
             switch result {
             case .success:
-                completion(.success)
+                completion(CAM.Result.success(()))
             case .failure(let error):
-                completion(.failure(description: error.description))
+                completion(.failure(error))
             }
         })
     }
     
     public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
-        completion(.success(products: []))
+        completion(.success([]))
     }
     
     public func itemPurchased(purchasedItem: PurchasedProduct,
-                              completion: @escaping (ProductPurchaseResult) -> Void) {
+                              completion: @escaping (PurchaseResult) -> Void) {
         
     }
     
     public func itemsRestored(restoredItems: [PurchasedProduct],
-                              completion: @escaping (ProductPurchaseResult) -> Void) {
+                              completion: @escaping (PurchaseResult) -> Void) {
         
     }
 }
