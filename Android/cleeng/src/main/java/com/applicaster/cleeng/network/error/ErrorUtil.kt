@@ -6,9 +6,24 @@ import java.io.IOException
 
 class ErrorUtil {
     companion object {
-        fun parseError(response: Response<*>): ResponseError {
+        fun handleError(response: Response<*>): WebServiceError {
+            val error: ResponseError = parseError(response)
+            var webError: WebServiceError = WebServiceError.DEFAULT
+            if (response.code() == 500 && error.code != null) {
+                webError = when {
+                    error.code.toInt() == 10 -> WebServiceError.NO_USER_EXISTS
+                    error.code.toInt() == 13 -> WebServiceError.USER_ALREADY_EXISTS
+                    error.code.toInt() == 15 -> WebServiceError.INVALID_CREDENTIALS
+                    else -> WebServiceError.DEFAULT
+                }
+            }
+            return webError
+        }
+
+        private fun parseError(response: Response<*>): ResponseError {
             val converter = ServiceGenerator.retrofit.responseBodyConverter<ResponseError>(
-                ResponseError::class.java, arrayOfNulls<Annotation>(0))
+                ResponseError::class.java, arrayOfNulls<Annotation>(0)
+            )
 
             val error: ResponseError
 

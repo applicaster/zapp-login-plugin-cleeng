@@ -7,9 +7,7 @@ import com.applicaster.cam.params.billing.BillingOffer
 import com.applicaster.cam.params.billing.ProductType
 import com.applicaster.cleeng.CleengService
 import com.applicaster.cleeng.network.Result
-import com.applicaster.cleeng.network.error.Error
 import com.applicaster.cleeng.network.executeRequest
-import com.applicaster.cleeng.network.handleResponse
 import com.applicaster.cleeng.network.request.RegisterRequestData
 import com.applicaster.cleeng.network.request.SubscribeRequestData
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
@@ -40,8 +38,8 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             cleengService.getUserToken()
         )
         executeRequest {
-            val response = cleengService.networkHelper.requestSubscriptions(requestData)
-            when (val result = handleResponse(response)) {
+            val result = cleengService.networkHelper.requestSubscriptions(requestData)
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     val billingOfferList: ArrayList<BillingOffer> = arrayListOf()
@@ -57,8 +55,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
 
                 is Result.Failure -> {
-                    val error: Error? = result.value
-                    //error handling logic
+                    callback.onFailure(cleengService.getErrorMessage(result.value))
                 }
             }
         }
@@ -66,11 +63,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun login(authFieldsInput: HashMap<String, String>, callback: LoginCallback) {
         executeRequest {
-            val response = cleengService.networkHelper.login(
+            val result = cleengService.networkHelper.login(
                 authFieldsInput["email"].orEmpty(),
                 authFieldsInput["password"].orEmpty()
             )
-            when (val result = handleResponse(response)) {
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (!responseDataResult.isNullOrEmpty())
@@ -79,7 +76,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure(result.value?.message().orEmpty())
+                    callback.onFailure(cleengService.getErrorMessage(result.value))
                 }
             }
         }
@@ -87,11 +84,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun loginWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
         executeRequest {
-            val response = cleengService.networkHelper.loginFacebook(
+            val result = cleengService.networkHelper.loginFacebook(
                 email,
                 id
             )
-            when (val result = handleResponse(response)) {
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (!responseDataResult.isNullOrEmpty())
@@ -100,7 +97,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure(result.value?.message().orEmpty())
+                    callback.onFailure(cleengService.getErrorMessage(result.value))
                 }
             }
         }
@@ -108,7 +105,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun signUp(authFieldsInput: HashMap<String, String>, callback: SignUpCallback) {
         executeRequest {
-            val response = cleengService.networkHelper.register(
+            val result = cleengService.networkHelper.register(
                 RegisterRequestData(
                     authFieldsInput["email"].orEmpty(),
                     authFieldsInput["password"].orEmpty(),
@@ -118,7 +115,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     cleengService.getUser().locale
                 )
             )
-            when (val result = handleResponse(response)) {
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (!responseDataResult.isNullOrEmpty())
@@ -127,7 +124,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure(result.value?.message().orEmpty())
+                    callback.onFailure(cleengService.getErrorMessage(result.value))
                 }
             }
         }
@@ -135,7 +132,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun signupWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
         executeRequest {
-            val response = cleengService.networkHelper.register(
+            val result = cleengService.networkHelper.registerFacebook(
                 RegisterRequestData(
                     email,
                     null,
@@ -145,7 +142,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     cleengService.getUser().locale
                 )
             )
-            when (val result = handleResponse(response)) {
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (!responseDataResult.isNullOrEmpty())
@@ -154,7 +151,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure(result.value?.message().orEmpty())
+                    callback.onFailure(cleengService.getErrorMessage(result.value))
                 }
             }
         }
@@ -183,14 +180,14 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         )
 
         executeRequest {
-            val response = cleengService.networkHelper.subscribe(subscribeRequestData)
-            when (val result = handleResponse(response)) {
+            val result = cleengService.networkHelper.subscribe(subscribeRequestData)
+            when (result) {
                 is Result.Success -> {
                     finishPurchaseFlow(offerId)
                 }
 
                 is Result.Failure -> {
-                    Log.e(TAG, result.value?.message())
+                    Log.e(TAG, result.value?.name)
                 }
             }
         }
@@ -204,8 +201,8 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         )
 
         executeRequest {
-            val response = cleengService.networkHelper.requestSubscriptions(requestData)
-            when (val result = handleResponse(response)) {
+            val result = cleengService.networkHelper.requestSubscriptions(requestData)
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     responseDataResult?.forEach {
@@ -214,8 +211,8 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
 
                 is Result.Failure -> {
-                    val error: Error? = result.value
-                    Log.e(TAG, error?.message())
+//                    val error: Error? = result.value
+                    Log.e(TAG, result.value.toString())
                 }
             }
         }
@@ -227,10 +224,10 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun resetPassword(authFieldsInput: HashMap<String, String>, callback: PasswordResetCallback) {
         executeRequest {
-            val response = cleengService.networkHelper.resetPassword(
+            val result = cleengService.networkHelper.resetPassword(
                 authFieldsInput["email"].orEmpty()
             )
-            when (val result = handleResponse(response)) {
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: ResetPasswordResponseData? = result.value
                     if (responseDataResult?.success == true)
@@ -241,7 +238,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure(result.value?.message().orEmpty())
+                    callback.onFailure(cleengService.getErrorMessage(result.value))
                 }
             }
         }

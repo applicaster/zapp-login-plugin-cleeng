@@ -7,8 +7,4 @@ data class ResponseError(
     val code: String?,
     @SerializedName("message")
     val message: String?
-) : Error {
-    override fun code(): String = code.orEmpty()
-
-    override fun message(): String = message.orEmpty()
-}
+) : Error

@@ -10,8 +10,8 @@ import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.data.User
 import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
+import com.applicaster.cleeng.network.error.WebServiceError
 import com.applicaster.cleeng.network.executeRequest
-import com.applicaster.cleeng.network.handleResponse
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.CleengAsyncTaskListener
@@ -42,8 +42,8 @@ class CleengService {
 
     fun handleStartupHook(context: Context, listener: HookListener?) {
         executeRequest {
-            val response = networkHelper.extendToken(getUserToken())
-            when (val result = handleResponse(response)) {
+            val result = networkHelper.extendToken(getUserToken())
+            when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     parseAuthResponse(responseDataResult.orEmpty())
@@ -223,6 +223,10 @@ class CleengService {
     fun isAccessGranted(subscriptionData: SubscriptionsResponseData): Boolean {
 //        save current authId if access granted
         return subscriptionData.accessGranted ?: false
+    }
+
+    fun getErrorMessage(webError: WebServiceError?): String {
+        return pluginConfigurator?.getCleengErrorMessage(webError ?: WebServiceError.DEFAULT).orEmpty()
     }
 
     private enum class Option {
