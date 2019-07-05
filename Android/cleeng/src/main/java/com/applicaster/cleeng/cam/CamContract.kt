@@ -230,7 +230,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun isPurchaseRequired(): Boolean = cleengService.isAccessGranted()
+    override fun isPurchaseRequired(): Boolean = !cleengService.isAccessGranted()
 
     override fun resetPassword(authFieldsInput: HashMap<String, String>, callback: PasswordResetCallback) {
         executeRequest {
