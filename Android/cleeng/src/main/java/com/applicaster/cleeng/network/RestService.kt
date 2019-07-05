@@ -1,10 +1,10 @@
 package com.applicaster.cleeng.network
 
-import com.applicaster.cleeng.network.request.SubscribeRequest
-import com.applicaster.cleeng.network.request.SubscriptionsRequest
-import com.applicaster.cleeng.network.response.OfferResponse
-import com.applicaster.cleeng.network.response.RegisterResponce
-import com.applicaster.cleeng.network.response.ResetPasswordResponse
+import com.applicaster.cleeng.network.request.SubscribeRequestData
+import com.applicaster.cleeng.network.request.SubscriptionsRequestData
+import com.applicaster.cleeng.network.response.AuthResponseData
+import com.applicaster.cleeng.network.response.ResetPasswordResponseData
+import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -15,13 +15,13 @@ interface RestService {
 
     @FormUrlEncoded
     @POST("register")
-    suspend fun register(
+    suspend fun registerEmail(
         @Field("email") email: String,
         @Field("password") password: String,
         @Field("country") country: String,
         @Field("locale") locale: String,
         @Field("currency") currency: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("register")
@@ -31,42 +31,41 @@ interface RestService {
         @Field("country") country: String,
         @Field("locale") locale: String,
         @Field("currency") currency: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("login")
-    suspend fun login(
+    suspend fun loginEmail(
        @Field("email") email: String,
        @Field("password") password: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("login")
     suspend fun loginFacebook(
         @Field("email") email: String,
         @Field("FacebookId") facebookId: String
-    ): Response<List<RegisterResponce>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("passwordReset")
     suspend fun resetPassword(
         @Field("email") email: String
-    ): Response<ResetPasswordResponse>
+    ): Response<ResetPasswordResponseData>
 
     @FormUrlEncoded
     @POST("extendToken")
     suspend fun extendToken(
         @Field("token") token: String
-    ): Response<RegisterResponce>
+    ): Response<List<AuthResponseData>>
 
     @POST("subscriptions")
     suspend fun requestSubscriptions(
-        @Body subscriptionsRequest: SubscriptionsRequest
-    ): Response<List<OfferResponse>>
+        @Body subscriptionsRequestData: SubscriptionsRequestData
+    ): Response<List<SubscriptionsResponseData>>
 
     @POST("subscription")
     suspend fun subscribe(
-        @Body subscribeRequest: SubscribeRequest
+        @Body subscribeRequestData: SubscribeRequestData
     ): Response<Unit>
-
 }

@@ -1,7 +1,7 @@
 package com.applicaster.cleeng.network
 
-import com.applicaster.cleeng.network.error.Error
 import com.applicaster.cleeng.network.error.ErrorUtil
+import com.applicaster.cleeng.network.error.WebServiceError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -11,9 +11,11 @@ import kotlin.coroutines.CoroutineContext
 
 
 private lateinit var job: Job
+private lateinit var exceptionHandler: CleengCoroutineExceptionHandler
 private val scope by lazy {
     job = Job()
-    val coroutineContext: CoroutineContext = Dispatchers.IO + job
+    exceptionHandler = CleengCoroutineExceptionHandler {  }
+    val coroutineContext: CoroutineContext = Dispatchers.Main + job + exceptionHandler
     CoroutineScope(coroutineContext)
 }
 
@@ -24,29 +26,17 @@ fun executeRequest(request: suspend () -> Unit) {
 }
 
 fun cancelCurrentJob() {
-    if (job.isActive)
+    if (::job.isInitialized && job.isActive)
         job.cancel()
 }
 
-fun<R> handleResponse(response: Response<R>): Result<R, Error> {
+fun <R> handleResponse(response: Response<R>): Result<R, WebServiceError> {
     return when {
         response.isSuccessful -> {
             Result.Success(response.body())
         }
-        response.code() == 400 -> {
-            Result.Failure(ErrorUtil.parseError(response))
-        }
-        response.code() == 401 -> {
-            Result.Failure(ErrorUtil.parseError(response))
-        }
-        response.code() == 422 -> {
-            Result.Failure(ErrorUtil.parseError(response))
-        }
-        response.code() == 500 -> {
-            Result.Failure(ErrorUtil.parseError(response))
-        }
         else -> {
-            Result.Failure(ErrorUtil.parseError(response))
+            Result.Failure(ErrorUtil.handleError(response))
         }
     }
 }

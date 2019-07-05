@@ -3,7 +3,7 @@ package com.applicaster.cleeng.network.request
 
 import com.google.gson.annotations.SerializedName
 
-data class SubscribeRequest(
+data class SubscribeRequestData(
     @SerializedName("auth_id")
     val authId: String?,
     @SerializedName("offer_id")

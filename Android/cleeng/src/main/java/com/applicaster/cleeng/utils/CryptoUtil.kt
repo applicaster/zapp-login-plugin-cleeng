@@ -1,9 +1,10 @@
 package com.applicaster.cleeng.utils
 
+import android.annotation.SuppressLint
+import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import com.applicaster.cleeng.BuildConfig
-import com.google.firebase.iid.FirebaseInstanceId
 import java.lang.Exception
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
@@ -11,8 +12,11 @@ import java.security.SecureRandom
 import javax.crypto.*
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.PBEParameterSpec
-import javax.crypto.spec.SecretKeySpec
+import com.applicaster.app.CustomApplication
+import java.util.*
 
+
+@SuppressLint("HardwareIds")
 class CryptoUtil {
     private val TAG = CryptoUtil::class.java.canonicalName
     private var PACKAGE_NAME = BuildConfig.APPLICATION_ID
@@ -20,12 +24,15 @@ class CryptoUtil {
     private val IV_BITS_MIN = 12
     private val IV_BITS_MAX = 16
     private val ITERATIONS = 64
-    private val skfAlgorithm = "PBKDF2WithHmacSHA1"
-    private val transformation = "AES/GCM/NoPadding"
-    private val sksAlgorithm = "AES"
+    private val skfAlgorithm = "PBEWithMD5AndDES"
+    private val transformation = "PBEWithMD5AndDES"
 
     // lazy generate and get instanceId string
-    private val instanceId: String by lazy { FirebaseInstanceId.getInstance().id }
+    private val instanceId: String by lazy {
+        val id =
+            Settings.Secure.getString(CustomApplication.getApplication().contentResolver, Settings.Secure.ANDROID_ID)
+        UUID.nameUUIDFromBytes(id.toByteArray()).toString()
+    }
 
     fun encode(value: String): String {
         return Base64.encodeToString(value.toByteArray(), Base64.DEFAULT).trim()
@@ -56,12 +63,12 @@ class CryptoUtil {
         try {
             decryptedData = decrypt(key, decodedToken)
         } catch (e: Exception) {
-
+            Log.e(TAG, e.message)
         }
         return decryptedData
     }
 
-    private fun generateSecretKey(passphrase: String): SecretKeySpec {
+    private fun generateSecretKey(passphrase: String): SecretKey {
         val factory = SecretKeyFactory.getInstance(skfAlgorithm)
         val spec = PBEKeySpec(
             passphrase.toCharArray(),
@@ -69,11 +76,10 @@ class CryptoUtil {
             ITERATIONS,
             KEYLEN_BITS
         )
-        val tmp = factory.generateSecret(spec)
-        return SecretKeySpec(tmp.encoded, sksAlgorithm)
+        return factory.generateSecret(spec)
     }
 
-    private fun encrypt(secretKeySpec: SecretKeySpec, token: String): ByteArray {
+    private fun encrypt(secretKey: SecretKey, token: String): ByteArray {
         var byteBuffer: ByteBuffer? = null
         try {
             val iv = ByteArray(IV_BITS_MIN)
@@ -82,7 +88,7 @@ class CryptoUtil {
             val cipher = Cipher.getInstance(transformation)
             val parameterSpec =
                 PBEParameterSpec((instanceId + PACKAGE_NAME).toByteArray(Charsets.UTF_8), ITERATIONS)
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameterSpec)
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec)
             val cipherBytes = cipher.doFinal(token.toByteArray(Charsets.UTF_8))
             byteBuffer = ByteBuffer.allocate(4 + iv.size + cipherBytes.size)
             byteBuffer.putInt(iv.size)
@@ -100,7 +106,7 @@ class CryptoUtil {
         return byteBuffer?.array() ?: byteArrayOf()
     }
 
-    private fun decrypt(secretKeySpec: SecretKeySpec, token: ByteArray): String {
+    private fun decrypt(secretKey: SecretKey, token: ByteArray): String {
         val ivLength: Int
         val iv: ByteArray
         val cipherBytes: ByteArray
@@ -118,7 +124,7 @@ class CryptoUtil {
             val cipher = Cipher.getInstance(transformation)
             cipher.init(
                 Cipher.DECRYPT_MODE,
-                secretKeySpec,
+                secretKey,
                 PBEParameterSpec((instanceId + PACKAGE_NAME).toByteArray(Charsets.UTF_8), ITERATIONS)
             )
             encryptedBytes = cipher.doFinal(cipherBytes)

@@ -2,12 +2,14 @@ package com.applicaster.cleeng.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.applicaster.app.CustomApplication
 
-class SharedPreferencesUtil(private val context: Context?) {
+class SharedPreferencesUtil {
     private val KEY_PREFERENCES = "cleeng_prefs"
     private val KEY_USER_TOKEN = "user_token"
 
-    private val sharedPreferences: SharedPreferences? = context?.getSharedPreferences(KEY_PREFERENCES, Context.MODE_PRIVATE)
+    private val sharedPreferences: SharedPreferences? =
+        CustomApplication.getApplication().applicationContext.getSharedPreferences(KEY_PREFERENCES, Context.MODE_PRIVATE)
     private val editor: SharedPreferences.Editor? = sharedPreferences?.edit()
     private val cryptoUtils = CryptoUtil()
 
@@ -18,6 +20,11 @@ class SharedPreferencesUtil(private val context: Context?) {
     }
 
     fun getUserToken(): String =
-        cryptoUtils.decryptToken(sharedPreferences?.getString(cryptoUtils.decode(KEY_USER_TOKEN), "").orEmpty())
+        cryptoUtils.decryptToken(sharedPreferences?.getString(cryptoUtils.encode(KEY_USER_TOKEN), "").orEmpty())
+
+    fun removeUserToken() {
+        editor?.remove(cryptoUtils.encode(KEY_USER_TOKEN))
+        editor?.apply()
+    }
 
  }
