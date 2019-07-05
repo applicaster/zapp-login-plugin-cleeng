@@ -160,47 +160,45 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     }
 
     override fun onItemPurchased(purchase: List<Purchase>, callback: PurchaseCallback) {
-        subscribeOn(purchase, callback)
+        purchase.forEach { subscribeOn(it, callback) }
     }
 
     override fun onPurchasesRestored(purchases: List<Purchase>, callback: RestoreCallback) {
-        subscribeOn(purchases, callback)
+        purchases.forEach { subscribeOn(it, callback) }
     }
 
-    private fun subscribeOn(purchases: List<Purchase>, callback: ActionCallback) {
-        purchases.forEach { purchaseItem ->
-            val entry = currentOffers.entries.find {
-                purchaseItem.sku == it.key
-            }
+    private fun subscribeOn(purchaseItem: Purchase, callback: ActionCallback) {
+        val entry = currentOffers.entries.find {
+            purchaseItem.sku == it.key
+        }
 
-            val receipt = SubscribeRequestData.Receipt(
-                purchaseItem.originalJson,
-                purchaseItem.orderId,
-                purchaseItem.packageName,
-                purchaseItem.sku,
-                (-1).toString(), // stub
-                purchaseItem.purchaseTime.toString(),
-                purchaseItem.purchaseToken
-            )
+        val receipt = SubscribeRequestData.Receipt(
+            purchaseItem.originalJson,
+            purchaseItem.orderId,
+            purchaseItem.packageName,
+            purchaseItem.sku,
+            (-1).toString(), // stub
+            purchaseItem.purchaseTime.toString(),
+            purchaseItem.purchaseToken
+        )
 
-            val subscribeRequestData = SubscribeRequestData(
-                null,
-                entry?.value,
-                receipt,
-                cleengService.getUser().token
-            )
+        val subscribeRequestData = SubscribeRequestData(
+            null,
+            entry?.value,
+            receipt,
+            cleengService.getUser().token
+        )
 
-            executeRequest {
-                val result = cleengService.networkHelper.subscribe(subscribeRequestData)
-                when (result) {
-                    is Result.Success -> {
-                        finishPurchaseFlow(entry?.value.orEmpty(), callback)
-                    }
+        executeRequest {
+            val result = cleengService.networkHelper.subscribe(subscribeRequestData)
+            when (result) {
+                is Result.Success -> {
+                    finishPurchaseFlow(entry?.value.orEmpty(), callback)
+                }
 
-                    is Result.Failure -> {
-                        callback.onFailure("")
-                        Log.e(TAG, result.value?.name)
-                    }
+                is Result.Failure -> {
+                    callback.onFailure("")
+                    Log.e(TAG, result.value?.name)
                 }
             }
         }
