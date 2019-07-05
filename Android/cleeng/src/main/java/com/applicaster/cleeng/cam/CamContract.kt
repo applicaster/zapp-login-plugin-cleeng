@@ -22,20 +22,17 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     private val currentOffers: HashMap<String, String> = hashMapOf()
 
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getPluginConfig() =
-        cleengService.getPluginConfigurationParams()
-
-    override fun isPurchaseRequired(entitlements: List<String>) = true //TODO: dummy. add proper handling
+    override fun getPluginConfig() = cleengService.getPluginConfigurationParams()
 
     override fun isUserLogged(): Boolean = !cleengService.getUser().token.isNullOrEmpty()
 
     override fun loadEntitlements(callback: EntitlementsLoadCallback) {
         val requestData = SubscriptionsRequestData(
             1,
-            /*cleengService.getUser().userOffers?.map { it.authId.orEmpty() }.orEmpty()*/listOf("48"),
+            cleengService.getUser().userOffers?.map { it.authId.orEmpty() }.orEmpty(),
             cleengService.getUserToken()
         )
         executeRequest {
@@ -162,43 +159,54 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun onItemPurchased(purchase: Purchase) {
-        val entry = currentOffers.entries.find {
-            purchase.sku == it.key
-        }
+    override fun onItemPurchased(purchase: List<Purchase>, callback: PurchaseCallback) {
+        subscribeOn(purchase, callback)
+    }
 
-        val receipt = SubscribeRequestData.Receipt(
-            purchase.originalJson,
-            purchase.orderId,
-            purchase.packageName,
-            purchase.sku,
-            (-1).toString(), // stub
-            purchase.purchaseTime.toString(),
-            purchase.purchaseToken
-        )
+    override fun onPurchasesRestored(purchases: List<Purchase>, callback: RestoreCallback) {
+        subscribeOn(purchases, callback)
+    }
 
-        val subscribeRequestData = SubscribeRequestData(
-            null,
-            entry?.value,
-            receipt,
-            cleengService.getUser().token
-        )
+    private fun subscribeOn(purchases: List<Purchase>, callback: ActionCallback) {
+        purchases.forEach { purchaseItem ->
+            val entry = currentOffers.entries.find {
+                purchaseItem.sku == it.key
+            }
 
-        executeRequest {
-            val result = cleengService.networkHelper.subscribe(subscribeRequestData)
-            when (result) {
-                is Result.Success -> {
-                    finishPurchaseFlow(entry?.value.orEmpty())
-                }
+            val receipt = SubscribeRequestData.Receipt(
+                purchaseItem.originalJson,
+                purchaseItem.orderId,
+                purchaseItem.packageName,
+                purchaseItem.sku,
+                (-1).toString(), // stub
+                purchaseItem.purchaseTime.toString(),
+                purchaseItem.purchaseToken
+            )
 
-                is Result.Failure -> {
-                    Log.e(TAG, result.value?.name)
+            val subscribeRequestData = SubscribeRequestData(
+                null,
+                entry?.value,
+                receipt,
+                cleengService.getUser().token
+            )
+
+            executeRequest {
+                val result = cleengService.networkHelper.subscribe(subscribeRequestData)
+                when (result) {
+                    is Result.Success -> {
+                        finishPurchaseFlow(entry?.value.orEmpty(), callback)
+                    }
+
+                    is Result.Failure -> {
+                        callback.onFailure("")
+                        Log.e(TAG, result.value?.name)
+                    }
                 }
             }
         }
     }
 
-    private fun finishPurchaseFlow(offerId: String) {
+    private fun finishPurchaseFlow(offerId: String, callback: ActionCallback) {
         val requestData = SubscriptionsRequestData(
             null,
             listOf(offerId),
@@ -212,20 +220,19 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     responseDataResult?.forEach {
                         cleengService.parseAccessGranted(it)
+                        callback.onSuccess()
                     }
                 }
 
                 is Result.Failure -> {
-//                    val error: Error? = result.value
+                    callback.onFailure("")
                     Log.e(TAG, result.value.toString())
                 }
             }
         }
     }
 
-    override fun onPurchasesRestored(callback: RestoreCallback) {
-        callback.onSuccess(listOf())
-    }
+    override fun isPurchaseRequired(): Boolean = cleengService.isAccessGranted()
 
     override fun resetPassword(authFieldsInput: HashMap<String, String>, callback: PasswordResetCallback) {
         executeRequest {
@@ -238,7 +245,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     if (responseDataResult?.success == true)
                         callback.onSuccess()
                     else
-                        callback.onFailure("Error") //TODO: replace with separated error
+                        callback.onFailure("Error")
 
                 }
 
