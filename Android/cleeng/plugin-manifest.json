@@ -1,0 +1,847 @@
+{
+    "api": {
+        "require_startup_execution": true,
+        "class_name": "com.applicaster.cleeng.CleengLoginPlugin",
+        "proguard_rules": "##---------------Proguard configuration for Cleeng  ----------\n-keep class com.applicaster.cleeng.CleengLoginPlugin { *; }## Android Coroutines specific rules ##\n# ServiceLoader support\n-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}\n-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}\n-keepnames class kotlinx.coroutines.android.AndroidExceptionPreHandler {}\n-keepnames class kotlinx.coroutines.android.AndroidDispatcherFactory {}\n# Most of volatile fields are updated with AFU and should not be mangled\n-keepclassmembernames class kotlinx.** {volatile <fields>;}\n\n## GSON specific rules ##\n# Gson uses generic type information stored in a class file when working with fields. Proguard\n# removes such information by default, so configure it to keep all of it.\n-keepattributes Signature\n# For using GSON @Expose annotation\n#-keepattributes *Annotation*\n-keepattributes EnclosingMethod\n# Gson specific classes\n-keep class sun.misc.Unsafe { *; }\n-keep class com.google.gson.** { *; }\n# Application classes that will be serialized/deserialized over Gson\n-keep class com.google.gson.examples.android.model.** { *; }\n# Prevent proguard from stripping interface information from TypeAdapterFactory,\n# JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)\n-keep class * implements com.google.gson.TypeAdapterFactory\n-keep class * implements com.google.gson.JsonSerializer\n-keep class * implements com.google.gson.JsonDeserializer\n\n## OkHttp specific rules ##\n-keepattributes Signature\n-keepattributes *Annotation*\n-keep class okhttp3.** { *; }\n-keep interface okhttp3.** { *; }\n-dontwarn okhttp3.**\n\n## Retrofit 2.X specific rules ##\n# https://square.github.io/retrofit/\n-dontwarn retrofit2.**\n-keep class retrofit2.** { *; }\n-dontwarn okio.**\n-keepattributes *Annotation*,Signature\n\n-keepclasseswithmembers, allowobfuscation class * {@retrofit2.http.* <methods>;}\n\n"
+    },
+    "dependency_repository_url": [{
+        "url": "https://dl.bintray.com/applicaster-ltd/maven_plugins/"
+    }],
+    "platform": "android",
+    "author_name": "Alex Khomich, Denis Razumeev",
+    "author_email": "a.khomich@applicaster.com, d.razumeev@applicaster.com",
+    "manifest_version": "0.0.1",
+    "dependency_version": "0.0.1",
+    "name": "Cleeng Test",
+    "description": "Cleeng Test",
+    "cover_image": "",
+    "type": "login",
+    "screen": false,
+    "identifier": "cleeng_cam",
+    "ui_builder_support": true,
+    "dependency_name": "com.applicaster:cleeng-login-plugin",
+    "whitelisted_account_ids": ["5a4516fa41442c000b0195d6"],
+    "min_zapp_sdk": "8.2.1",
+    "deprecated_since_zapp_sdk": "",
+    "unsupported_since_zapp_sdk": "",
+    "react_native": false,
+    "custom_configuration_fields": [
+        {
+            "general": {
+                "fields": [
+                    {
+                        "key": "trigger_on_app_launch",
+                        "type": "switch",
+                        "label_tooltip": "If checked, the plugin UI will be launched when the user launches the app, unless the device is already authorized to access the app.",
+                        "initial_value": "false"
+                    },
+                    {
+                        "key": "app_level_entitlements",
+                        "type": "text_input",
+                        "label_tooltip": "Enter here, in a comma-separated list, any entitlements which should provide users access to the home screen of the app. If no entitlements are entered here but 'Trigger on App Launch' is set, only sign-up/login will be required for app-level access."
+                    },
+                    {
+                        "key": "default_login_screen",
+                        "type": "text_input",
+                        "label_tooltip": "<p>When the login process begins, this field determines whether to prompt login first with an option to switch to sign-up (in case the user does not have an account), or sign-up fist with an option to switch to login (in case the user already has an account). </p><p>Possible values: Login or Sign-up</p>",
+                        "initial_value": "Login"
+                    },
+                    {
+                        "key": "default_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text of an alert explaining there is an issue when the user is not able to move forward and specific error messaging is not applicable.",
+                        "initial_value": "An error occurred trying to process your request. Please go back and try again."
+                    },
+                    {
+                        "key": "expired_purchase_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The text that will be displayed in the alert message presented when the user tries to access content and has a relevant voucher which has expired.</p><p>This will lead to the payment options screen</p>",
+                        "initial_value": "The applicable purchase you’ve made has expired. Please make a valid purchase to access this content."
+                    },
+                    {
+                        "key": "design_assets",
+                        "type": "uploader",
+                        "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here."
+                    },
+                    {
+                        "group": true,
+                        "label": "Screen Title Text",
+                        "tooltip": "The font that will be used for the text at the top of each screen in the gateway process",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "screen_title_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font that will be used for the text at the top of each screen in the gateway process"
+                            },
+                            {
+                                "key": "screen_title_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font that will be used for the text at the top of each screen in the gateway process"
+                            },
+                            {
+                                "key": "screen_title_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size that will be used for the text at the top of each screen in the gateway process",
+                                "initial_value": "19"
+                            },
+                            {
+                                "key": "screen_title_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size that will be used for the text at the top of each screen in the gateway process",
+                                "initial_value": "19"
+                            },
+                            {
+                                "key": "screen_title_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color that will be used for the text at the top of each screen in the gateway process",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "group": true,
+                        "label": "Screen Description Text",
+                        "tooltip": "The font that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "screen_description_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text."
+                            },
+                            {
+                                "key": "screen_description_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text."
+                            },
+                            {
+                                "key": "screen_description_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "screen_description_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "screen_description_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "authentication_input_fields",
+                        "type": "text_input",
+                        "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://example.com)"
+                    },
+                    {
+                        "group": true,
+                        "label": "Input Field Label Text",
+                        "tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "input_field_label_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value."
+                            },
+                            {
+                                "key": "input_field_label_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value."
+                            },
+                            {
+                                "key": "input_field_label_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "input_field_label_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "input_field_label_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+                                "initial_value": "#4a4a4a"
+                            }
+                        ]
+                    },
+                    {
+                        "group": true,
+                        "label": "Action Button Text",
+                        "tooltip": "The font for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "action_button_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)"
+                            },
+                            {
+                                "key": "action_button_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)"
+                            },
+                            {
+                                "key": "action_button_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
+                                "initial_value": "14"
+                            },
+                            {
+                                "key": "action_button_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
+                                "initial_value": "14"
+                            },
+                            {
+                                "key": "action_button_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "group": true,
+                        "label": "Prompt Text",
+                        "tooltip": "These fields will determine the font used in the prompt prior to the link in various scenarios",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "prompt_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font used in the prompt prior to the link for such scenarios.</p>"
+                            },
+                            {
+                                "key": "prompt_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font used in the prompt prior to the link for such scenarios.</p>"
+                            },
+                            {
+                                "key": "prompt_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-size used in the prompt prior to the link for such scenarios.</p>",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "prompt_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-size used in the prompt prior to the link for such scenarios.</p>",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "prompt_color",
+                                "type": "color_picker",
+                                "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-color used in the prompt prior to the link for such scenarios.</p>",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "group": true,
+                        "label": "Link Text",
+                        "tooltip": "These fields will determine the font used for linkable text in various scenarios",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "link_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font used for such linkable text in the gateway screens."
+                            },
+                            {
+                                "key": "link_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font used for such linkable text in the gateway screens."
+                            },
+                            {
+                                "key": "link_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size used for such linkable text in the gateway screens.",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "link_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size used for such linkable text in the gateway screens.",
+                                "initial_value": "13"
+                            },
+                            {
+                                "key": "link_color",
+                                "type": "color_picker",
+                                "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size used for such linkable text in the gateway screens.",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "alternative_authentication_priority",
+                        "type": "switch",
+                        "label_tooltip": "<p>The login and signup screens can enable third party options (e.g. Facebook) for user authentication, if the relevant assets and fields are configured.</p><p>Checking this field sets the alternative authentication as highest priority and will display it above the custom form. Which option to take depends on your priorities - having the alternative logins at the top of the screen may make conversion more likely but will also lead to the collection of the data the third party uses rather than the data specified by your custom form.</p><p>For design purposes, we recommend checking this field if the custom form includes more than three fields.</p>",
+                        "initial_value": "false"
+                    },
+                    {
+                        "key": "alternative_authentication_separator_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>If assets are provided in the Design Assets file (field above) for any alternative methods of user authentication (e.g. Facebook), then below the input fields for standard login/sign-up, there is a design separating the standard login/sign-up form from alternative options, with text in the middle of the design.</p><p>Depending on the main language of the app, we recommend putting a version of the word “Or” here to distinguish between the two modes of authentication.</p>",
+                        "initial_value": "Or"
+                    },
+                    {
+                        "group": true,
+                        "label": "Alternative Authentication Separator Text",
+                        "tooltip": "The font for the alternative authorization separator text",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "alternative_authentication_separator_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font for the alternative authorization separator text."
+                            },
+                            {
+                                "key": "alternative_authentication_separator_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font for the alternative authorization separator text."
+                            },
+                            {
+                                "key": "alternative_authentication_separator_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the alternative authorization separator text.",
+                                "initial_value": "12"
+                            },
+                            {
+                                "key": "alternative_authentication_separator_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the alternative authorization separator text.",
+                                "initial_value": "12"
+                            },
+                            {
+                                "key": "alternative_authentication_separator_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color for the alternative authorization separator text.",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "alternative_authentication_prompt_text",
+                        "type": "text_input",
+                        "label_tooltip": "The optional text presented above the options for alternative methods of login/sign-up via third party providers (Facebook, Google, or Twitter)",
+                        "initial_value": "Login with:"
+                    },
+                    {
+                        "group": true,
+                        "label": "Alternative Authentication Prompt Text",
+                        "tooltip": "The font prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "alternative_authentication_prompt_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font prompting the user to use a third party option (e.g. Facebook) to login or sign-up."
+                            },
+                            {
+                                "key": "alternative_authentication_prompt_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font prompting the user to use a third party option (e.g. Facebook) to login or sign-up."
+                            },
+                            {
+                                "key": "alternative_authentication_prompt_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
+                                "initial_value": "12"
+                            },
+                            {
+                                "key": "alternative_authentication_prompt_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
+                                "initial_value": "12"
+                            },
+                            {
+                                "key": "alternative_authentication_prompt_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "restore_help_message_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>If you supported in-app purchases before SSO/login, you may want to notify users that they can restore old purchases on the storefront screen once they authenticate. This field provides a message for users to understand this.</p><p>This field is left blank by default, but an example message would be “If you’ve already made a purchase, you will be able to restore that purchase at no cost once you’ve logged in.</p>",
+                        "initial_value": ""
+                    },
+                    {
+                        "key": "invalid_email_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "Various screens include an email input. This field determines The text that will be displayed in an in-screen error alert bubble when a user doesn’t provide a valid email address.",
+                        "initial_value": "Please enter a valid email address"
+                    },
+                    {
+                        "key": "required_field_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "Various screens include manual input fields. If a required field is not populated, the user will not be able to proceed to the next screen. This field provides the text the user will see when clicking on the error icon for the given field.",
+                        "initial_value": "Required Field"
+                    },
+                    {
+                        "key": "facebook_permissions_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "Given login via Facebook is supported, this field provides the text that will be displayed in the alert message presented when the user tries to login or sign up via Facebook and does not provide the Facebook app permissions to share email information.",
+                        "initial_value": "Please provide Facebook permission to share email information in order to login with Facebook."
+                    },
+                    {
+                        "key": "login_title_text",
+                        "type": "text_input",
+                        "label_tooltip": "The title text presented at the top of the login screen",
+                        "initial_value": "Login to Your Account"
+                    },
+                    {
+                        "key": "login_button_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text within the main call-to-action button of the login screen, triggering the login process",
+                        "initial_value": "Login"
+                    },
+                    {
+                        "key": "password_reset_link_text",
+                        "type": "text_input",
+                        "label_tooltip": "The link (call-to-action) which leads to the password reset screen",
+                        "initial_value": "Forgot Your Password?"
+                    },
+                    {
+                        "key": "sign_up_prompt_text",
+                        "type": "text_input",
+                        "label_tooltip": "The prompt text just before the link which leads to the sign-up screen",
+                        "initial_value": "Don’t have an account?"
+                    },
+                    {
+                        "key": "sign_up_link_text",
+                        "type": "text_input",
+                        "label_tooltip": "The link (call-to-action) which leads to the sign-up screen, following the value put in the field titled Sign Up Prompt Text",
+                        "initial_value": "Sign Up"
+                    },
+                    {
+                        "group": true,
+                        "label": "Reset Password Text",
+                        "tooltip": "The font for the text that will be displayed to prompt the user to restore their password",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "reset_password_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font for the text that will be displayed to prompt the user to restore their password"
+                            },
+                            {
+                                "key": "reset_password_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font for the text that will be displayed to prompt the user to restore their password"
+                            },
+                            {
+                                "key": "reset_password_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the text that will be displayed to prompt the user to restore their password",
+                                "initial_value": "11"
+                            },
+                            {
+                                "key": "reset_password_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the text that will be displayed to prompt the user to restore their password",
+                                "initial_value": "11"
+                            },
+                            {
+                                "key": "reset_password_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color for the text that will be displayed to prompt the user to restore their password",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "nonexistent_user_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text that will be displayed in the alert message presented when the user tries to login and the username/email they’ve entered is returned as not existing.",
+                        "initial_value": "No user exists for this email"
+                    },
+                    {
+                        "key": "invalid_credentials_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text that will be displayed in the alert message presented when the user tries to login and the credentials (e.g. password/pin) they’ve entered is returned as not existing.",
+                        "initial_value": "Invalid password was entered"
+                    },
+                    {
+                        "key": "sign_up_title_text",
+                        "type": "text_input",
+                        "label_tooltip": "The title text presented at the top of the sign-up screen",
+                        "initial_value": "Create an Account"
+                    },
+                    {
+                        "key": "sign_up_button_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text within the main call-to-action button of the sign-up screen, triggering the sign-up (aka registration) process",
+                        "initial_value": "Sign Up"
+                    },
+                    {
+                        "key": "login_prompt_text",
+                        "type": "text_input",
+                        "label_tooltip": "The prompt text just before the link which leads to the login screen",
+                        "initial_value": "Already have an account?"
+                    },
+                    {
+                        "key": "login_link_text",
+                        "type": "text_input",
+                        "label_tooltip": "The link which leads to the login screen, following the Login Prompt Text",
+                        "initial_value": "Log In"
+                    },
+                    {
+                        "key": "existing_user_alert_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text that will be displayed in the alert message presented when the user tries to sign-up with a user which already exists.",
+                        "initial_value": "This user already exists. Try logging in."
+                    },
+                    {
+                        "key": "storefront_screen_title_text",
+                        "type": "text_input",
+                        "label_tooltip": "The title text at the top of the purchase options screen. If you are supporting payment options other than subscriptions, make sure to change the default value",
+                        "initial_value": "Choose a Subscription"
+                    },
+                    {
+                        "key": "storefront_screen_description_text",
+                        "type": "text_input",
+                        "label_tooltip": "If populated, the text presented to the user below the title and above the input fields of the payment options screen. This value is defaulted to blank",
+                        "initial_value": ""
+                    },
+                    {
+                        "key": "restore_prompt_text",
+                        "type": "text_input",
+                        "label_tooltip": "If you already purchased an account -",
+                        "initial_value": "If you already purchased an account -"
+                    },
+                    {
+                        "key": "restore_link_text",
+                        "type": "text_input",
+                        "label_tooltip": "The link which leads to the restore screen, following the Restore Prompt Text",
+                        "initial_value": "Restore Your Account"
+                    },
+                    {
+                        "group": true,
+                        "label": "Payment Option Title Text",
+                        "tooltip": "The font used in the title of each payment option",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "payment_option_title_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font used in the title of each payment option"
+                            },
+                            {
+                                "key": "payment_option_title_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font used in the title of each payment option"
+                            },
+                            {
+                                "key": "payment_option_title_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used in the title of each payment option",
+                                "initial_value": "20"
+                            },
+                            {
+                                "key": "payment_option_title_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used in the title of each payment option",
+                                "initial_value": "20"
+                            },
+                            {
+                                "key": "payment_option_title_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color used in the title of each payment option",
+                                "initial_value": "#1f2021"
+                            }
+                        ]
+                    },
+                    {
+                        "group": true,
+                        "label": "Payment Option Description Text",
+                        "tooltip": "The font used in the description of each payment option (below the title and above the button for selecting the given payment option)",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "payment_option_description_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font used in the description of each payment option (below the title and above the button for selecting the given payment option)"
+                            },
+                            {
+                                "key": "payment_option_description_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font used in the description of each payment option (below the title and above the button for selecting the given payment option)"
+                            },
+                            {
+                                "key": "payment_option_description_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used in the description of each payment option (below the title and above the button for selecting the given payment option)",
+                                "initial_value": "14"
+                            },
+                            {
+                                "key": "payment_option_description_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used in the description of each payment option (below the title and above the button for selecting the given payment option)",
+                                "initial_value": "14"
+                            },
+                            {
+                                "key": "payment_option_description_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color used in the description of each payment option (below the title and above the button for selecting the given payment option)",
+                                "initial_value": "#1f2021"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "payment_option_button_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The text that will appear before the price of a payment option in the button of a payment option card. A space character will be automatically placed between this field and the price value.</p><p>For example, if the price of an item is $3.99 and this field is defaulted to “Subscribe for”, then the button will read “Subscribe for $3.99</p>",
+                        "initial_value": "Subscribe for"
+                    },
+                    {
+                        "key": "legal_details_text",
+                        "type": "text_input",
+                        "label_tooltip": "The legal text presented at the bottom of the payment option screen. Used only on iOS.",
+                        "initial_value": "Payment will be charged to iTunes Account at confirmation of purchase. Subscription automatically renews unless auto-renew is turned off at least 24-hours before the end of the current period.Account will be charged for renewal within 24-hours prior to the end of the current period, and identify the cost of the renewal. Subscriptions may be managed by the user and auto-renewal may be turned off by going to the user's Account Settings after purchase.Any unused portion of a free trial period, if offered, will be forfeited when the user purchases a subscription to that publication, where applicable."
+                    },
+                    {
+                        "group": true,
+                        "label": "Legal Details Text",
+                        "tooltip": "The font used for the payment options screen legal text",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "legal_details_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font used for the payment options screen legal text"
+                            },
+                            {
+                                "key": "legal_details_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font used for the payment options screen legal text"
+                            },
+                            {
+                                "key": "legal_details_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used for the payment options screen legal text",
+                                "initial_value": "10"
+                            },
+                            {
+                                "key": "legal_details_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used for the payment options screen legal text",
+                                "initial_value": "10"
+                            },
+                            {
+                                "key": "legal_details_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color used for the payment options screen legal text",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "legal_details_background",
+                        "type": "color_picker",
+                        "label_tooltip": "The payment options screen presents legal information to the user on iOS. This field sets the color for the bottom banner area where this text is presented",
+                        "initial_value": "#122040"
+                    },
+                    {
+                        "key": "password_reset_title_text",
+                        "type": "text_input",
+                        "label_tooltip": "The title text at the top of the password reset screen",
+                        "initial_value": "Reset Your Password"
+                    },
+                    {
+                        "key": "password_reset_description_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text presented to the user below the title and above the input field of the password reset screen",
+                        "initial_value": "Enter your email to reset your password:"
+                    },
+                    {
+                        "key": "password_reset_button_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text within the main call-to-action button of the password reset screen, triggering the password reset process",
+                        "initial_value": "Reset Password"
+                    },
+                    {
+                        "group": true,
+                        "label": "Confirmation Title Text",
+                        "tooltip": "The font used as the title of confirmation screens",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "confirmation_title_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font used as the title of confirmation screens"
+                            },
+                            {
+                                "key": "confirmation_title_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font used as the title of confirmation screens"
+                            },
+                            {
+                                "key": "confirmation_title_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used as the title of confirmation screens",
+                                "initial_value": "25"
+                            },
+                            {
+                                "key": "confirmation_title_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used as the title of confirmation screens",
+                                "initial_value": "25"
+                            },
+                            {
+                                "key": "confirmation_title_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color used as the title of confirmation screens",
+                                "initial_value": "#000000"
+                            }
+                        ]
+                    },
+                    {
+                        "group": true,
+                        "label": "Confirmation Description Text",
+                        "tooltip": "The font used in the description of confirmation screens (below the title and above the button)",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "confirmation_description_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font used in the description of confirmation screens (below the title and above the button)"
+                            },
+                            {
+                                "key": "confirmation_description_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font used in the description of confirmation screens (below the title and above the button)"
+                            },
+                            {
+                                "key": "confirmation_description_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used in the description of confirmation screens (below the title and above the button)",
+                                "initial_value": "20"
+                            },
+                            {
+                                "key": "confirmation_description_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size used in the description of confirmation screens (below the title and above the button)",
+                                "initial_value": "20"
+                            },
+                            {
+                                "key": "confirmation_description_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color used in the description of confirmation screens (below the title and above the button)",
+                                "initial_value": "#000000"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "confirmation_button_text",
+                        "type": "text_input",
+                        "label_tooltip": "The text on the button of a confirmation screen which indicates the user has read the message and is ready to move past this screen.",
+                        "initial_value": "OK"
+                    },
+                    {
+                        "group": true,
+                        "label": "Confirmation Button Text",
+                        "tooltip": "The font for the Confirmation Button Text",
+                        "folded": true,
+                        "fields": [
+                            {
+                                "key": "confirmation_button_font_ios",
+                                "type": "ios_font_selector",
+                                "label_tooltip": "The font for the Confirmation Button Text"
+                            },
+                            {
+                                "key": "confirmation_button_font_android",
+                                "type": "android_font_selector",
+                                "label_tooltip": "The font for the Confirmation Button Text"
+                            },
+                            {
+                                "key": "confirmation_button_size_phone",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the Confirmation Button Text",
+                                "initial_value": "14"
+                            },
+                            {
+                                "key": "confirmation_button_size_pad",
+                                "type": "number_input",
+                                "label_tooltip": "The font-size for the Confirmation Button Text",
+                                "initial_value": "14"
+                            },
+                            {
+                                "key": "confirmation_button_color",
+                                "type": "color_picker",
+                                "label_tooltip": "The font-color for the Confirmation Button Text",
+                                "initial_value": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "payment_confirmation_title_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The title text at the top of confirmation notice after a payment was successful.</p><p>This field is required in order for a confirmation alert to be displayed.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
+                        "initial_value": "Congratulations!"
+                    },
+                    {
+                        "key": "payment_confirmation_description_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The descriptive text below the title in the payment confirmation notice. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
+                        "initial_value": "You can now access locked content with this purchase"
+                    },
+                    {
+                        "key": "restore_purchase_confirmation_title_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The title text at the top of confirmation notice after a purchase was successfully restored.</p><p>This field is required in order for a confirmation alert to be displayed.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
+                        "initial_value": "Congratulations!"
+                    },
+                    {
+                        "key": "restore_purchase_confirmation_description_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The descriptive text below the title in the payment confirmation notice. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
+                        "initial_value": "Any pre-existing purchases you’ve made have been restored and assigned to your account."
+                    },
+                    {
+                        "key": "password_reset_confirmation_title_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The title text at the top of confirmation notice after a password reset email was delivered to the user.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
+                        "initial_value": "Password Reset Delivered"
+                    },
+                    {
+                        "key": "password_reset_confirmation_description_text",
+                        "type": "text_input",
+                        "label_tooltip": "<p>The descriptive text below the title in the password reset confirmation notice. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app. </p><p>This field is required in order for a confirmation alert to be displayed.</p>",
+                        "initial_value": "Check your email in order reset your password for this account"
+                    }
+                ]
+            }
+        }
+    ],
+    "hooks": {
+        "fields": [
+            {
+                "group": true,
+                "label": "Before Load",
+                "folded": true,
+                "fields": [
+                    {
+                        "key": "preload_plugins",
+                        "type": "preload_plugins_selector",
+                        "label": "Select Plugins"
+                    }
+                ]
+            }
+        ]
+    }
+}
