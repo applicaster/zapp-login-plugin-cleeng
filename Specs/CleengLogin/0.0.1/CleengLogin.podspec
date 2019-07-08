@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.static_framework = true
   s.dependency 'ZappPlugins'  
   s.dependency 'ApplicasterSDK', '~> 9.4.5'
-  s.dependency 'CAM'
+  s.dependency 'CAM', '= 1.0.1'
   s.xcconfig =  { 'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
     'ENABLE_BITCODE' => 'YES',
     'SWIFT_VERSION' => '4.2'
