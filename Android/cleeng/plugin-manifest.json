@@ -9,7 +9,7 @@
     }],
     "platform": "android",
     "author_name": "Alex Khomich, Denis Razumeev",
-    "author_email": "a.khomich@applicaster.com, d.razumeev@applicaster.com",
+    "author_email": "a.khomich@applicaster.com",
     "manifest_version": "0.0.1",
     "dependency_version": "0.0.1",
     "name": "Cleeng Test",
