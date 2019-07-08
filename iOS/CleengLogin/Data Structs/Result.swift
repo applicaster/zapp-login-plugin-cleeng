@@ -6,13 +6,6 @@
 //
 
 import Foundation
-import Alamofire
-
-enum CleengError: Error {
-    case requestError(Data)
-    case networkError(AFError)
-    case serverError
-}
 
 enum Result<Success, Failure> {
     case success(Success)
