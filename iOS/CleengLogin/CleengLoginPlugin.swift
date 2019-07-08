@@ -12,10 +12,6 @@ import CAM
 
 private let kCleengUserLoginToken = "CleengUserLoginToken"
 
-enum CleengErrors: Error {
-    case authTokenNotParsed
-}
-
 @objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
     
     private var userToken: String?
@@ -83,7 +79,7 @@ enum CleengErrors: Error {
             switch result {
             case .success(let data):
                 let isParsed = self.parseAuthTokensResponse(json: data)
-                isParsed == true ? completion(.success(())) : completion(.failure(CleengErrors.authTokenNotParsed))
+                isParsed == true ? completion(.success) : completion(.failure(CleengError.authTokenNotParsed))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -242,7 +238,7 @@ enum CleengErrors: Error {
     // MARK: - JSON Response parsing
     
     private func parseAuthTokensResponse(json: Data) -> Bool {
-        guard let cleengTokens = try? JSONDecoder().decode(CleengTokens.self, from: json) else {
+        guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: json) else {
             return false
         }
         for item in cleengTokens {
@@ -279,10 +275,7 @@ enum CleengErrors: Error {
 extension ZappCleengLogin: CAMDelegate {    
     
     public func getPluginConfig() -> [String: String] {
-        if let config = configurationJSON as? [String: String] {
-            return config
-        }
-        return [String: String]()
+        return configurationJSON as? [String: String] ?? [:]
     }
     
     public func isUserLogged() -> Bool {
@@ -327,7 +320,7 @@ extension ZappCleengLogin: CAMDelegate {
         networkAdapter.resetPassword(data: data, completion: { (result) in
             switch result {
             case .success:
-                completion(CAM.Result.success(()))
+                completion(.success)
             case .failure(let error):
                 completion(.failure(error))
             }

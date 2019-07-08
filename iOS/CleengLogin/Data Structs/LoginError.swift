@@ -61,4 +61,5 @@ enum CleengError: Error {
     case requestError(LoginError)
     case networkError(Error)
     case serverError
+    case authTokenNotParsed
 }
