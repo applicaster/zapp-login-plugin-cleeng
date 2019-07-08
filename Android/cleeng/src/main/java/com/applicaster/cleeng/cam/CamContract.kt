@@ -27,7 +27,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun getPluginConfig() = cleengService.getPluginConfigurationParams()
 
-    override fun isUserLogged(): Boolean = !cleengService.getUser().token.isNullOrEmpty()
+    override fun isUserLogged(): Boolean = cleengService.getUserToken().isNotEmpty()
 
     override fun loadEntitlements(callback: EntitlementsLoadCallback) {
         val requestData = SubscriptionsRequestData(
