@@ -30,6 +30,12 @@
             "general": {
                 "fields": [
                     {
+                        "key": "cleeng_login_publisher_id",
+                        "type": "text_input",
+                        "label_tooltip": "Cleeng publisher id",
+                        "initial_value": "5b3cc7c2fed4fa00149037d6"
+                    },
+                    {
                         "key": "trigger_on_app_launch",
                         "type": "switch",
                         "label_tooltip": "If checked, the plugin UI will be launched when the user launches the app, unless the device is already authorized to access the app.",

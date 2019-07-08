@@ -202,7 +202,7 @@ typealias OfferID = String
     
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
                                                      completion: (() -> Swift.Void)?) {
-        guard let startOnAppLaunch = configurationJSON?["cleeng_login_start_on_app_launch"] else {
+        guard let startOnAppLaunch = configurationJSON?["trigger_on_app_launch"] else {
             completion?()
             return
         }
