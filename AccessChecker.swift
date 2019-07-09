@@ -14,10 +14,11 @@ class AccessChecker {
     var userPermissionEntitlementsIds = Set<String>()
     var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
     
+    //MARK: - isUserComply
+    
     public func isUserComply(policies: [String: NSObject], isAuthenticated: Bool) -> Bool {
-        let parser = FlowParser()
-        let playableItems = parser.parsePlayableItems(from: policies)
-        let flow = parser.parseFlow(from: playableItems)
+        let playableItems = flowParser.parsePlayableItems(from: policies)
+        let flow = flowParser.parseFlow(from: playableItems)
         
         assert(playableItems.count == 1, "It is assumed only one item comes in this method.")
         
@@ -41,7 +42,9 @@ class AccessChecker {
         return isComply
     }
     
-    func getStartupFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
+    //MARK: - Flow parsing
+    
+    public func getStartupFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
         var isTriggerOnAppLaunch = false
         if let startOnAppLaunch = dictionary?["trigger_on_app_launch"] {
             if let flag = startOnAppLaunch as? Bool {
@@ -72,7 +75,7 @@ class AccessChecker {
         }
     }
     
-    func getLoginFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
+    public func getLoginFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
         setAuthIDs(from: dictionary)
         let flow = flowParser.parseFlow(from: dictionary)
         switch flow {
@@ -91,9 +94,13 @@ class AccessChecker {
         }
     }
     
-    func isPurchaseNeeded() -> Bool {
+    //MARK: - CAM Delegate
+    
+    public func isPurchaseNeeded() -> Bool {
         return userPermissionEntitlementsIds.isDisjoint(with: currentVideoEntitlementsIds)
     }
+    
+    //MARK: - Private
     
     private func setAuthIDs(from authIDs: [String]) {
         currentVideoEntitlementsIds.removeAll()
