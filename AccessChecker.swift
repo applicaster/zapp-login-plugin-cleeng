@@ -14,8 +14,6 @@ class AccessChecker {
     var userPermissionEntitlementsIds = Set<String>()
     var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
     
-    //MARK: - isUserComply
-    
     public func isUserComply(policies: [String: NSObject], isAuthenticated: Bool) -> Bool {
         let playableItems = flowParser.parsePlayableItems(from: policies)
         let flow = flowParser.parseFlow(from: playableItems)
@@ -41,8 +39,6 @@ class AccessChecker {
         
         return isComply
     }
-    
-    //MARK: - Flow parsing
     
     public func getStartupFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
         var isTriggerOnAppLaunch = false
@@ -94,13 +90,9 @@ class AccessChecker {
         }
     }
     
-    //MARK: - CAM Delegate
-    
     public func isPurchaseNeeded() -> Bool {
         return userPermissionEntitlementsIds.isDisjoint(with: currentVideoEntitlementsIds)
     }
-    
-    //MARK: - Private
     
     private func setAuthIDs(from authIDs: [String]) {
         currentVideoEntitlementsIds.removeAll()
