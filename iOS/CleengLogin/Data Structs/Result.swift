@@ -25,5 +25,4 @@ extension Result where Failure == Void {
 }
 
 typealias CleengAPIResult = Result<Data, CleengError>
-typealias SilentLoginResult = Result<Void, Void>
 typealias ItemPurchasingResult = Result<Void, CleengError>
