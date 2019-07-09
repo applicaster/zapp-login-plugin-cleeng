@@ -19,7 +19,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-
+    
     @IBAction private func start() {
         let authKey = "requires_authentication"
         let entitlementsKey = "ds_product_ids"
@@ -29,13 +29,7 @@ class ViewController: UIViewController {
         pluggableLogin = login
         if let login = login {
             let params = ["playable_items": NSArray(array: [item])]
-            login.isUserComply!(policies: params) { [weak login] (isComply) in
-                if !isComply {
-                    login?.login(["cleeng_login_start_with_action": "sign_in", "playable_items": [item]], completion: { _ in })
-                }
-            }
+            login.login(["cleeng_login_start_with_action": "sign_in", "playable_items": [item]], completion: { _ in })
         }
-        
     }
-
 }

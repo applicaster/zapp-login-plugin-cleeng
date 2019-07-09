@@ -16,9 +16,8 @@ typealias StoreID = String
 typealias OfferID = String
 @objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
     
+    private var accessChecker = AccessChecker()
     private var userToken: String?
-    private var userPermissionEntitlementsIds = Set<String>()
-    private var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     
     private var publisherId = ""
@@ -56,45 +55,19 @@ typealias OfferID = String
     
     // MARK: - Private methods
     
-    private func setCurrentVideoItemsData(additionalParameters: [String: Any]?) {
-        currentVideoEntitlementsIds.removeAll()
-        let playableItems = FlowParser().parsePlayableItems(from: additionalParameters)
-        playableItems.forEach {
-            let entitlementIds = $0.extensionsDictionary?["ds_product_ids"] as? [String] ?? []
-            currentVideoEntitlementsIds.append(contentsOf: entitlementIds)
-        }
-    }
-    
-    private func getModifiedDspFlow(camFlow: CAMFlow) -> CAMFlow {
-        switch camFlow {
-        case .authentication:
-            return isAuthenticated() ? .no : .authentication
-        case .authAndStorefront:
-            return isAuthenticated() ? .storefront : .authAndStorefront
-        default:
-            return camFlow
-        }
-    }
-    
-    private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
-        let entitlementsKey = "ds_product_ids"
-        return playableItems.first?.extensionsDictionary?[entitlementsKey] as? [String] ?? []
-    }
-    
-    private func silentAuthorization(completion: @escaping (SilentLoginResult) -> Void) {
+    private func silentAuthorization(completion: @escaping () -> Void) {
         guard let savedLoginToken = UserDefaults.standard.string(forKey: kCleengUserLoginToken) else {
-            completion(.failure)
+            completion()
             return
         }
-        
         networkAdapter.extendToken(token: savedLoginToken, completion: { (result) in
             switch result {
             case .success(let data):
-                let isParsed = self.parseAuthTokensResponse(json: data)
-                isParsed == true ? completion(.success) : completion(.failure)
+                let _ = self.parseAuthTokensResponse(json: data)
             case .failure:
-                completion(.failure)
+                break
             }
+            completion()
         })
     }
     
@@ -141,7 +114,7 @@ typealias OfferID = String
                     return
                 }
                 if let access = verifiedOffer.accessGranted, access {
-                    self.userPermissionEntitlementsIds.insert(verifiedOffer.authID)
+                    self.accessChecker.userPermissionEntitlementsIds.insert(verifiedOffer.authID)
                     completion(.success)
                 } else {
                     completion(.failure(.serverError))
@@ -189,76 +162,35 @@ typealias OfferID = String
     
     public func executeAfterAppRootPresentation(displayViewController: UIViewController?,
                                                 completion: (() -> Swift.Void)?) {
-        silentAuthorization(completion: { (result) in
-            switch result {
-            case .success:
-                completion?()
-            case .failure:
-                self.executeAfterAppRootPresentationFlow(displayViewController: displayViewController,
-                                                         completion: completion)
-            }
+        silentAuthorization(completion: { () in
+            self.executeAfterAppRootPresentationFlow(displayViewController: displayViewController,
+                                                     completion: completion)
         })
     }
     
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
                                                      completion: (() -> Swift.Void)?) {
-        guard let startOnAppLaunch = configurationJSON?["trigger_on_app_launch"] else {
-            completion?()
-            return
-        }
-        var presentLogin = false
-        if let flag = startOnAppLaunch as? Bool {
-            presentLogin = flag
-        } else if let num = startOnAppLaunch as? Int {
-            presentLogin = (num == 1)
-        } else if let str = startOnAppLaunch as? String {
-            presentLogin = (str == "1")
-        }
-        
-        if presentLogin {
+        let flow = accessChecker.getStartupFlow(for: configurationJSON as? [String: Any],
+                                                isAuthenticated: isAuthenticated())
+        if flow != .no {
             guard let controller = displayViewController else {
                 completion?()
                 return
             }
             let contentAccessManager = ContentAccessManager(rootViewController: controller,
                                                             camDelegate: self,
-                                                            camFlow: .authentication,
+                                                            camFlow: flow,
                                                             completion: { _ in completion?() })
             contentAccessManager.startFlow()
+        } else {
+            completion?()
         }
     }
     
     // MARK: - ZPLoginProviderUserDataProtocol
-    
-    public func isUserComply(policies: [String: NSObject]) -> Bool {
-        let parser = FlowParser()
-        let playableItems = parser.parsePlayableItems(from: policies)
-        let flow = parser.parseFlow(from: playableItems)
-        
-        assert(playableItems.count == 1, "It is assumed only one item comes in this method.")
-        
-        var isComply = false
-        
-        switch flow {
-        case .authentication:
-            isComply = isAuthenticated()
-        case .storefront:
-            let entitlements = parseEntitlements(from: playableItems)
-            isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
-        case .authAndStorefront:
-            if isAuthenticated() == true {
-                let entitlements = parseEntitlements(from: playableItems)
-                isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
-            }
-        case .no:
-            isComply = true
-        }
-        
-        return isComply
-    }
  
     public func isUserComply(policies: [String: NSObject], completion: @escaping (Bool) -> Void) {
-        let result = isUserComply(policies: policies)
+        let result = accessChecker.isUserComply(policies: policies, isAuthenticated: isAuthenticated())
         completion(result)
     }
     
@@ -272,15 +204,7 @@ typealias OfferID = String
             completion(.failed)
         }
         
-        setCurrentVideoItemsData(additionalParameters: additionalParameters)
-        
-        var flow = self.flow
-        
-        if additionalParameters != nil {
-            flow = FlowParser().parseFlow(from: additionalParameters)
-        }
-        
-        flow = getModifiedDspFlow(camFlow: flow)
+        let flow = accessChecker.getLoginFlow(for: additionalParameters, isAuthenticated: isAuthenticated())
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
                                                         camDelegate: self,
@@ -326,7 +250,7 @@ typealias OfferID = String
                 UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
             } else {
                 if let authID = item.authID {
-                    userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
+                    accessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
                                                                  //subscription token in dicrionary by authId
                 }
             }
@@ -359,7 +283,7 @@ extension ZappCleengLogin: CAMDelegate {
     }
     
     public func isPurchaseNeeded() -> Bool {
-        return userPermissionEntitlementsIds.isDisjoint(with: currentVideoEntitlementsIds)
+        return accessChecker.isPurchaseNeeded()
     }
     
     public func facebookLogin(userData: (email: String, userId: String),
@@ -405,7 +329,7 @@ extension ZappCleengLogin: CAMDelegate {
     
     public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
         networkAdapter.subscriptions(token: userToken, byAuthId: 1,
-                                     offers: currentVideoEntitlementsIds, completion: { (result) in
+                                     offers: accessChecker.currentVideoEntitlementsIds, completion: { (result) in
             switch result {
             case .success(let data):
                 let offers = self.parseCleengOffersResponse(json: data)
