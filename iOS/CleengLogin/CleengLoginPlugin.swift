@@ -63,7 +63,7 @@ typealias OfferID = String
         networkAdapter.extendToken(token: savedLoginToken, completion: { (result) in
             switch result {
             case .success(let data):
-                let _ = self.parseAuthTokensResponse(json: data)
+                _ = self.parseAuthTokensResponse(json: data)
             case .failure:
                 break
             }
