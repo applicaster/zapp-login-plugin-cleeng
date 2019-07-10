@@ -44,7 +44,32 @@ class CleengService {
         ContentAccessManager.onProcessStarted(camContract, context)
     }
 
-    fun handleStartupHook(context: Context, listener: HookListener?) {
+    /**
+     * This fun will be called on the application startup. Trying to execute extend token request and decide which [CamFlow]
+     * need to be executed
+     *
+     *                                                                                  +--------+
+     *                                                                   yes  --------->|purchase|  yes
+     *                                                              ---------/          |needed? |------->Launch CamFlow.STOREFRONT
+     *                                                   +-----------------------+      +--------+
+     *                                                   |app level entitlements |         ---\
+     *                                          -------->|exist in plugin config?|          no -----\
+     *                            yes  --------/         +-----------------------+                   ---> X
+     *                        +---------------+                      ---------\
+     *                        |trigger on app |                          no    --------> X
+     * request succeed ------>|launch enabled?|
+     *          ------/       +---------------+
+     *+-------------------+        no  ----------> X
+     *| login user & get  |
+     *| owned entitlements|                               +-----------------------+  yes   -----> Launch CamFlow.AUTH_AND_STOREFRONT
+     *+-------------------+       yes ------------------> |app level entitlements | ------/
+     *          ------\       +---------------+           |exist in plugin config?|
+     *  request failed ------>|trigger on app |           +-----------------------+
+     *                        |launch enabled?|                                 --------\
+     *                        +---------------+                                      no  -------> Launch CAMFlow. AUTHENTICATION
+     *                           no  ------------>X
+     */
+     fun handleStartupHook(context: Context, listener: HookListener?) {
         executeRequest {
             val result = networkHelper.extendToken(getUserToken())
             when (result) {
