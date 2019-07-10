@@ -142,7 +142,8 @@
             {
                 "key": "authentication_input_fields",
                 "type": "text_input",
-                "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://example.com)"
+                "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://example.com)",
+                "initial_value": "{\"Sign-up\":[{\"type\":\"EMAIL\",\"key\":\"email\",\"title\":\"Email\",\"hint\":\"Email\",\"mandatory\":true},{\"type\":\"PASSWORD\",\"key\":\"password\",\"title\":\"Password\",\"hint\":\"Password\",\"mandatory\":true}],\"Login\":[{\"type\":\"EMAIL\",\"key\":\"email\",\"title\":\"Email\",\"hint\":\"Email\",\"mandatory\":true},{\"type\":\"PASSWORD\",\"key\":\"password\",\"title\":\"Password\",\"hint\":\"Password\",\"mandatory\":true}],\"Password-reset\":[{\"type\":\"EMAIL\",\"key\":\"email\",\"title\":\"Email\",\"hint\":\"Email\",\"mandatory\":true}]}"
             },
             {
                 "group": true,
