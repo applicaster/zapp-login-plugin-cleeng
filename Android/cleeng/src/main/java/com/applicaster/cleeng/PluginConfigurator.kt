@@ -6,12 +6,16 @@ class PluginConfigurator(private val pluginConfig: Map<String, String>) {
     fun getPluginConfig() = pluginConfig
 
     fun getPublisherId(): String {
-        return getOrEmpty(KEY_PUBLISHER_ID) ?: ""
+        return getOrDefault(KEY_PUBLISHER_ID)
     }
 
     fun isTriggerOnAppLaunch(): Boolean {
         return getOrEmpty(KEY_TRIGGER_ON_APP_LAUNCH)?.toBoolean() ?: false
     }
+
+    fun getAppLevelEntitlements(): List<String> =
+    // obtain string with coma separated list like "4, 8, 15, 16, 23, 42" and convert to List<String>
+        getOrDefault(KEY_APP_LEVEL_ENTITLEMENTS).split(",").map { it.trim() }
 
     fun getCleengErrorMessage(webError: WebServiceError): String {
         return when (webError) {
@@ -34,6 +38,7 @@ class PluginConfigurator(private val pluginConfig: Map<String, String>) {
 
 const val KEY_PUBLISHER_ID = "cleeng_login_publisher_id"
 const val KEY_TRIGGER_ON_APP_LAUNCH = "trigger_on_app_launch"
+const val KEY_APP_LEVEL_ENTITLEMENTS = "present_storefront_upon_launch"
 
 const val KEY_ERROR_DEFAULT = "default_alert_text"
 const val KEY_ERROR_NO_EXISTING_USER = "nonexistent_user_alert_text"

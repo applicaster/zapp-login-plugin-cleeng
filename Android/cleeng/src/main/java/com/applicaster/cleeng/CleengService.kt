@@ -35,8 +35,10 @@ class CleengService {
 
     private val user: User = User()
 
-    private val productIds: ArrayList<String> = arrayListOf()
-    private val accessGrantedItems: HashSet<String> = hashSetOf()
+    /**
+     * List of productId available to be bought (in old cleeng implementation named authId)
+     */
+    private val availableProductIds: ArrayList<String> = arrayListOf()
 
     fun mockStart(context: Context) {
         ContentAccessManager.onProcessStarted(camContract, context)
@@ -49,13 +51,23 @@ class CleengService {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     parseAuthResponse(responseDataResult.orEmpty())
+                    if (pluginConfigurator?.isTriggerOnAppLaunch() == true) {
+                        availableProductIds.addAll(pluginConfigurator?.getAppLevelEntitlements().orEmpty())
+                        if (!isAccessGranted()) {
+                            setSessionParams(false, availableProductIds)
+                            ContentAccessManager.onProcessStarted(camContract, context)
+                        }
+                    }
                     listener?.onHookFinished()
                 }
 
                 is Result.Failure -> {
                     // handle error and open loginEmail or sign up screen
-                    if (pluginConfigurator?.isTriggerOnAppLaunch() == true)
+                    if (pluginConfigurator?.isTriggerOnAppLaunch() == true) {
+                        val appLevelEntitlements = pluginConfigurator?.getAppLevelEntitlements().orEmpty()
+                        setSessionParams(true, appLevelEntitlements)
                         ContentAccessManager.onProcessStarted(camContract, context)
+                    }
                 }
             }
         }
@@ -63,16 +75,17 @@ class CleengService {
 
     fun parseAuthResponse(responseDataResult: List<AuthResponseData>) {
         val offers = arrayListOf<Offer>()
+        val ownedProductIds = hashSetOf<String>()
         for (authData in responseDataResult) {
             if (authData.offerId.isNullOrEmpty()) { //parse user data
                 saveUserToken(authData.token.orEmpty())
             } else {//parse owned offers
                 offers.add(Offer(authData.offerId, authData.token, authData.authId))
-                productIds.clear()
-                productIds.add(authData.authId.orEmpty())
+                ownedProductIds.add(authData.authId.orEmpty())
             }
         }
         setUserOffers(offers)
+        addOwnedProducts(ownedProductIds)
     }
 
     fun isItemLocked(model: Any?, loginContractCallback: (Boolean) -> Unit) {
@@ -123,7 +136,7 @@ class CleengService {
     fun isItemLocked(model: Any?): Boolean {
         if (model is Playable) {
             fetchFeedData(model)
-            productIds.forEach { productId ->
+            availableProductIds.forEach { productId ->
                 if (isUserOffersComply(productId))
                     return false
             }
@@ -145,35 +158,40 @@ class CleengService {
         val productIDsKey = "ds_product_ids"
         when (playable) {
             is APAtomEntry.APAtomEntryPlayable -> {
-                val isAuthRequired: Boolean =
-                    playable.entry.getExtension(authKey, Boolean::class.java) ?: false
-                productIds.addAll((playable.entry.getExtension(productIDsKey, List::class.java) as? ArrayList<String>).orEmpty())
-                val option: Option = if (productIds.isNotEmpty()) Option.SOME else Option.NONE
-                camContract.setCamFlow(matchAuthFlowValues(isAuthRequired to option))
+                val isAuthRequired: Boolean = playable.entry.getExtension(authKey, Boolean::class.java) ?: false
+                val productIds = playable.entry.getExtension(productIDsKey, List::class.java) as? ArrayList<String>
+                setSessionParams(isAuthRequired, productIds.orEmpty())
             }
 
             is APChannel -> {
                 val isAuthRequired: Boolean = playable.getExtension(authKey).toString().toBoolean()
-                productIds.addAll((playable.getExtension(productIDsKey) as? ArrayList<String>).orEmpty())
-                val option: Option = if (productIds.isNotEmpty()) Option.SOME else Option.NONE
-                camContract.setCamFlow(matchAuthFlowValues(isAuthRequired to option))
+                val productIds = playable.getExtension(productIDsKey) as? ArrayList<String>
+                setSessionParams(isAuthRequired, productIds.orEmpty())
             }
 
             is APModel -> {
                 val isAuthRequired: Boolean = playable.getExtension(authKey).toString().toBoolean()
-                productIds.addAll((playable.getExtension(productIDsKey) as? ArrayList<String>).orEmpty())
-                val option: Option = if (productIds.isNotEmpty()) Option.SOME else Option.NONE
-                camContract.setCamFlow(matchAuthFlowValues(isAuthRequired to option))
+                val productIds = playable.getExtension(productIDsKey) as? ArrayList<String>
+                setSessionParams(isAuthRequired, productIds.orEmpty())
             }
 
             is APAtomEntry -> {
-                val isAuthRequired: Boolean =
-                    playable.getExtension(authKey, Boolean::class.java) ?: false
-                productIds.addAll((playable.getExtension(productIDsKey, List::class.java) as? ArrayList<String>).orEmpty())
-                val option: Option = if (productIds.isNotEmpty()) Option.SOME else Option.NONE
-                camContract.setCamFlow(matchAuthFlowValues(isAuthRequired to option))
+                val isAuthRequired: Boolean = playable.getExtension(authKey, Boolean::class.java) ?: false
+                val productIds = playable.getExtension(productIDsKey, List::class.java) as? ArrayList<String>
+                setSessionParams(isAuthRequired, productIds.orEmpty())
             }
         }
+    }
+
+    /**
+     * Set available product ids relevant to this user session and decide which [CamFlow] we need to be used
+     * Available product ids can be obtained in many different ways (from playable / from plugin config)
+     */
+    private fun setSessionParams(isAuthRequired: Boolean, parsedProductIds: List<String>) {
+        availableProductIds.clear()
+        availableProductIds.addAll(parsedProductIds)
+        val option: Option = if (availableProductIds.isNotEmpty()) Option.SOME else Option.NONE
+        camContract.setCamFlow(matchAuthFlowValues(isAuthRequired to option))
     }
 
     private fun matchAuthFlowValues(extensionsData: Pair<Boolean, Option>): CamFlow {
@@ -220,8 +238,12 @@ class CleengService {
         preferences.removeUserToken()
     }
 
-    fun setUserOffers(offers: ArrayList<Offer>) {
+    private fun setUserOffers(offers: ArrayList<Offer>) {
         user.userOffers = offers
+    }
+
+    private fun addOwnedProducts(ownedProductIds: HashSet<String>) {
+        user.ownedProductIds.addAll(ownedProductIds)
     }
 
     fun setPluginConfigurator(pluginConfigurator: PluginConfigurator) {
@@ -231,14 +253,13 @@ class CleengService {
     fun getPluginConfigurationParams() = pluginConfigurator?.getPluginConfig().orEmpty()
 
     fun parseAccessGranted(subscriptionData: SubscriptionsResponseData) {
-        accessGrantedItems.clear()
 //        save current authId if access granted
-       if (subscriptionData.accessGranted == true && !subscriptionData.authId.isNullOrEmpty()) {
-           accessGrantedItems.add(subscriptionData.authId)
-       }
+        if (subscriptionData.accessGranted == true && !subscriptionData.authId.isNullOrEmpty()) {
+            user.ownedProductIds.add(subscriptionData.authId)
+        }
     }
 
-    fun isAccessGranted(): Boolean = accessGrantedItems.intersect(productIds).isNotEmpty()
+    fun isAccessGranted(): Boolean = user.ownedProductIds.intersect(availableProductIds).isNotEmpty()
 
     fun getErrorMessage(webError: WebServiceError?): String {
         return pluginConfigurator?.getCleengErrorMessage(webError ?: WebServiceError.DEFAULT).orEmpty()
