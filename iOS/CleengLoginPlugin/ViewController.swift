@@ -10,7 +10,6 @@ import UIKit
 import ZappPlugins
 import CleengLogin
 import ZappLoginPluginsSDK
-import ApplicasterSDK
 
 class ViewController: UIViewController {
 

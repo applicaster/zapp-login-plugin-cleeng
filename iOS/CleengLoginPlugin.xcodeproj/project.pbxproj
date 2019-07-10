@@ -103,7 +103,6 @@
 				B60A1DC022A5313000A440E1 /* Frameworks */,
 				B60A1DC122A5313000A440E1 /* Resources */,
 				25C6A57282A52698EDCB8C33 /* [CP] Embed Pods Frameworks */,
-				24086ED86E10BBA55FCA0E92 /* [CP] Copy Pods Resources */,
 				B64D576322A7E4CD00A20F42 /* Add test data to app */,
 				B6C71E6122AFB47B00E623A2 /* Swift Lint */,
 			);
@@ -163,23 +162,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		24086ED86E10BBA55FCA0E92 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-CleengLoginPlugin/Pods-CleengLoginPlugin-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-CleengLoginPlugin/Pods-CleengLoginPlugin-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CleengLoginPlugin/Pods-CleengLoginPlugin-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		25C6A57282A52698EDCB8C33 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
