@@ -1,7 +1,7 @@
 PODS:
   - Alamofire (4.8.2)
   - ApplicasterIAP (0.0.3)
-  - CAM (0.0.1):
+  - CAM (1.0.1):
     - ApplicasterIAP
     - ZappPlugins
   - CleengLogin (0.0.1):
@@ -37,8 +37,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   ApplicasterIAP: 3e02eab421049bae6a12e4dcfd03b467e7dac847
-  CAM: 834fa444ed57c71629361df6e9724e2b23212908
-  CleengLogin: f25c2d642e8966e12508b692a308eace8f56a699
+  CAM: 1f6ac3648c0cc621038571e04e2d3ecdfbb4e63c
+  CleengLogin: 588829f0c90c0578e276397f9bd23e021850cb72
   ZappLoginPluginsSDK: 548119bbd8b28e6fe7bd67ead2c550c8db6870c1
   ZappPlugins: 22fad1f8afba01d35de8ca4b1a132bde12a07cf5
 

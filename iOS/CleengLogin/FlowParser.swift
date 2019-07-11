@@ -14,6 +14,7 @@ private enum FlowParserKeys: String {
     case entitlements = "ds_product_ids"
     case playableItems = "playable_items"
     case vodItems = "vod_item_id"
+    case legacyEntitlements = "authorization_providers_ids" // used to retrieve auth ids of legacy item, if not empty auth and purchase required
 }
 
 class FlowParser {
@@ -33,9 +34,16 @@ class FlowParser {
             assert(false)
             return .no
         }
+        var isAuthRequired: Bool
+        var entitlements: [String]
         
-        let isAuthRequired = item.extensionsDictionary?[FlowParserKeys.auth.rawValue] as? Bool ?? false
-        let entitlements = item.extensionsDictionary?[FlowParserKeys.entitlements.rawValue] as? [String] ?? []
+        if let legacyEntitlements = item.extensionsDictionary?[FlowParserKeys.legacyEntitlements.rawValue] as? [String] {
+            isAuthRequired = !legacyEntitlements.isEmpty
+            entitlements = legacyEntitlements
+        } else {
+            isAuthRequired = item.extensionsDictionary?[FlowParserKeys.auth.rawValue] as? Bool ?? false
+            entitlements = item.extensionsDictionary?[FlowParserKeys.entitlements.rawValue] as? [String] ?? []
+        }
         
         switch (isAuthRequired, entitlements.isEmpty) {
         case (true, true):

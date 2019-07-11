@@ -106,7 +106,10 @@ class AccessChecker {
     }
     
     private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
-        let entitlementsKey = "ds_product_ids"
-        return playableItems.first?.extensionsDictionary?[entitlementsKey] as? [String] ?? []
+        if let legacyEntitlements = playableItems.first?.extensionsDictionary?["authorization_providers_ids"] as? [String] {
+            return legacyEntitlements
+        } else {
+            return playableItems.first?.extensionsDictionary?["ds_product_ids"] as? [String] ?? []
+        }
     }
 }
