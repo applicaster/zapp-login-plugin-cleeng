@@ -14,6 +14,7 @@ import com.applicaster.cleeng.network.request.SubscriptionsRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
+import com.applicaster.cleeng.utils.isNullOrEmpty
 
 class CamContract(private val cleengService: CleengService) : ICamContract {
     private val TAG = CamContract::class.java.canonicalName
@@ -50,7 +51,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                         )
                         billingOfferList.add(billingOffer)
                         if (!it.androidProductId.isNullOrEmpty() && !it.id.isNullOrEmpty()) {
-                            currentOffers[it.androidProductId] = it.id
+                            currentOffers[it.androidProductId!!] = it.id!!
                         }
                     }
                     callback.onSuccess(billingOfferList)
@@ -72,7 +73,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
-                    if (!responseDataResult.isNullOrEmpty())
+                    if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
                     callback.onSuccess()
                 }
@@ -93,7 +94,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
-                    if (!responseDataResult.isNullOrEmpty())
+                    if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
                     callback.onSuccess()
                 }
@@ -120,7 +121,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
-                    if (!responseDataResult.isNullOrEmpty())
+                    if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
                     callback.onSuccess()
                 }
@@ -147,7 +148,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             when (result) {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
-                    if (!responseDataResult.isNullOrEmpty())
+                    if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
                     callback.onSuccess()
                 }

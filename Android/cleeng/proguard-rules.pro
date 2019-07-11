@@ -22,10 +22,10 @@
 
 ## Android Coroutines specific rules ##
 # ServiceLoader support
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
--keepnames class kotlinx.coroutines.android.AndroidExceptionPreHandler {}
--keepnames class kotlinx.coroutines.android.AndroidDispatcherFactory {}
+-keepnames class kotlinx.coroutines.experimental.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.experimental.CoroutineExceptionHandler {}
+-keepnames class kotlinx.coroutines.experimental.android.AndroidExceptionPreHandler {}
+-keepnames class kotlinx.coroutines.experimental.android.AndroidDispatcherFactory {}
 # Most of volatile fields are updated with AFU and should not be mangled
 -keepclassmembernames class kotlinx.** {
     volatile <fields>;
@@ -55,6 +55,8 @@
 -keep class okhttp3.** { *; }
 -keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
+
+-keep class com.applicaster.cleeng.CleengLoginPlugin { *; }
 
 ## Retrofit 2.X specific rules ##
 # https://square.github.io/retrofit/

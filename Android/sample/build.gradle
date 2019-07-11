@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.applicaster.cleeng.sample"
         minSdkVersion 17
-        targetSdkVersion 28
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -44,6 +44,6 @@ dependencies {
 
     annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
     implementation ('com.google.dagger:dagger:2.8') {
-        because "it's used in applicaster sdk, but not included as dependency"
+        //  it's used in applicaster sdk, but not included as dependency
     }
 }

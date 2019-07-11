@@ -24,6 +24,7 @@ import com.applicaster.model.APVodItem
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.util.AppData
+import com.applicaster.cleeng.utils.isNullOrEmpty
 
 class CleengService {
 
@@ -66,7 +67,7 @@ class CleengService {
      *          ------\       +---------------+           |exist in plugin config?|
      *  request failed ------>|trigger on app |           +-----------------------+
      *                        |launch enabled?|                                 --------\
-     *                        +---------------+                                      no  -------> Launch CAMFlow. AUTHENTICATION
+     *                        +---------------+                                      no  -------> Launch CAMFlow.AUTHENTICATION
      *                           no  ------------>X
      */
      fun handleStartupHook(context: Context, listener: HookListener?) {
@@ -280,7 +281,7 @@ class CleengService {
     fun parseAccessGranted(subscriptionData: SubscriptionsResponseData) {
 //        save current authId if access granted
         if (subscriptionData.accessGranted == true && !subscriptionData.authId.isNullOrEmpty()) {
-            user.ownedProductIds.add(subscriptionData.authId)
+            user.ownedProductIds.add(subscriptionData.authId!!)
         }
     }
 
