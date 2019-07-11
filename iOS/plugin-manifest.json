@@ -5,7 +5,8 @@
     },
     "dependency_repository_url": [
         "https://github.com/applicaster/zapp-login-plugin-cleeng",
-        "https://github.com/applicaster/applicaster-cam-framework"
+        "https://github.com/applicaster/applicaster-cam-framework",
+        "https://github.com/applicaster/applicaster-iap-framework"
     ],
     "platform": "ios",
     "author_name": "Roman Karpievich, Egor Brel",
