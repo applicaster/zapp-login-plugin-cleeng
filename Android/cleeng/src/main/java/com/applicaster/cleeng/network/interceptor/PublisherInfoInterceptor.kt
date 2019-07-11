@@ -16,9 +16,9 @@ class PublisherInfoInterceptor(private val publisherId: String) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest: Request = chain.request()
-
-        val newRequest = when (val contentType = originalRequest.body()?.contentType()) {
-            MediaType.get(MEDIA_TYPE_FORM_URL_ENCODED) -> {
+        val contentType = originalRequest.body()?.contentType()
+        val newRequest = when (contentType) {
+            MediaType.parse(MEDIA_TYPE_FORM_URL_ENCODED) -> {
                 val newRequestBody: String = StringBuffer(
                     originalRequest.body().bodyToString()
                 ).apply {
@@ -30,7 +30,7 @@ class PublisherInfoInterceptor(private val publisherId: String) : Interceptor {
                 originalRequest.newBuilder().post(RequestBody.create(contentType, newRequestBody)).build()
             }
 
-            MediaType.get(MEDIA_TYPE_APPLICATION_JSON_UTF8) -> {
+            MediaType.parse(MEDIA_TYPE_APPLICATION_JSON_UTF8) -> {
                 val originalRequestBody = originalRequest.body().bodyToString()
                 val json = Gson().fromJson(originalRequestBody, Map::class.java)
                 val jsonMap: MutableMap<Any?, Any?> = json.toMutableMap()

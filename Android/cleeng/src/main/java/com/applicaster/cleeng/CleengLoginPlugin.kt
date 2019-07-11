@@ -12,7 +12,6 @@ import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
 import java.io.Serializable
-import kotlin.collections.HashMap
 
 class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
 
@@ -25,7 +24,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         context: Context,
         mockPluginConfiguration: Map<String, String>
     ) {
-        if (cleengService.getPluginConfigurationParams().isNullOrEmpty())
+        if (cleengService.getPluginConfigurationParams().isEmpty())
             cleengService.setPluginConfigurator(PluginConfigurator(mockPluginConfiguration))
         cleengService.mockStart(context)
     }
@@ -49,12 +48,13 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
             if (!isTokenValid) {
                 ContentAccessManager.onProcessStarted(cleengService.camContract, it)
             } else {
-                when (cleengService.isAccessGranted()) {
-                    true -> { hookListener.hookCompleted(hashMapOf()) }
-                    else -> { ContentAccessManager.onProcessStarted(cleengService.camContract, it) }
-                }
+                if (cleengService.isAccessGranted())
+                    hookListener.hookCompleted(hashMapOf())
+                else
+                    ContentAccessManager.onProcessStarted(cleengService.camContract, it)
             }
         }
+
     }
 
     override fun isTokenValid(): Boolean = cleengService.getUserToken().isNotEmpty()
