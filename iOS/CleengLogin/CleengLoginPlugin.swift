@@ -13,7 +13,7 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
 
 typealias StoreID = String
 typealias OfferID = String
-@objc public class ZappCleengLogin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
+@objc public class CleengLoginPlugin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
     
     private var accessChecker = AccessChecker()
     private var userToken: String?
@@ -275,7 +275,7 @@ typealias OfferID = String
 
 // MARK: - CAMDelegate
 
-extension ZappCleengLogin: CAMDelegate {
+extension CleengLoginPlugin: CAMDelegate {
     
     public func getPluginConfig() -> [String: String] {
         return configurationJSON as? [String: String] ?? [:]
