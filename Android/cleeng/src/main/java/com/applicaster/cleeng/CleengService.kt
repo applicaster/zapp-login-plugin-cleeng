@@ -2,12 +2,12 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import com.applicaster.app.APProperties
-import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
 import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.data.User
+import com.applicaster.cleeng.data.playable.ProductDataProvider
 import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.WebServiceError
@@ -16,15 +16,14 @@ import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.CleengAsyncTaskListener
 import com.applicaster.cleeng.utils.SharedPreferencesUtil
+import com.applicaster.cleeng.utils.isNullOrEmpty
 import com.applicaster.loader.json.APChannelLoader
 import com.applicaster.loader.json.APVodItemLoader
 import com.applicaster.model.APChannel
-import com.applicaster.model.APModel
 import com.applicaster.model.APVodItem
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.util.AppData
-import com.applicaster.cleeng.utils.isNullOrEmpty
 
 class CleengService {
 
@@ -70,7 +69,7 @@ class CleengService {
      *                        +---------------+                                      no  -------> Launch CAMFlow.AUTHENTICATION
      *                           no  ------------>X
      */
-     fun handleStartupHook(context: Context, listener: HookListener?) {
+    fun handleStartupHook(context: Context, listener: HookListener?) {
         executeRequest {
             val result = networkHelper.extendToken(getUserToken())
             when (result) {
@@ -161,7 +160,7 @@ class CleengService {
 
     fun isItemLocked(model: Any?): Boolean {
         if (model is Playable) {
-            fetchFeedData(model)
+            fetchProductData(model)
             availableProductIds.forEach { productId ->
                 if (isUserOffersComply(productId))
                     return false
@@ -179,32 +178,19 @@ class CleengService {
         return false
     }
 
-    fun fetchFeedData(playable: Playable?) {
-        val authKey = "requires_authentication"
-        val productIDsKey = "ds_product_ids"
-        when (playable) {
-            is APAtomEntry.APAtomEntryPlayable -> {
-                val isAuthRequired: Boolean = playable.entry.getExtension(authKey, Boolean::class.java) ?: false
-                val productIds = playable.entry.getExtension(productIDsKey, List::class.java) as? ArrayList<String>
+    fun fetchProductData(playable: Playable?) {
+        val productDataProvider = ProductDataProvider.fromPlayable(playable)
+        if (productDataProvider != null) {
+            val legacyAuthProviderIds = productDataProvider.getLegacyProviderIds()
+            if (legacyAuthProviderIds == null) {
+                //obtain data from DSP
+                val isAuthRequired: Boolean = productDataProvider.isAuthRequired()
+                val productIds = productDataProvider.getProductIds()
                 setSessionParams(isAuthRequired, productIds.orEmpty())
-            }
-
-            is APChannel -> {
-                val isAuthRequired: Boolean = playable.getExtension(authKey).toString().toBoolean()
-                val productIds = playable.getExtension(productIDsKey) as? ArrayList<String>
-                setSessionParams(isAuthRequired, productIds.orEmpty())
-            }
-
-            is APModel -> {
-                val isAuthRequired: Boolean = playable.getExtension(authKey).toString().toBoolean()
-                val productIds = playable.getExtension(productIDsKey) as? ArrayList<String>
-                setSessionParams(isAuthRequired, productIds.orEmpty())
-            }
-
-            is APAtomEntry -> {
-                val isAuthRequired: Boolean = playable.getExtension(authKey, Boolean::class.java) ?: false
-                val productIds = playable.getExtension(productIDsKey, List::class.java) as? ArrayList<String>
-                setSessionParams(isAuthRequired, productIds.orEmpty())
+            } else {
+                // if legacyAuthProviderIds is not empty we should init CamFlow.AUTH_AND_STOREFRONT
+                // otherwise CamFlow.EMPTY
+                setSessionParams(legacyAuthProviderIds.isNotEmpty(), legacyAuthProviderIds)
             }
         }
     }

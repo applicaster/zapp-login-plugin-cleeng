@@ -44,7 +44,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         callback: LoginContract.Callback?
     ) {
         context?.let {
-            cleengService.fetchFeedData(playable)
+            cleengService.fetchProductData(playable)
             if (!isTokenValid) {
                 ContentAccessManager.onProcessStarted(cleengService.camContract, it)
             } else {
