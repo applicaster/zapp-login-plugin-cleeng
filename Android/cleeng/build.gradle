@@ -96,7 +96,7 @@ def getVersionName = { ->
     try {
         def stdout = new ByteArrayOutputStream()
         exec {
-            commandLine 'git', 'describe', '--abbrev=0', '--tags'
+            commandLine 'git', 'describe', '--match', 'android-*', '--abbrev=0', '--tags'
             standardOutput = stdout
         }
         def tag = stdout.toString().trim()
