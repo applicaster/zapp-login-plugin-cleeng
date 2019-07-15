@@ -18,6 +18,7 @@ typealias OfferID = String
     private var accessChecker = AccessChecker()
     private var userToken: String?
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
+    private var offers: [CleengOffer] = []
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
@@ -332,6 +333,7 @@ extension CleengLoginPlugin: CAMDelegate {
             switch result {
             case .success(let data):
                 let offers = self.parseCleengOffersResponse(json: data)
+                self.offers = offers
                 self.currentAvailableOfferIDs = offers.reduce([String: String]()) { (dict, item) -> [String: String] in
                     var dict = dict
                     dict[item.appleProductID] = item.offerID
@@ -410,6 +412,25 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func purchaseProperties(for productIdentifier: String) -> PurchaseProperties {
-        return PurchaseProperties()
+        var purchaseProperties = PurchaseProperties(productIdentifier: productIdentifier,
+                                                    isSubscriber: (accessChecker.userPermissionEntitlementsIds.isEmpty == false))
+        
+        guard let offer = self.offers.first(where: { $0.appleProductID == productIdentifier }) else {
+            return purchaseProperties
+        }
+        
+        purchaseProperties.trialPeriod = offer.freeDays
+        
+        if let period = offer.period, period.isEmpty == false {
+            purchaseProperties.subscriptionDuration = period
+        }
+        
+        if let tags = offer.accessToTags, tags.isEmpty == false {
+            purchaseProperties.purchaseEntityType = .category
+        } else {
+            purchaseProperties.purchaseEntityType = .vod
+        }
+        
+        return purchaseProperties
     }
 }

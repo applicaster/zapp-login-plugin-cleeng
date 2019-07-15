@@ -8,13 +8,21 @@
 import Foundation
 
 struct CleengOffer: Codable {
-    let offerID, appleProductID, authID: String
+    let offerID: String
+    let period: String?
+    let freeDays: String?
+    let appleProductID: String
+    let authID: String
     let accessGranted: Bool?
+    let accessToTags: [String]?
     
     enum CodingKeys: String, CodingKey {
         case offerID = "id"
+        case period
+        case freeDays
         case appleProductID = "appleProductId"
         case authID = "authId"
         case accessGranted
+        case accessToTags
     }
 }
