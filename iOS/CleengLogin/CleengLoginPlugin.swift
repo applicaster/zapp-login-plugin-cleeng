@@ -404,11 +404,19 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func itemName() -> String {
-        return ""
+        return accessChecker.playableItem?.playableName() ?? ""
     }
     
     public func itemType() -> String {
-        return ""
+        guard let item = accessChecker.playableItem else {
+            return ""
+        }
+        
+        if let isPlaylist = item.isPlaylist, isPlaylist == true {
+            return "Feed"
+        }
+        
+        return "Video"
     }
     
     public func purchaseProperties(for productIdentifier: String) -> PurchaseProperties {

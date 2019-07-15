@@ -13,6 +13,7 @@ class AccessChecker {
     var flowParser = FlowParser()
     var userPermissionEntitlementsIds = Set<String>()
     var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
+    public var playableItem: ZPPlayable?
     
     public func isUserComply(policies: [String: NSObject], isAuthenticated: Bool) -> Bool {
         let playableItems = flowParser.parsePlayableItems(from: policies)
@@ -101,6 +102,7 @@ class AccessChecker {
     
     private func setAuthIDs(from dictionary: [String: Any]?) {
         let playableItems = flowParser.parsePlayableItems(from: dictionary)
+        self.playableItem = playableItems.first
         let ids = parseEntitlements(from: playableItems)
         setAuthIDs(from: ids)
     }
