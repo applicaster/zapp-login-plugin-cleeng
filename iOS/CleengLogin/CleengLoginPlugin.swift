@@ -401,4 +401,16 @@ extension CleengLoginPlugin: CAMDelegate {
             hasAccess == true ? completion(.success) : completion(.failure(restoreError!))
         }
     }
+    
+    public func itemName() -> String {
+        return ""
+    }
+    
+    public func itemType() -> String {
+        return ""
+    }
+    
+    public func purchaseProperties(for productIdentifier: String) -> PurchaseProperties {
+        return PurchaseProperties()
+    }
 }
