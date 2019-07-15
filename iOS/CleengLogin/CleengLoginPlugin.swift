@@ -85,7 +85,7 @@ typealias OfferID = String
     private func purchaseItem(token: String,
                               offerId: String,
                               transactionId: String,
-                              receiptData: String,
+                              receiptData: Data,
                               isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
         networkAdapter.purchaseItem(token: userToken, offerId: offerId,
                                     transactionId: transactionId, receiptData: receiptData,
@@ -346,15 +346,16 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (PurchaseResult) -> Void) {
-        guard let storeId = purchasedItem.product?.productIdentifier,
-            let offerId = currentAvailableOfferIDs[storeId] else {
+        let storeId = purchasedItem.transaction.payment.productIdentifier
+        guard let offerId = currentAvailableOfferIDs[storeId],
+            let transactionId = purchasedItem.transaction.transactionIdentifier else {
                 return
         }
-        let transactionId = purchasedItem.transaction?.transactionIdentifier
+        
         self.purchaseItem(token: userToken ?? "",
                           offerId: offerId,
-                          transactionId: transactionId ?? "",
-                          receiptData: purchasedItem.receipt ?? "",
+                          transactionId: transactionId,
+                          receiptData: purchasedItem.receipt,
                           isRestored: false) { (result) in
             switch result {
             case .success:
@@ -366,11 +367,10 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (PurchaseResult) -> Void) {
-        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]()) {
-            (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
+        let restoredOffers = restoredItems.reduce([]) { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
             var array = array
-            guard let storeId = item.transaction?.payment.productIdentifier,
-                let offerId = currentAvailableOfferIDs[storeId] else {
+            let storeId = item.transaction.payment.productIdentifier
+            guard let offerId = currentAvailableOfferIDs[storeId] else {
                     return array
             }
             array.append((offerId: offerId, restoredItem: item))
@@ -385,8 +385,8 @@ extension CleengLoginPlugin: CAMDelegate {
             dispatchGroup.enter()
             self.purchaseItem(token: userToken ?? "",
                               offerId: item.offerId,
-                              transactionId: item.restoredItem.transaction?.transactionIdentifier ?? "",
-                              receiptData: item.restoredItem.receipt ?? "",
+                              transactionId: item.restoredItem.transaction.transactionIdentifier ?? "",
+                              receiptData: item.restoredItem.receipt,
                               isRestored: true) { (result) in
                 switch result {
                 case .success:

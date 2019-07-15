@@ -57,13 +57,13 @@ class CleengNetworkHandler {
         performRequest(api: api, completion: completion)
     }
     
-    func purchaseItem(token: String?, offerId: String, transactionId: String? = nil, receiptData: String? = nil,
+    func purchaseItem(token: String?, offerId: String, transactionId: String, receiptData: Data,
                       isRestored: Bool, completion: @escaping (CleengAPIResult) -> Void) {
         let api = CleengAPI.purchaseItem(publisherID: publisherID,
                                          offerId: offerId,
                                          token: token ?? "",
-                                         transactionId: transactionId ?? "",
-                                         receiptData: receiptData ?? "",
+                                         transactionId: transactionId,
+                                         receiptData: receiptData,
                                          isRestored: isRestored)
         performRequest(api: api, completion: completion)
     }
