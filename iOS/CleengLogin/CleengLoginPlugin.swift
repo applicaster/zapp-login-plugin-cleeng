@@ -340,14 +340,13 @@ extension CleengLoginPlugin: CAMDelegate {
                 let storeIDs = Array(self.currentAvailableOfferIDs.keys)
                 completion(.success(storeIDs))
             case .failure(let error):
-                return
+                completion(.failure(error))
             }
         })
     }
     
     public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (PurchaseResult) -> Void) {
-        let storeId = purchasedItem.transaction.payment.productIdentifier
-        guard let offerId = currentAvailableOfferIDs[storeId],
+        guard let offerId = currentAvailableOfferIDs[purchasedItem.productIdentifier],
             let transactionId = purchasedItem.transaction.transactionIdentifier else {
                 return
         }
@@ -361,7 +360,7 @@ extension CleengLoginPlugin: CAMDelegate {
             case .success:
                 completion(.success)
             case .failure(let error):
-                return
+                completion(.failure(error))
             }
         }
     }
@@ -369,8 +368,8 @@ extension CleengLoginPlugin: CAMDelegate {
     public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (PurchaseResult) -> Void) {
         let restoredOffers = restoredItems.reduce([]) { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
             var array = array
-            let storeId = item.transaction.payment.productIdentifier
-            guard let offerId = currentAvailableOfferIDs[storeId] else {
+            
+            guard let offerId = currentAvailableOfferIDs[item.productIdentifier] else {
                     return array
             }
             array.append((offerId: offerId, restoredItem: item))
