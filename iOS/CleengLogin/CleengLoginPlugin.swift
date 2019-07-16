@@ -19,6 +19,7 @@ typealias OfferID = String
     private var userToken: String?
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     private var offers: [CleengOffer] = []
+    private var flowTrigger: Trigger = .appLaunch
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
@@ -170,6 +171,7 @@ typealias OfferID = String
     
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
                                                      completion: (() -> Swift.Void)?) {
+        flowTrigger = .appLaunch
         let flow = accessChecker.getStartupFlow(for: configurationJSON as? [String: Any],
                                                 isAuthenticated: isAuthenticated())
         if flow != .no {
@@ -263,6 +265,7 @@ typealias OfferID = String
     public func executeHook(presentationIndex: NSInteger,
                             dataDict: [String: Any]?,
                             taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
+        flowTrigger = .tapCell
         login(nil) { (operationStatus) in
             switch operationStatus {
             case .completedSuccessfully:
@@ -276,7 +279,7 @@ typealias OfferID = String
 
 // MARK: - CAMDelegate
 
-extension CleengLoginPlugin: CAMDelegate {
+extension CleengLoginPlugin: CAMDelegate {    
     
     public func getPluginConfig() -> [String: String] {
         return configurationJSON as? [String: String] ?? [:]
@@ -440,5 +443,9 @@ extension CleengLoginPlugin: CAMDelegate {
         }
         
         return purchaseProperties
+    }
+    
+    public func trigger() -> Trigger {
+        return flowTrigger
     }
 }
