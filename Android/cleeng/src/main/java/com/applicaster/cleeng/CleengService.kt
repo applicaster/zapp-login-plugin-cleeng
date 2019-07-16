@@ -81,9 +81,12 @@ class CleengService {
                         if (!isAccessGranted()) {
                             setSessionParams(false, availableProductIds)
                             ContentAccessManager.onProcessStarted(camContract, context)
+                        } else {
+                            listener?.onHookFinished()
                         }
+                    } else {
+                        listener?.onHookFinished()
                     }
-                    listener?.onHookFinished()
                 }
 
                 is Result.Failure -> {
@@ -92,6 +95,8 @@ class CleengService {
                         val appLevelEntitlements = pluginConfigurator?.getAppLevelEntitlements().orEmpty()
                         setSessionParams(true, appLevelEntitlements)
                         ContentAccessManager.onProcessStarted(camContract, context)
+                    } else {
+                        listener?.onHookFinished()
                     }
                 }
             }
