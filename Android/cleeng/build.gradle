@@ -15,9 +15,14 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -45,7 +50,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.0'
+    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.1'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         implementation project(':cam')
@@ -128,11 +133,11 @@ publishing {
                 version versionFromTag
 
                 artifactId ARTIFACT_ID
-                artifact ("build/outputs/aar/${project.getName()}.aar") {
-                    builtBy assemble
+                artifact ("build/outputs/aar/${project.getName()}-release.aar") {
+                    builtBy assembleRelease
                 }
-//                artifact androidJavadocsJar
-//                artifact androidSourcesJar
+                artifact androidJavadocsJar
+                artifact androidSourcesJar
                 pom.withXml {
                     Node root = asNode()
                     root.appendNode('name', ARTIFACT_ID)
@@ -206,7 +211,7 @@ bintray {
     publish = true
     override = true
     pkg {
-        repo = 'maven'
+        repo = 'maven_plugins'
         name = ARTIFACT_ID
         userOrg = 'applicaster-ltd'
         websiteUrl = POM_URL
