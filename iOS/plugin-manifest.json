@@ -11,7 +11,7 @@
     "platform": "ios",
     "author_name": "Roman Karpievich, Egor Brel",
     "author_email": "r.karpievich@applicaster.com",
-    "manifest_version": "0.0.1",
+    "manifest_version": "0.0.2",
     "dependency_version": "0.0.2",
     "name": "Cleeng Test",
     "description": "Cleeng Test",
