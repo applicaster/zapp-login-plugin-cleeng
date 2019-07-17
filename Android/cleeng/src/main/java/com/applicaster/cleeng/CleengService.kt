@@ -2,6 +2,7 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import com.applicaster.app.APProperties
+import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
@@ -164,11 +165,13 @@ class CleengService {
     }
 
     fun isItemLocked(model: Any?): Boolean {
-        if (model is Playable) {
-            fetchProductData(model)
-            availableProductIds.forEach { productId ->
-                if (isUserOffersComply(productId))
-                    return false
+        when (model) {
+            is Playable, is APAtomEntry -> {
+                fetchProductData(model)
+                availableProductIds.forEach { productId ->
+                    if (isUserOffersComply(productId))
+                        return false
+                }
             }
         }
         return true
@@ -183,8 +186,8 @@ class CleengService {
         return false
     }
 
-    fun fetchProductData(playable: Playable?) {
-        val productDataProvider = ProductDataProvider.fromPlayable(playable)
+    fun fetchProductData(playableData: Any?) {
+        val productDataProvider = ProductDataProvider.fromPlayable(playableData)
         if (productDataProvider != null) {
             val legacyAuthProviderIds = productDataProvider.getLegacyProviderIds()
             if (legacyAuthProviderIds == null) {
