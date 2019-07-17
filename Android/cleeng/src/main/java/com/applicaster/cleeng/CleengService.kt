@@ -23,6 +23,7 @@ import com.applicaster.loader.json.APVodItemLoader
 import com.applicaster.model.APChannel
 import com.applicaster.model.APVodItem
 import com.applicaster.plugin_manager.hook.HookListener
+import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.util.AppData
 
@@ -119,7 +120,7 @@ class CleengService {
         addOwnedProducts(ownedProductIds)
     }
 
-    fun isItemLocked(model: Any?, loginContractCallback: (Boolean) -> Unit) {
+    fun checkItemLocked(model: Any?, callback: LoginContract.Callback?) {
 
         when (model) {
             is APChannel -> {
@@ -127,11 +128,11 @@ class CleengService {
                 itemChannelLoader = APChannelLoader(
                     object : CleengAsyncTaskListener<APChannel>() {
                         override fun onComplete(result: APChannel) {
-                            loginContractCallback(isItemLocked(itemChannelLoader?.bean))
+                            callback?.onResult(isItemLocked(itemChannelLoader?.bean))
                         }
 
                         override fun onError() {
-                            loginContractCallback(false)
+                            callback?.onResult(false)
                         }
                     },
                     model.id,
@@ -146,11 +147,11 @@ class CleengService {
                 vodItemLoader = APVodItemLoader(
                     object : CleengAsyncTaskListener<APVodItem>() {
                         override fun onComplete(result: APVodItem) {
-                            loginContractCallback(isItemLocked(vodItemLoader?.bean))
+                            callback?.onResult(isItemLocked(vodItemLoader?.bean))
                         }
 
                         override fun onError() {
-                            loginContractCallback(false)
+                            callback?.onResult(false)
                         }
                     },
                     model,
@@ -160,27 +161,35 @@ class CleengService {
                 vodItemLoader.loadBean()
             }
 
-            else -> isItemLocked(model)
+            else -> isItemLocked(model, callback)
         }
     }
 
-    fun isItemLocked(model: Any?): Boolean {
+    fun isItemLocked(model: Any?, callback: LoginContract.Callback? = null): Boolean {
         when (model) {
             is Playable, is APAtomEntry -> {
                 fetchProductData(model)
-                availableProductIds.forEach { productId ->
-                    if (isUserOffersComply(productId))
-                        return false
+                if (availableProductIds.isEmpty()) {
+                    callback?.onResult(false)
+                    return false
+                } else {
+                    availableProductIds.forEach { productId ->
+                        if (isUserOffersComply(productId)) {
+                            callback?.onResult(false)
+                            return false
+                        }
+                    }
                 }
             }
         }
+        callback?.onResult(true)
         return true
     }
 
     private fun isUserOffersComply(productId: String): Boolean {
         val offersList = getUser().userOffers
         offersList?.forEach { offer ->
-            if (offer.authId.isNullOrEmpty() && offer.authId == productId)
+            if (!offer.authId.isNullOrEmpty() && offer.authId == productId)
                 return true
         }
         return false

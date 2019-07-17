@@ -2,6 +2,7 @@ package com.applicaster.cleeng
 
 import android.content.Context
 import android.support.v4.app.Fragment
+import android.util.Log
 import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.hook_screen.HookScreen
@@ -14,6 +15,8 @@ import com.applicaster.plugin_manager.screen.PluginScreen
 import java.io.Serializable
 
 class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
+
+    private val TAG = CleengLoginPlugin::class.java.simpleName
 
     private val cleengService: CleengService by lazy { CleengService() }
 
@@ -68,9 +71,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     }
 
     override fun isItemLocked(context: Context?, model: Any?, callback: LoginContract.Callback?) {
-        cleengService.isItemLocked(model) { result ->
-            callback?.onResult(result)
-        }
+        cleengService.checkItemLocked(model, callback)
     }
 
     override fun executeOnStartup(context: Context?, listener: HookListener?) {
@@ -114,6 +115,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         isActivity: Boolean
     ) {
         //TODO: Empty body?
+        Log.i(TAG, "Present!")
     }
 
     override var hook: HashMap<String, String?> = hashMapOf()
