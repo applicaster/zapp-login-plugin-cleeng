@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.author       = {"Brel Egor" => "brel@scand.com"}
   s.ios.deployment_target = '10.0'
   s.swift_version = '4.2'
-  s.source       = { :git => "https://github.com/applicaster/zapp-login-plugin-cleeng", :tag => 'ios-' + s.version.to_s }
+  s.source       = { :git => "git@github.com:applicaster/zapp-login-plugin-cleeng.git", :tag => 'ios-' + s.version.to_s }
   s.source_files = 'iOS/CleengLogin/**/*.{swift,h,m}'
   s.requires_arc = true
   s.static_framework = true
