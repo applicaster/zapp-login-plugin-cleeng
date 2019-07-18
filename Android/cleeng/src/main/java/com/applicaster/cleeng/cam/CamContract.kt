@@ -257,8 +257,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun isRedeemActivated(): Boolean = false //TODO: dummy. add proper handling
 
-    // TODO: dummy. Uncomment "camFlow" line and remove hardcoded CamFlow enum value
-    override fun getCamFlow(): CamFlow = /*camFlow*/CamFlow.AUTH_AND_STOREFRONT
+    override fun getCamFlow(): CamFlow = camFlow
 
     /**
      * This one sets CAM flow value obtained form playable item after login call.

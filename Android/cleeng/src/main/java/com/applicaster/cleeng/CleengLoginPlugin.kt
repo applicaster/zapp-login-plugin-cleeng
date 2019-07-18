@@ -3,15 +3,15 @@ package com.applicaster.cleeng
 import android.content.Context
 import android.support.v4.app.Fragment
 import android.util.Log
-import com.applicaster.atom.model.APAtomEntry
+import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.hook_screen.HookScreen
 import com.applicaster.hook_screen.HookScreenListener
-import com.applicaster.hook_screen.HookScreenManager
 import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
+import com.google.gson.Gson
 import java.io.Serializable
 
 class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
@@ -48,16 +48,19 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     ) {
         context?.let {
             cleengService.fetchProductData(playable)
-            if (!isTokenValid) {
-                ContentAccessManager.onProcessStarted(cleengService.camContract, it)
-            } else {
-                if (cleengService.isAccessGranted())
-                    hookListener.hookCompleted(hashMapOf())
-                else
+            if (cleengService.camContract.getCamFlow() != CamFlow.EMPTY) {
+                if (!isTokenValid) {
                     ContentAccessManager.onProcessStarted(cleengService.camContract, it)
+                } else {
+                    if (cleengService.isAccessGranted())
+                        hookListener.hookCompleted(hashMapOf())
+                    else
+                        ContentAccessManager.onProcessStarted(cleengService.camContract, it)
+                }
+            } else {
+                hookListener.hookCompleted(mutableMapOf())
             }
         }
-
     }
 
     override fun isTokenValid(): Boolean = cleengService.getUserToken().isNotEmpty()
@@ -82,12 +85,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     override fun getToken(): String = cleengService.getUserToken()
 
     override fun setPluginConfigurationParams(params: MutableMap<Any?, Any?>?) {
-        //transform MutableMap<Any?, Any?>? to Map<String, String>?
-        val pluginConfig = params?.entries?.associate { entry ->
-            entry.key.toString() to entry.value.toString()
-        }
-        if (pluginConfig != null)
-            cleengService.setPluginConfigurator(PluginConfigurator(pluginConfig))
+        // empty
     }
 
     override fun handlePluginScheme(context: Context?, data: MutableMap<String, String>?): Boolean =
@@ -114,8 +112,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         dataSource: Serializable?,
         isActivity: Boolean
     ) {
-        //TODO: Empty body?
-        Log.i(TAG, "Present!")
+        Log.i(TAG, "Present screen")
     }
 
     override var hook: HashMap<String, String?> = hashMapOf()
@@ -128,15 +125,26 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         hookProps: Map<String, Any>?
     ) {
         this.hookListener = hookListener
-        val playable = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY) as? APAtomEntry.APAtomEntryPlayable
-        login(context, playable, mutableMapOf()) {}
+        val data = hook["screenMap"]
+        val config: MutableMap<Any?, Any?>? = getPluginConfiguration(data ?: "")["general"] as? MutableMap<Any?, Any?>
+
+        //transform MutableMap<Any?, Any?>? to Map<String, String>?
+        val pluginConfig = config?.entries?.associate { entry ->
+            entry.key.toString() to entry.value.toString()
+        }
+        if (pluginConfig != null)
+            cleengService.setPluginConfigurator(PluginConfigurator(pluginConfig))
+        login(context, null, mutableMapOf()) {}
     }
+
+    private fun getPluginConfiguration(data: String): Map<String, Any> =
+            Gson().fromJson(data, Map::class.java) as Map<String, Any>
 
     override fun getListener(): HookScreenListener =
         hookListener
 
     override fun hookDismissed() {
-        //TODO: Empty body?
+        // empty
     }
 
     override fun isFlowBlocker(): Boolean = true
