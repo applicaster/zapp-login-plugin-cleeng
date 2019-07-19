@@ -22,27 +22,18 @@ class FlowParser {
     // MARK: - Public methods
     
     public func parseFlow(from dictionary: [String: Any]?) -> CAMFlow {
-        let playableItems = self.parsePlayableItems(from: dictionary)
-        let flow = self.parseFlow(from: playableItems)
-        
-        return flow
-    }
-    
-    public func parseFlow(from playableItems: [ZPPlayable]) -> CAMFlow {
-        // In general we assume only one item comes to plugin
-        guard let item = playableItems.first else {
-            assert(false)
+        guard let dictionary = dictionary else {
             return .no
         }
         var isAuthRequired: Bool
         var entitlements: [String]
         
-        if let legacyEntitlements = item.extensionsDictionary?[FlowParserKeys.legacyEntitlements.rawValue] as? [String] {
+        if let legacyEntitlements = dictionary[FlowParserKeys.legacyEntitlements.rawValue] as? [Int] {
             isAuthRequired = !legacyEntitlements.isEmpty
-            entitlements = legacyEntitlements
+            entitlements = legacyEntitlements.map { String($0) }
         } else {
-            isAuthRequired = item.extensionsDictionary?[FlowParserKeys.auth.rawValue] as? Bool ?? false
-            entitlements = item.extensionsDictionary?[FlowParserKeys.entitlements.rawValue] as? [String] ?? []
+            isAuthRequired = dictionary[FlowParserKeys.auth.rawValue] as? Bool ?? false
+            entitlements = dictionary[FlowParserKeys.entitlements.rawValue] as? [String] ?? []
         }
         
         switch (isAuthRequired, entitlements.isEmpty) {
@@ -57,12 +48,11 @@ class FlowParser {
         }
     }
     
-    public func parsePlayableItems(from dictionary: [String: Any]?) -> [ZPPlayable] {
-        var playableItems = dictionary?[FlowParserKeys.playableItems.rawValue] as? [ZPPlayable]
-        if playableItems == nil {
-            playableItems = dictionary?[FlowParserKeys.vodItems.rawValue] as? [ZPPlayable]
+    public func parseEntitlements(from dictionary: [String: Any]) -> [String] {
+        if let legacyEntitlements = dictionary[FlowParserKeys.legacyEntitlements.rawValue] as? [Int] {
+            return legacyEntitlements.map { String($0) }
+        } else {
+            return dictionary[FlowParserKeys.entitlements.rawValue] as? [String] ?? []
         }
-        
-        return playableItems ?? []
-    }    
+    }
 }
