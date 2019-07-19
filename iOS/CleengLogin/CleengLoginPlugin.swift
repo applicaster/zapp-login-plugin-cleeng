@@ -13,8 +13,9 @@ private let kCleengUserLoginToken = "CleengUserLoginToken"
 
 typealias StoreID = String
 typealias OfferID = String
-@objc public class CleengLoginPlugin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol {
+@objc public class CleengLoginPlugin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol, ZPPluggableScreenProtocol {
     
+    public var screenPluginDelegate: ZPPlugableScreenDelegate?
     private var accessChecker = AccessChecker()
     private var userToken: String?
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
@@ -42,14 +43,21 @@ typealias OfferID = String
     }
     
     public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
+        super.init()
         
+        let playableItems = dataSourceModel as? [ZPPlayable] ?? []
+        flow = .no
+        flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
+                                        isAuthenticated: isAuthenticated())
     }
     
     public required init?(pluginModel: ZPPluginModel, dataSourceModel: NSObject?) {
         super.init()
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
-        flow = FlowParser().parseFlow(from: playableItems)
+        flow = .no
+        flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
+                                        isAuthenticated: isAuthenticated())
     }
     
     // MARK: - Private methods
@@ -188,6 +196,11 @@ typealias OfferID = String
     
     // MARK: - ZPLoginProviderUserDataProtocol
  
+    public func isUserComply(policies: [String : NSObject]) -> Bool {
+        let result = accessChecker.isUserComply(policies: policies, isAuthenticated: isAuthenticated())
+        return result
+    }
+    
     public func isUserComply(policies: [String: NSObject], completion: @escaping (Bool) -> Void) {
         let result = accessChecker.isUserComply(policies: policies, isAuthenticated: isAuthenticated())
         completion(result)
@@ -203,7 +216,11 @@ typealias OfferID = String
             completion(.failed)
         }
         
-        let flow = accessChecker.getLoginFlow(for: additionalParameters, isAuthenticated: isAuthenticated())
+        var flow = self.flow
+        
+        if additionalParameters != nil {
+            flow = accessChecker.getCamFlow(for: additionalParameters, isAuthenticated: isAuthenticated())
+        }
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
                                                         camDelegate: self,
@@ -259,6 +276,10 @@ typealias OfferID = String
     
     // MARK: - ZPScreenHookAdapterProtocol
     
+    public func requestScreenPluginPresentation(completion: @escaping (Bool) -> Void) {
+        completion(false)
+    }
+    
     public func executeHook(presentationIndex: NSInteger,
                             dataDict: [String: Any]?,
                             taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
@@ -270,6 +291,12 @@ typealias OfferID = String
                 taskFinishedWithCompletion(false, nil, nil)
             }
         }
+    }
+    
+    //MARK: ZPPluggableScreenProtocol
+    
+    public func createScreen() -> UIViewController {
+        return UIViewController()
     }
 }
 
@@ -328,7 +355,7 @@ extension CleengLoginPlugin: CAMDelegate {
     
     public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
         networkAdapter.subscriptions(token: userToken, byAuthId: 1,
-                                     offers: accessChecker.currentVideoEntitlementsIds, completion: { (result) in
+                                     offers: accessChecker.currentItemEntitlementsIds, completion: { (result) in
             switch result {
             case .success(let data):
                 let offers = self.parseCleengOffersResponse(json: data)

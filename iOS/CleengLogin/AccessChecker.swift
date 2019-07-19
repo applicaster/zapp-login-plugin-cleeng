@@ -12,13 +12,10 @@ import ZappPlugins
 class AccessChecker {
     var flowParser = FlowParser()
     var userPermissionEntitlementsIds = Set<String>()
-    var currentVideoEntitlementsIds = [String]() //Auth Ids from dsp
+    var currentItemEntitlementsIds = [String]() //Auth Ids from dsp
     
     public func isUserComply(policies: [String: NSObject], isAuthenticated: Bool) -> Bool {
-        let playableItems = flowParser.parsePlayableItems(from: policies)
-        let flow = flowParser.parseFlow(from: playableItems)
-        
-        assert(playableItems.count == 1, "It is assumed only one item comes in this method.")
+        let flow = flowParser.parseFlow(from: policies)
         
         var isComply = false
         
@@ -26,11 +23,11 @@ class AccessChecker {
         case .authentication:
             isComply = isAuthenticated
         case .storefront:
-            let entitlements = parseEntitlements(from: playableItems)
+            let entitlements = flowParser.parseEntitlements(from: policies)
             isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
         case .authAndStorefront:
             if isAuthenticated {
-                let entitlements = parseEntitlements(from: playableItems)
+                let entitlements = flowParser.parseEntitlements(from: policies)
                 isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
             }
         case .no:
@@ -56,7 +53,7 @@ class AccessChecker {
             let ids = startupAuthIDs.split(separator: ",").map(String.init)
             if !ids.isEmpty {
                 shouldPresentStorefront = true
-                setAuthIDs(from: ids)
+                setItemAuthIDs(from: ids)
             }
         }
         switch (isAuthenticated, isTriggerOnAppLaunch, shouldPresentStorefront) {
@@ -71,8 +68,12 @@ class AccessChecker {
         }
     }
     
-    public func getLoginFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
-        setAuthIDs(from: dictionary)
+    public func getCamFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
+        guard let dictionary = dictionary else {
+            return .no
+        }
+        let authIds = flowParser.parseEntitlements(from: dictionary)
+        setItemAuthIDs(from: authIds)
         let flow = flowParser.parseFlow(from: dictionary)
         switch flow {
         case .authentication:
@@ -91,25 +92,11 @@ class AccessChecker {
     }
     
     public func isPurchaseNeeded() -> Bool {
-        return userPermissionEntitlementsIds.isDisjoint(with: currentVideoEntitlementsIds)
+        return userPermissionEntitlementsIds.isDisjoint(with: currentItemEntitlementsIds)
     }
     
-    private func setAuthIDs(from authIDs: [String]) {
-        currentVideoEntitlementsIds.removeAll()
-        currentVideoEntitlementsIds.append(contentsOf: authIDs)
-    }
-    
-    private func setAuthIDs(from dictionary: [String: Any]?) {
-        let playableItems = flowParser.parsePlayableItems(from: dictionary)
-        let ids = parseEntitlements(from: playableItems)
-        setAuthIDs(from: ids)
-    }
-    
-    private func parseEntitlements(from playableItems: [ZPPlayable]) -> [String] {
-        if let legacyEntitlements = playableItems.first?.extensionsDictionary?["authorization_providers_ids"] as? [String] {
-            return legacyEntitlements
-        } else {
-            return playableItems.first?.extensionsDictionary?["ds_product_ids"] as? [String] ?? []
-        }
+    private func setItemAuthIDs(from authIDs: [String]) {
+        currentItemEntitlementsIds.removeAll()
+        currentItemEntitlementsIds.append(contentsOf: authIDs)
     }
 }
