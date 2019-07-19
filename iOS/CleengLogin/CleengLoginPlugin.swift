@@ -26,6 +26,10 @@ typealias OfferID = String
     
     private var flow: CAMFlow = .no
     
+    public var isFlowBlocker: Bool {
+        return true
+    }
+    
     public required override init() {
         super.init()
         networkAdapter = CleengNetworkHandler(publisherID: "")
@@ -46,7 +50,6 @@ typealias OfferID = String
         super.init()
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
-        flow = .no
         flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
                                         isAuthenticated: isAuthenticated())
     }
@@ -55,7 +58,6 @@ typealias OfferID = String
         super.init()
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
-        flow = .no
         flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
                                         isAuthenticated: isAuthenticated())
     }
@@ -196,7 +198,7 @@ typealias OfferID = String
     
     // MARK: - ZPLoginProviderUserDataProtocol
  
-    public func isUserComply(policies: [String : NSObject]) -> Bool {
+    public func isUserComply(policies: [String: NSObject]) -> Bool {
         let result = accessChecker.isUserComply(policies: policies, isAuthenticated: isAuthenticated())
         return result
     }
