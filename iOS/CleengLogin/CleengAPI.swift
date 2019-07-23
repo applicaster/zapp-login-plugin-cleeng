@@ -18,7 +18,7 @@ enum CleengAPI {
     case extendToken(publisherID: String, token: String?)
     case subscriptions(publisherID: String, token: String?, byAuthId: Int, offers: [String]?)
     case purchaseItem(publisherID: String, offerId: String, token: String, transactionId: String,
-                      receiptData: String, isRestored: Bool)
+                      receiptData: Data, isRestored: Bool)
     case purchaseItemUsingCode(publisherID: String, offerId: String, token: String, reedeemCode: String)
 }
     

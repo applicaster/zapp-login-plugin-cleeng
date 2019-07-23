@@ -19,6 +19,8 @@ typealias OfferID = String
     private var accessChecker = AccessChecker()
     private var userToken: String?
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
+    private var offers: [CleengOffer] = []
+    private var flowTrigger: Trigger = .appLaunch
     
     private var publisherId = ""
     private var networkAdapter: CleengNetworkHandler!
@@ -95,7 +97,7 @@ typealias OfferID = String
     private func purchaseItem(token: String,
                               offerId: String,
                               transactionId: String,
-                              receiptData: String,
+                              receiptData: Data,
                               isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
         networkAdapter.purchaseItem(token: userToken, offerId: offerId,
                                     transactionId: transactionId, receiptData: receiptData,
@@ -179,6 +181,7 @@ typealias OfferID = String
     
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
                                                      completion: (() -> Swift.Void)?) {
+        flowTrigger = .appLaunch
         let flow = accessChecker.getStartupFlow(for: configurationJSON as? [String: Any],
                                                 isAuthenticated: isAuthenticated())
         if flow != .no {
@@ -285,6 +288,7 @@ typealias OfferID = String
     public func executeHook(presentationIndex: NSInteger,
                             dataDict: [String: Any]?,
                             taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
+        flowTrigger = .tapCell
         login(nil) { (operationStatus) in
             switch operationStatus {
             case .completedSuccessfully:
@@ -304,7 +308,7 @@ typealias OfferID = String
 
 // MARK: - CAMDelegate
 
-extension CleengLoginPlugin: CAMDelegate {
+extension CleengLoginPlugin: CAMDelegate {    
     
     public func getPluginConfig() -> [String: String] {
         return configurationJSON as? [String: String] ?? [:]
@@ -361,6 +365,7 @@ extension CleengLoginPlugin: CAMDelegate {
             switch result {
             case .success(let data):
                 let offers = self.parseCleengOffersResponse(json: data)
+                self.offers = offers
                 self.currentAvailableOfferIDs = offers.reduce([String: String]()) { (dict, item) -> [String: String] in
                     var dict = dict
                     dict[item.appleProductID] = item.offerID
@@ -369,37 +374,36 @@ extension CleengLoginPlugin: CAMDelegate {
                 let storeIDs = Array(self.currentAvailableOfferIDs.keys)
                 completion(.success(storeIDs))
             case .failure(let error):
-                return
+                completion(.failure(error))
             }
         })
     }
     
     public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (PurchaseResult) -> Void) {
-        guard let storeId = purchasedItem.product?.productIdentifier,
-            let offerId = currentAvailableOfferIDs[storeId] else {
+        guard let offerId = currentAvailableOfferIDs[purchasedItem.productIdentifier],
+            let transactionId = purchasedItem.transaction.transactionIdentifier else {
                 return
         }
-        let transactionId = purchasedItem.transaction?.transactionIdentifier
+        
         self.purchaseItem(token: userToken ?? "",
                           offerId: offerId,
-                          transactionId: transactionId ?? "",
-                          receiptData: purchasedItem.receipt ?? "",
+                          transactionId: transactionId,
+                          receiptData: purchasedItem.receipt,
                           isRestored: false) { (result) in
             switch result {
             case .success:
                 completion(.success)
             case .failure(let error):
-                return
+                completion(.failure(error))
             }
         }
     }
     
     public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (PurchaseResult) -> Void) {
-        let restoredOffers = restoredItems.reduce([(offerId: String, restoredItem: PurchasedProduct)]()) {
-            (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
+        let restoredOffers = restoredItems.reduce([]) { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
             var array = array
-            guard let storeId = item.transaction?.payment.productIdentifier,
-                let offerId = currentAvailableOfferIDs[storeId] else {
+            
+            guard let offerId = currentAvailableOfferIDs[item.productIdentifier] else {
                     return array
             }
             array.append((offerId: offerId, restoredItem: item))
@@ -414,8 +418,8 @@ extension CleengLoginPlugin: CAMDelegate {
             dispatchGroup.enter()
             self.purchaseItem(token: userToken ?? "",
                               offerId: item.offerId,
-                              transactionId: item.restoredItem.transaction?.transactionIdentifier ?? "",
-                              receiptData: item.restoredItem.receipt ?? "",
+                              transactionId: item.restoredItem.transaction.transactionIdentifier ?? "",
+                              receiptData: item.restoredItem.receipt,
                               isRestored: true) { (result) in
                 switch result {
                 case .success:
@@ -429,5 +433,48 @@ extension CleengLoginPlugin: CAMDelegate {
         dispatchGroup.notify(queue: DispatchQueue.main) {
             hasAccess == true ? completion(.success) : completion(.failure(restoreError!))
         }
+    }
+    
+    public func itemName() -> String {
+        return accessChecker.playableItem?.playableName() ?? ""
+    }
+    
+    public func itemType() -> String {
+        guard let item = accessChecker.playableItem else {
+            return ""
+        }
+        
+        if let isPlaylist = item.isPlaylist, isPlaylist == true {
+            return "Feed"
+        }
+        
+        return "Video"
+    }
+    
+    public func purchaseProperties(for productIdentifier: String) -> PurchaseProperties {
+        var purchaseProperties = PurchaseProperties(productIdentifier: productIdentifier,
+                                                    isSubscriber: (accessChecker.userPermissionEntitlementsIds.isEmpty == false))
+        
+        guard let offer = self.offers.first(where: { $0.appleProductID == productIdentifier }) else {
+            return purchaseProperties
+        }
+        
+        purchaseProperties.trialPeriod = offer.freeDays
+        
+        if let period = offer.period, period.isEmpty == false {
+            purchaseProperties.subscriptionDuration = period
+        }
+        
+        if let tags = offer.accessToTags, tags.isEmpty == false {
+            purchaseProperties.purchaseEntityType = .category
+        } else {
+            purchaseProperties.purchaseEntityType = .vod
+        }
+        
+        return purchaseProperties
+    }
+    
+    public func trigger() -> Trigger {
+        return flowTrigger
     }
 }
