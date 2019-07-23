@@ -93,7 +93,7 @@ extension CleengAPI {
                     "token": token ?? "",
                     "byAuthId": byAuthId,
                     "offers": offers ?? [String]()]
-        case .purchaseItem(let publisherID, let transactionId, let receiptData, let token, let offerId, let isRestored):
+        case .purchaseItem(let publisherID, let offerId, let token, let transactionId, let receiptData, let isRestored):
             let receiptInfo: [String: Any] = [
                 "transactionId": transactionId,
                 "receiptData": receiptData
@@ -107,7 +107,7 @@ extension CleengAPI {
                 "isRestored": isRestored
             ]
             return params
-        case .purchaseItemUsingCode(let publisherID, let token, let offerId, let couponCode):
+        case .purchaseItemUsingCode(let publisherID, let offerId, let token, let couponCode):
             return [
                 "publisherId": publisherID,
                 "appType": "ios",

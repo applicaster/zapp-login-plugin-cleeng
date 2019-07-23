@@ -22,7 +22,9 @@ typealias OfferID = String
     private var offers: [CleengOffer] = []
     private var flowTrigger: Trigger = .appLaunch
     
-    private var publisherId = ""
+    private var publisherId: String {
+        return networkAdapter.publisherID
+    }
     private var networkAdapter: CleengNetworkHandler!
     public var configurationJSON: NSDictionary?
     
