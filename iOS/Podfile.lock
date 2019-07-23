@@ -1,7 +1,7 @@
 PODS:
   - Alamofire (4.8.2)
   - ApplicasterIAP (0.0.3)
-  - CAM (0.0.1):
+  - CAM (1.0.1):
     - ApplicasterIAP
     - ZappPlugins
   - CleengLogin (0.0.2):
@@ -12,19 +12,19 @@ PODS:
   - ZappLoginPluginsSDK (7.0.1):
     - Alamofire
     - ZappPlugins
-  - ZappPlugins (8.5.1)
+  - ZappPlugins (8.6.0)
 
 DEPENDENCIES:
   - CAM (from `../Submodules/CAM/CAM.podspec`)
   - CleengLogin (from `../CleengLogin.podspec`)
 
 SPEC REPOS:
+  "git@github.com:applicaster/applicaster-iap-framework.git":
+    - ApplicasterIAP
   "git@github.com:applicaster/CocoaPods-Private.git":
     - ZappLoginPluginsSDK
   "git@github.com:applicaster/CocoaPods.git":
     - ZappPlugins
-  https://github.com/applicaster/applicaster-iap-framework:
-    - ApplicasterIAP
   https://github.com/cocoapods/specs.git:
     - Alamofire
 
@@ -37,11 +37,11 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   ApplicasterIAP: 3e02eab421049bae6a12e4dcfd03b467e7dac847
-  CAM: 834fa444ed57c71629361df6e9724e2b23212908
+  CAM: 1f6ac3648c0cc621038571e04e2d3ecdfbb4e63c
   CleengLogin: a5da0438503d84c2e9865ab88f7254b9b6da5885
   ZappLoginPluginsSDK: 548119bbd8b28e6fe7bd67ead2c550c8db6870c1
-  ZappPlugins: f8a89e2c0ac7b4e3384053afcd898fc028311ab7
+  ZappPlugins: 0ce6cb2e61ab1994b12dd55b2d7de902ccf28d0a
 
-PODFILE CHECKSUM: c09eecc612f6fbd556345b335ef6d0d6e241458a
+PODFILE CHECKSUM: bf58afe7249691740fd5fe920977c5d018e49eb5
 
-COCOAPODS: 1.7.1
+COCOAPODS: 1.7.4

@@ -27,6 +27,7 @@ typealias OfferID = String
     public var configurationJSON: NSDictionary?
     
     private var flow: CAMFlow = .no
+    private var currentPlaybleItem: ZPPlayable?
     
     public var isFlowBlocker: Bool {
         return true
@@ -52,6 +53,7 @@ typealias OfferID = String
         super.init()
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
+        self.currentPlaybleItem = playableItems.first
         flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
                                         isAuthenticated: isAuthenticated())
     }
@@ -60,6 +62,7 @@ typealias OfferID = String
         super.init()
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
+        self.currentPlaybleItem = playableItems.first
         flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
                                         isAuthenticated: isAuthenticated())
     }
@@ -436,11 +439,11 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func itemName() -> String {
-        return accessChecker.playableItem?.playableName() ?? ""
+        return currentPlaybleItem?.playableName() ?? ""
     }
     
     public func itemType() -> String {
-        guard let item = accessChecker.playableItem else {
+        guard let item = currentPlaybleItem else {
             return ""
         }
         

@@ -7,9 +7,8 @@ source 'git@github.com:applicaster/CocoaPods.git'
 source 'git@github.com:CocoaPods/Specs.git'
 source 'git@github.com:applicaster/CocoaPods-Private.git'
 source 'git@github.com:applicaster/PluginsBuilderCocoaPods.git'
-source 'https://github.com/applicaster/ZappLoginPluginsSDK-iOS'
-source 'https://github.com/applicaster/applicaster-iap-framework'
-source 'https://github.com/applicaster/applicaster-cam-framework'
+source 'git@github.com:applicaster/applicaster-iap-framework'
+source 'git@github.com:applicaster/applicaster-cam-framework'
 
 target 'CleengLoginPlugin' do
   pod 'CleengLogin', :path => '../CleengLogin.podspec'
