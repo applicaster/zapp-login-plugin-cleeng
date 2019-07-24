@@ -10,7 +10,7 @@
     "platform": "android",
     "author_name": "Alex Khomich, Denis Razumeev",
     "author_email": "a.khomich@applicaster.com",
-    "manifest_version": "0.0.2",
+    "manifest_version": "0.0.3",
     "dependency_version": "0.0.2",
     "name": "Cleeng Test",
     "description": "Cleeng Test",
@@ -50,10 +50,11 @@
                 "label_tooltip": "Enter here, in a comma-separated list, any entitlements which should provide users access to the home screen of the app. If no entitlements are entered here but 'Trigger on App Launch' is set, only sign-up/login will be required for app-level access."
             },
             {
-                "key": "default_login_screen",
-                "type": "text_input",
-                "label_tooltip": "<p>When the login process begins, this field determines whether to prompt login first with an option to switch to sign-up (in case the user does not have an account), or sign-up fist with an option to switch to login (in case the user already has an account). </p><p>Possible values: Login or Sign-up</p>",
-                "initial_value": "Login"
+                "key": "default_authentication_screen",
+                "type": "multi_select",
+				"options": [{"text": "Login","value": "Login"},{"text": "Sign-Up", "value": "Sign-Up"}],
+				"label_tooltip": "<p>When the authentication process begins, this field determines what to present first.</p><p>By selecting “Login”, the plugin will prompt login first, with an option to switch to the sign-up screen in case the user does not have an account.</p><p>By selecting “Sign-Up”, the plugin will present the user with the sign-up (aka registration) screen first, with an option to switch to login in case the user already has an account.</p>",
+				"initial_value": "Login"
             },
             {
                 "key": "default_alert_text",
