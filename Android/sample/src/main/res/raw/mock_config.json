@@ -1,7 +1,7 @@
 {
   "cleeng_login_publisher_id" : "5b3cc7c2fed4fa00149037d6",
   "trigger_on_app_launch":"false",
-  "app_level_entitlements":"",
+  "app_level_product_ids":"",
   "default_login_screen":"Login",
 
   "facebook_login_required": "true",
