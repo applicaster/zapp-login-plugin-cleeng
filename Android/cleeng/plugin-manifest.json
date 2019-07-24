@@ -10,7 +10,7 @@
     "platform": "android",
     "author_name": "Alex Khomich, Denis Razumeev",
     "author_email": "a.khomich@applicaster.com",
-    "manifest_version": "0.0.2",
+    "manifest_version": "0.0.3",
     "dependency_version": "0.0.2",
     "name": "Cleeng Test",
     "description": "Cleeng Test",
@@ -42,18 +42,25 @@
                 "key": "trigger_on_app_launch",
                 "type": "switch",
                 "label_tooltip": "If checked, the plugin UI will be launched when the user launches the app, unless the device is already authorized to access the app.",
+                "initial_value": "true"
+            },
+			{
+                "key": "present_storefront_upon_launch",
+                "type": "switch",
+                "label_tooltip": "<p>Determine whether to present storefront upon app launch after authentication.</p><p>If switched off, only sign-up/login will be required for app-level access.</p>",
                 "initial_value": "false"
             },
             {
-                "key": "app_level_entitlements",
+                "key": "app_level_product_ids",
                 "type": "text_input",
-                "label_tooltip": "Enter here, in a comma-separated list, any entitlements which should provide users access to the home screen of the app. If no entitlements are entered here but 'Trigger on App Launch' is set, only sign-up/login will be required for app-level access."
+                "label_tooltip": "<p>Enter here, in a comma-separated list, the product ids specified by the service provider for any entitlements which provide users access to the home screen of the app.</p><p>At least one value must be provided in order to present the storefront screen upon launch.</p>"
             },
             {
-                "key": "default_login_screen",
-                "type": "text_input",
-                "label_tooltip": "<p>When the login process begins, this field determines whether to prompt login first with an option to switch to sign-up (in case the user does not have an account), or sign-up fist with an option to switch to login (in case the user already has an account). </p><p>Possible values: Login or Sign-up</p>",
-                "initial_value": "Login"
+                "key": "default_authentication_screen",
+                "type": "multi_select",
+				"options": [{"text": "Login","value": "Login"},{"text": "Sign-Up", "value": "Sign-Up"}],
+				"label_tooltip": "<p>When the authentication process begins, this field determines what to present first.</p><p>By selecting “Login”, the plugin will prompt login first, with an option to switch to the sign-up screen in case the user does not have an account.</p><p>By selecting “Sign-Up”, the plugin will present the user with the sign-up (aka registration) screen first, with an option to switch to login in case the user already has an account.</p>",
+				"initial_value": "Login"
             },
             {
                 "key": "default_alert_text",
