@@ -46,11 +46,15 @@ repositories {
         }
         url 'https://dl.bintray.com/applicaster-ltd/maven'
     }
+    maven {
+        url "https://dl.bintray.com/applicaster-ltd/maven_plugins/"
+
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.2'
+    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.3'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         implementation project(':cam')
