@@ -29,18 +29,10 @@ import com.applicaster.util.AppData
 
 class CleengService {
 
-    val networkHelper: NetworkHelper by lazy { NetworkHelper(pluginConfigurator?.getPublisherId().orEmpty()) }
+    val networkHelper: NetworkHelper by lazy { NetworkHelper() }
     val camContract: CamContract by lazy { CamContract(this@CleengService) }
 
-    private var pluginConfigurator: PluginConfigurator? = null
     private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
-
-    private val user: User = User()
-
-    /**
-     * List of productId available to be bought (in old cleeng implementation named authId)
-     */
-    private val availableProductIds: ArrayList<String> = arrayListOf()
 
     fun mockStart(context: Context) {
         ContentAccessManager.onProcessStarted(camContract, context)
@@ -78,10 +70,10 @@ class CleengService {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     parseAuthResponse(responseDataResult.orEmpty())
-                    if (pluginConfigurator?.isTriggerOnAppLaunch() == true) {
-                        availableProductIds.addAll(pluginConfigurator?.getAppLevelEntitlements().orEmpty())
-                        if (!isAccessGranted()) {
-                            setSessionParams(false, availableProductIds)
+                    if (Session.pluginConfigurator?.isTriggerOnAppLaunch() == true) {
+                        Session.availableProductIds.addAll(Session.pluginConfigurator?.getAppLevelEntitlements().orEmpty())
+                        if (!Session.isAccessGranted()) {
+                            setSessionParams(false, Session.availableProductIds)
                             ContentAccessManager.onProcessStarted(camContract, context)
                         } else {
                             listener?.onHookFinished()
@@ -93,8 +85,8 @@ class CleengService {
 
                 is Result.Failure -> {
                     // handle error and open loginEmail or sign up screen
-                    if (pluginConfigurator?.isTriggerOnAppLaunch() == true) {
-                        val appLevelEntitlements = pluginConfigurator?.getAppLevelEntitlements().orEmpty()
+                    if (Session.pluginConfigurator?.isTriggerOnAppLaunch() == true) {
+                        val appLevelEntitlements = Session.pluginConfigurator?.getAppLevelEntitlements().orEmpty()
                         setSessionParams(true, appLevelEntitlements)
                         ContentAccessManager.onProcessStarted(camContract, context)
                     } else {
@@ -116,8 +108,8 @@ class CleengService {
                 ownedProductIds.add(authData.authId.orEmpty())
             }
         }
-        setUserOffers(offers)
-        addOwnedProducts(ownedProductIds)
+        Session.setUserOffers(offers)
+        Session.addOwnedProducts(ownedProductIds)
     }
 
     fun checkItemLocked(model: Any?, callback: LoginContract.Callback?) {
@@ -169,11 +161,11 @@ class CleengService {
         when (model) {
             is Playable, is APAtomEntry -> {
                 fetchProductData(model)
-                if (availableProductIds.isEmpty()) {
+                if (Session.availableProductIds.isEmpty()) {
                     callback?.onResult(false)
                     return false
                 } else {
-                    availableProductIds.forEach { productId ->
+                    Session.availableProductIds.forEach { productId ->
                         if (isUserOffersComply(productId)) {
                             callback?.onResult(false)
                             return false
@@ -187,7 +179,7 @@ class CleengService {
     }
 
     private fun isUserOffersComply(productId: String): Boolean {
-        val offersList = getUser().userOffers
+        val offersList = Session.user?.userOffers
         offersList?.forEach { offer ->
             if (!offer.authId.isNullOrEmpty() && offer.authId == productId)
                 return true
@@ -217,9 +209,9 @@ class CleengService {
      * Available product ids can be obtained in many different ways (from playable / from plugin config)
      */
     private fun setSessionParams(isAuthRequired: Boolean, parsedProductIds: List<String>) {
-        availableProductIds.clear()
-        availableProductIds.addAll(parsedProductIds)
-        val option: Option = if (availableProductIds.isNotEmpty()) Option.SOME else Option.NONE
+        Session.availableProductIds.clear()
+        Session.availableProductIds.addAll(parsedProductIds)
+        val option: Option = if (Session.availableProductIds.isNotEmpty()) Option.SOME else Option.NONE
         camContract.setCamFlow(matchAuthFlowValues(isAuthRequired to option))
     }
 
@@ -227,12 +219,12 @@ class CleengService {
         return when (extensionsData) {
             (true to Option.NONE) -> {
                 if (!isUserLogged())
-                    CamFlow.AUTHENTICATION
+                    return CamFlow.AUTHENTICATION
                 CamFlow.EMPTY
             }
             (true to Option.SOME) -> {
                 if (!isUserLogged())
-                    CamFlow.AUTH_AND_STOREFRONT
+                    return CamFlow.AUTH_AND_STOREFRONT
                 CamFlow.STOREFRONT
             }
             (false to Option.SOME) -> {
@@ -247,51 +239,22 @@ class CleengService {
         }
     }
 
-    fun getUser() = user
-
     fun saveUserToken(token: String) {
-        user.token = token
+        Session.user?.token = token
         preferences.saveUserToken(token)
     }
 
     fun getUserToken(): String {
-        if (user.token.isNullOrEmpty()) {
+        if (Session.user?.token.isNullOrEmpty()) {
             return preferences.getUserToken()
         }
-        return user.token.orEmpty()
+        return Session.user?.token.orEmpty()
     }
 
     fun isUserLogged(): Boolean = getUserToken().isNotEmpty()
 
     fun logout() {
         preferences.removeUserToken()
-    }
-
-    private fun setUserOffers(offers: ArrayList<Offer>) {
-        user.userOffers = offers
-    }
-
-    private fun addOwnedProducts(ownedProductIds: HashSet<String>) {
-        user.ownedProductIds.addAll(ownedProductIds)
-    }
-
-    fun setPluginConfigurator(pluginConfigurator: PluginConfigurator) {
-        this@CleengService.pluginConfigurator = pluginConfigurator
-    }
-
-    fun getPluginConfigurationParams() = pluginConfigurator?.getPluginConfig().orEmpty()
-
-    fun parseAccessGranted(subscriptionData: SubscriptionsResponseData) {
-//        save current authId if access granted
-        if (subscriptionData.accessGranted == true && !subscriptionData.authId.isNullOrEmpty()) {
-            user.ownedProductIds.add(subscriptionData.authId!!)
-        }
-    }
-
-    fun isAccessGranted(): Boolean = user.ownedProductIds.intersect(availableProductIds).isNotEmpty()
-
-    fun getErrorMessage(webError: WebServiceError?): String {
-        return pluginConfigurator?.getCleengErrorMessage(webError ?: WebServiceError.DEFAULT).orEmpty()
     }
 
     private enum class Option {

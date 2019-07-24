@@ -3,6 +3,7 @@ package com.applicaster.cleeng.data.playable
 import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.model.APChannel
 import com.applicaster.model.APModel
+import kotlin.math.roundToInt
 
 interface ProductDataProvider {
     fun getLegacyProviderIds(): List<String>?
@@ -89,10 +90,13 @@ class ProductAPModelItem(private val apModel: APModel) : ProductDataProvider {
 
 class ProductAPAtomEntryItem(private val playable: APAtomEntry) : ProductDataProvider {
     override fun getLegacyProviderIds(): List<String>? {
-        return getSafety { playable.getExtension(
-            ProductDataProvider.KEY_LEGACY_AUTH_PROVIDER_IDS,
-            List::class.java
-        ) as? List<String> }
+        val data = getSafety { playable.getExtension(
+                ProductDataProvider.KEY_LEGACY_AUTH_PROVIDER_IDS,
+                List::class.java
+        ) as? List<Double> }
+        return data?.map {
+            it.toInt().toString()
+        }
     }
 
     override fun isAuthRequired(): Boolean {

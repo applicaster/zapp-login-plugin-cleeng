@@ -9,10 +9,10 @@ import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 
-class NetworkHelper(private val publisherId: String) {
+class NetworkHelper {
 
     private val retrofitService by lazy {
-        ServiceGenerator.setCustomInterceptor(PublisherInfoInterceptor(publisherId))
+        ServiceGenerator.setCustomInterceptor(PublisherInfoInterceptor())
         ServiceGenerator.createRetrofitService(RestService::class.java)
     }
 
