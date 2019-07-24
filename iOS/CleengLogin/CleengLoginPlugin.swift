@@ -8,11 +8,13 @@
 import ZappPlugins
 import ZappLoginPluginsSDK
 import CAM
+import ComponentsSDK
 
 private let kCleengUserLoginToken = "CleengUserLoginToken"
 
 typealias StoreID = String
 typealias OfferID = String
+
 @objc public class CleengLoginPlugin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol, ZPPluggableScreenProtocol {
     
     public var screenPluginDelegate: ZPPlugableScreenDelegate?
@@ -31,28 +33,41 @@ typealias OfferID = String
     private var flow: CAMFlow = .no
     private var currentPlaybleItem: ZPPlayable?
     
+    private var pluginConfiguration: [String: Any] = [:]
+    
     public var isFlowBlocker: Bool {
         return true
     }
     
     public required override init() {
         super.init()
-        networkAdapter = CleengNetworkHandler(publisherID: "")
+        
+        assert(false, "Unexpected call of initialiizer")
     }
     
     public required init(configurationJSON: NSDictionary?) {
         super.init()
-        self.configurationJSON = configurationJSON
-        if let id = configurationJSON?["cleeng_login_publisher_id"] as? String {
-            publisherId = id
-        }
         
-        networkAdapter = CleengNetworkHandler(publisherID: publisherId)
-        networkAdapter.errorMessage = errorMessage()
+        self.configurationJSON = configurationJSON
+        
+        if let pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("cleeng_cam")?.general {
+            self.pluginConfiguration = pluginConfiguration
+            
+            if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
+                networkAdapter = CleengNetworkHandler(publisherID: publisherID)
+                networkAdapter.errorMessage = errorMessage()
+            }
+        }
     }
     
     public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
         super.init()
+        
+        self.pluginConfiguration = screenModel.general
+        if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
+            networkAdapter = CleengNetworkHandler(publisherID: publisherID)
+            networkAdapter.errorMessage = errorMessage()
+        }
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
         self.currentPlaybleItem = playableItems.first
@@ -63,10 +78,7 @@ typealias OfferID = String
     public required init?(pluginModel: ZPPluginModel, dataSourceModel: NSObject?) {
         super.init()
         
-        let playableItems = dataSourceModel as? [ZPPlayable] ?? []
-        self.currentPlaybleItem = playableItems.first
-        flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
-                                        isAuthenticated: isAuthenticated())
+        assert(false, "Unexpected call of initialiizer")
     }
     
     // MARK: - Private methods
