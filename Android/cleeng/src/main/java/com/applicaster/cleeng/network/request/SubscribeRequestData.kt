@@ -4,9 +4,7 @@ package com.applicaster.cleeng.network.request
 import com.google.gson.annotations.SerializedName
 
 data class SubscribeRequestData(
-    @SerializedName("auth_id")
-    val authId: String?,
-    @SerializedName("offer_id")
+    @SerializedName("offerId")
     val offerId: String?,
     @SerializedName("receipt")
     val receipt: Receipt?,
@@ -23,7 +21,7 @@ data class SubscribeRequestData(
         @SerializedName("productId")
         val productId: String?,
         @SerializedName("purchaseState")
-        val purchaseState: String?,
+        val purchaseState: Int?,
         @SerializedName("purchaseTime")
         val purchaseTime: String?,
         @SerializedName("purchaseToken")
