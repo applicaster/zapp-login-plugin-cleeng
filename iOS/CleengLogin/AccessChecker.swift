@@ -49,7 +49,7 @@ class AccessChecker {
             }
         }
         var shouldPresentStorefront = false
-        if let startupAuthIDs = dictionary?["present_storefront_upon_launch"] as? String {
+        if let startupAuthIDs = dictionary?["app_level_product_ids"] as? String {
             let ids = startupAuthIDs.split(separator: ",").map(String.init)
             if !ids.isEmpty {
                 shouldPresentStorefront = true
