@@ -15,7 +15,7 @@ class PluginConfigurator(private val pluginConfig: Map<String, String>) {
 
     fun getAppLevelEntitlements(): List<String> =
     // obtain string with coma separated list like "4, 8, 15, 16, 23, 42" and convert to List<String>
-        getOrDefault(KEY_APP_LEVEL_ENTITLEMENTS).split(",").map { it.trim() }
+        getOrEmpty(KEY_APP_LEVEL_ENTITLEMENTS)?.split(",")?.map { it.trim() } ?: listOf()
 
     fun getCleengErrorMessage(webError: WebServiceError): String {
         return when (webError) {

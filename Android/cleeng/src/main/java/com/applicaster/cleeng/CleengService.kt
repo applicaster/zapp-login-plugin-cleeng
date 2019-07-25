@@ -34,6 +34,8 @@ class CleengService {
 
     private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
 
+    var startUpHookListener: HookListener? = null
+
     fun mockStart(context: Context) {
         ContentAccessManager.onProcessStarted(camContract, context)
     }
@@ -64,6 +66,7 @@ class CleengService {
      *                           no  ------------>X
      */
     fun handleStartupHook(context: Context, listener: HookListener?) {
+        startUpHookListener = listener
         executeRequest {
             val result = networkHelper.extendToken(getUserToken())
             when (result) {
@@ -76,10 +79,10 @@ class CleengService {
                             setSessionParams(false, Session.availableProductIds)
                             ContentAccessManager.onProcessStarted(camContract, context)
                         } else {
-                            listener?.onHookFinished()
+                            startUpHookListener?.onHookFinished()
                         }
                     } else {
-                        listener?.onHookFinished()
+                        startUpHookListener?.onHookFinished()
                     }
                 }
 
@@ -90,7 +93,7 @@ class CleengService {
                         setSessionParams(true, appLevelEntitlements)
                         ContentAccessManager.onProcessStarted(camContract, context)
                     } else {
-                        listener?.onHookFinished()
+                        startUpHookListener?.onHookFinished()
                     }
                 }
             }

@@ -10,8 +10,8 @@
     "platform": "android",
     "author_name": "Alex Khomich, Denis Razumeev",
     "author_email": "a.khomich@applicaster.com",
-    "manifest_version": "0.0.3",
-    "dependency_version": "0.0.3",
+    "manifest_version": "0.0.4",
+    "dependency_version": "0.0.4",
     "name": "Cleeng Test",
     "description": "Cleeng Test",
     "cover_image": "",
@@ -73,11 +73,6 @@
                 "type": "text_input",
                 "label_tooltip": "<p>The text that will be displayed in the alert message presented when the user tries to access content and has a relevant voucher which has expired.</p><p>This will lead to the payment options screen</p>",
                 "initial_value": "The applicable purchase you’ve made has expired. Please make a valid purchase to access this content."
-            },
-            {
-                "key": "design_assets",
-                "type": "uploader",
-                "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here."
             },
             {
                 "group": true,
@@ -842,7 +837,13 @@
             }
         ]
     },
-    "custom_configuration_fields": [],
+    "custom_configuration_fields": [
+        {
+            "key": "android_assets_bundle",
+            "type": "uploader",
+            "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here."
+        }
+    ],
     "hooks": {
         "fields": [
             {

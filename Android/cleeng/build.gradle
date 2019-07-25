@@ -54,7 +54,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.3'
+    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.4'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         implementation project(':cam')
@@ -70,9 +70,12 @@ dependencies {
     } else {
         api(applicasterSDKPath)
     }
+
+    implementation project(':screen-metadata')
     implementation ('com.github.LiquidPlayer:LiquidCore:0.4.6'){
         exclude group: 'com.android.support', module:'appcompat-v7'
     }
+    def support_version = '27.1.1'
     implementation "com.android.support:appcompat-v7:$support_version"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

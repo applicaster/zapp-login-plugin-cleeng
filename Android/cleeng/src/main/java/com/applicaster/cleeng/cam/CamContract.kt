@@ -271,4 +271,8 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     fun setCamFlow(camFlow: CamFlow) {
         this.camFlow = camFlow
     }
+
+    override fun onCamFinished() {
+        cleengService.startUpHookListener?.onHookFinished()
+    }
 }
