@@ -105,6 +105,7 @@
 				25C6A57282A52698EDCB8C33 /* [CP] Embed Pods Frameworks */,
 				B64D576322A7E4CD00A20F42 /* Add test data to app */,
 				B6C71E6122AFB47B00E623A2 /* Swift Lint */,
+				B68DEE3E0BC111E552B65473 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -218,6 +219,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "echo \"*** Copy Application resources to the build product ***\"\ncp -r \"${SRCROOT}/Resources/\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\"\n";
+		};
+		B68DEE3E0BC111E552B65473 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CleengLoginPlugin/Pods-CleengLoginPlugin-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-CleengLoginPlugin/Pods-CleengLoginPlugin-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CleengLoginPlugin/Pods-CleengLoginPlugin-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		B6C71E6122AFB47B00E623A2 /* Swift Lint */ = {
 			isa = PBXShellScriptBuildPhase;
