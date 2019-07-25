@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment
 import android.util.Log
 import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
+import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.hook_screen.HookScreen
 import com.applicaster.hook_screen.HookScreenListener
 import com.applicaster.hook_screen.HookScreenManager
@@ -12,6 +13,7 @@ import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
+import com.applicaster.screen_metadata.ScreensDataLoader
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -101,8 +103,14 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     }
 
     override fun executeOnStartup(context: Context?, listener: HookListener?) {
-        if (context != null && listener != null)
-            cleengService.handleStartupHook(context, listener)
+        val screenLoader = ScreensDataLoader()
+        executeRequest {
+            val pluginConfig = screenLoader.loadScreensData()
+            if (pluginConfig != null)
+                Session.pluginConfigurator = PluginConfigurator(pluginConfig)
+            if (context != null && listener != null)
+                cleengService.handleStartupHook(context, listener)
+        }
     }
 
     override fun getToken(): String = cleengService.getUserToken()

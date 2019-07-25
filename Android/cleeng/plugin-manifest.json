@@ -75,11 +75,6 @@
                 "initial_value": "The applicable purchase you’ve made has expired. Please make a valid purchase to access this content."
             },
             {
-                "key": "design_assets",
-                "type": "uploader",
-                "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here."
-            },
-            {
                 "group": true,
                 "label": "Screen Title Text",
                 "tooltip": "The font that will be used for the text at the top of each screen in the gateway process",
@@ -842,7 +837,13 @@
             }
         ]
     },
-    "custom_configuration_fields": [],
+    "custom_configuration_fields": [
+        {
+            "key": "android_assets_bundle",
+            "type": "uploader",
+            "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here."
+        }
+    ],
     "hooks": {
         "fields": [
             {
