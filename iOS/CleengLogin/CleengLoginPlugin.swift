@@ -33,7 +33,14 @@ typealias OfferID = String
     private var flow: CAMFlow = .no
     private var currentPlaybleItem: ZPPlayable?
     
-    private var pluginConfiguration: [String: Any] = [:]
+    private var pluginConfiguration: [String: Any] = [:] {
+        didSet {
+            for case let (key, value) as (String, String) in pluginConfiguration {
+                camConfiguration[key] = value
+            }
+        }
+    }
+    private var camConfiguration: [String: String] = [:]
     
     public var isFlowBlocker: Bool {
         return true
@@ -50,8 +57,11 @@ typealias OfferID = String
         
         self.configurationJSON = configurationJSON
         
-        if let pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("cleeng_cam")?.general {
+        if var pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("cleeng_cam")?.general {
             self.pluginConfiguration = pluginConfiguration
+            for case let (key, value) as (String, String) in pluginConfiguration {
+                camConfiguration[key] = value
+            }
             
             if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
                 networkAdapter = CleengNetworkHandler(publisherID: publisherID)
@@ -64,6 +74,10 @@ typealias OfferID = String
         super.init()
         
         self.pluginConfiguration = screenModel.general
+        for case let (key, value) as (String, String) in pluginConfiguration {
+            camConfiguration[key] = value
+        }
+        
         if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
             networkAdapter = CleengNetworkHandler(publisherID: publisherID)
             networkAdapter.errorMessage = errorMessage()
@@ -328,7 +342,7 @@ typealias OfferID = String
 extension CleengLoginPlugin: CAMDelegate {    
     
     public func getPluginConfig() -> [String: String] {
-        return configurationJSON as? [String: String] ?? [:]
+        return camConfiguration
     }
     
     public func isPurchaseNeeded() -> Bool {
@@ -340,10 +354,7 @@ extension CleengLoginPlugin: CAMDelegate {
         let api = CleengAPI.loginWithFacebook(publisherID: publisherId,
                                               email: userData.email,
                                               facebookId: userData.userId)
-//        authorize(api: api, completion: completion)
-        authorize(api: api) { (result) in
-            
-        }
+        authorize(api: api, completion: completion)
     }
     
     public func facebookSignUp(userData: (email: String, userId: String),
