@@ -1,2 +1,2 @@
-include ':sample', ':cleeng', ':cam', ':screen-metadata'
+include ':sample', ':cleeng', ':cam'
 project(':cam').projectDir = new File('../Submodules/CAM/Android/cam')

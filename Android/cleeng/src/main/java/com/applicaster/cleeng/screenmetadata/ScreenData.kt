@@ -1,4 +1,4 @@
-package com.applicaster.screen_metadata
+package com.applicaster.cleeng.screenmetadata
 
 
 import com.google.gson.annotations.SerializedName

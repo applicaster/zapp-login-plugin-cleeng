@@ -13,7 +13,7 @@ import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
-import com.applicaster.screen_metadata.ScreensDataLoader
+import com.applicaster.cleeng.screenmetadata.ScreensDataLoader
 import com.google.gson.Gson
 import java.io.Serializable
 

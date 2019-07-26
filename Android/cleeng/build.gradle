@@ -71,7 +71,6 @@ dependencies {
         api(applicasterSDKPath)
     }
 
-    implementation project(':screen-metadata')
     implementation ('com.github.LiquidPlayer:LiquidCore:0.4.6'){
         exclude group: 'com.android.support', module:'appcompat-v7'
     }
