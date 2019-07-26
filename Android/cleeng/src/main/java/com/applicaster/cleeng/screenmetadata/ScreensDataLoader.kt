@@ -1,4 +1,4 @@
-package com.applicaster.screen_metadata
+package com.applicaster.cleeng.screenmetadata
 
 import android.util.Log
 import com.applicaster.loader.APLoaderRequestsHelper
@@ -65,7 +65,13 @@ class ScreensDataLoader {
         val accountsPath = LoadersConstants.ACCOUNTS_PATH
         val accountId = AppData.getCrossDomainAccountId()
         val appsPath = LoadersConstants.APPS_PATH
-        val zappMetaData = MetaData(urlScheme, accountsPath, accountId, appsPath, metaData)
+        val zappMetaData = MetaData(
+            urlScheme,
+            accountsPath,
+            accountId,
+            appsPath,
+            metaData
+        )
         val builder = ScreenUrlBuilder(zappMetaData)
 
         retrofitService = createService(builder.baseUrl)
