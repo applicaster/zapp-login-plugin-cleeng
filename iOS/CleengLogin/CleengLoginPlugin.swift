@@ -59,8 +59,15 @@ typealias OfferID = String
         
         if var pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("cleeng_cam")?.general {
             self.pluginConfiguration = pluginConfiguration
-            for case let (key, value) as (String, String) in pluginConfiguration {
-                camConfiguration[key] = value
+            for (key, value) in pluginConfiguration {
+                switch value {
+                case let string as String:
+                    camConfiguration[key] = string
+                case let bool as Bool:
+                    camConfiguration[key] = bool.description
+                default:
+                    break
+                }
             }
             
             if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
@@ -74,8 +81,15 @@ typealias OfferID = String
         super.init()
         
         self.pluginConfiguration = screenModel.general
-        for case let (key, value) as (String, String) in pluginConfiguration {
-            camConfiguration[key] = value
+        for (key, value) in pluginConfiguration {
+            switch value {
+            case let string as String:
+                camConfiguration[key] = string
+            case let bool as Bool:
+                camConfiguration[key] = bool.description
+            default:
+                break
+            }
         }
         
         if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
