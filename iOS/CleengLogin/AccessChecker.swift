@@ -13,6 +13,9 @@ class AccessChecker {
     var flowParser = FlowParser()
     var userPermissionEntitlementsIds = Set<String>()
     var currentItemEntitlementsIds = [String]() //Auth Ids from dsp
+    var isPurchaseNeeded: Bool {
+        return userPermissionEntitlementsIds.isDisjoint(with: currentItemEntitlementsIds)
+    }
     
     public func isUserComply(policies: [String: NSObject], isAuthenticated: Bool) -> Bool {
         let flow = flowParser.parseFlow(from: policies)
@@ -62,7 +65,7 @@ class AccessChecker {
         case (false, true, true):
             return .authAndStorefront
         case (true, true, true):
-            return isPurchaseNeeded() ? .storefront : .no
+            return isPurchaseNeeded ? .storefront : .no
         default:
             return .no
         }
@@ -81,18 +84,14 @@ class AccessChecker {
         case .authAndStorefront:
             let updatedFlow = isAuthenticated ? CAMFlow.storefront : CAMFlow.authAndStorefront
             if updatedFlow == .storefront {
-                return isPurchaseNeeded() ? .storefront : .no
+                return isPurchaseNeeded ? .storefront : .no
             }
             return updatedFlow
         case .storefront:
-            return isPurchaseNeeded() ? .storefront : .no
+            return isPurchaseNeeded ? .storefront : .no
         default:
             return flow
         }
-    }
-    
-    public func isPurchaseNeeded() -> Bool {
-        return userPermissionEntitlementsIds.isDisjoint(with: currentItemEntitlementsIds)
     }
     
     private func setItemAuthIDs(from authIDs: [String]) {

@@ -360,7 +360,7 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func isPurchaseNeeded() -> Bool {
-        return accessChecker.isPurchaseNeeded()
+        return accessChecker.isPurchaseNeeded
     }
     
     public func facebookLogin(userData: (email: String, userId: String),
