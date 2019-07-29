@@ -10,11 +10,11 @@ import CAM
 import ZappPlugins
 
 class AccessChecker {
-    var flowParser = FlowParser()
-    var userPermissionEntitlementsIds = Set<String>()
+    private var flowParser = FlowParser()
+    static var userPermissionEntitlementsIds = Set<String>()
     var currentItemEntitlementsIds = [String]() //Auth Ids from dsp
     var isPurchaseNeeded: Bool {
-        return userPermissionEntitlementsIds.isDisjoint(with: currentItemEntitlementsIds)
+        return AccessChecker.userPermissionEntitlementsIds.isDisjoint(with: currentItemEntitlementsIds)
     }
     
     public func isUserComply(policies: [String: NSObject], isAuthenticated: Bool) -> Bool {
@@ -27,11 +27,11 @@ class AccessChecker {
             isComply = isAuthenticated
         case .storefront:
             let entitlements = flowParser.parseEntitlements(from: policies)
-            isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
+            isComply = !(AccessChecker.userPermissionEntitlementsIds.isDisjoint(with: entitlements))
         case .authAndStorefront:
             if isAuthenticated {
                 let entitlements = flowParser.parseEntitlements(from: policies)
-                isComply = !(userPermissionEntitlementsIds.isDisjoint(with: entitlements))
+                isComply = !(AccessChecker.userPermissionEntitlementsIds.isDisjoint(with: entitlements))
             }
         case .no:
             isComply = true
