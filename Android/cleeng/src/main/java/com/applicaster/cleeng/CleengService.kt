@@ -7,14 +7,11 @@ import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
 import com.applicaster.cleeng.data.Offer
-import com.applicaster.cleeng.data.User
 import com.applicaster.cleeng.data.playable.ProductDataProvider
 import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
-import com.applicaster.cleeng.network.error.WebServiceError
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.response.AuthResponseData
-import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.CleengAsyncTaskListener
 import com.applicaster.cleeng.utils.SharedPreferencesUtil
 import com.applicaster.cleeng.utils.isNullOrEmpty
@@ -62,7 +59,7 @@ class CleengService {
      *          ------\       +---------------+           |exist in plugin config?|
      *  request failed ------>|trigger on app |           +-----------------------+
      *                        |launch enabled?|                                 --------\
-     *                        +---------------+                                      no  -------> Launch CAMFlow.AUTHENTICATION
+     *                        +---------------+                                      no  -------> Launch CamFlow.AUTHENTICATION
      *                           no  ------------>X
      */
     fun handleStartupHook(context: Context, listener: HookListener?) {
@@ -198,11 +195,11 @@ class CleengService {
                 //obtain data from DSP
                 val isAuthRequired: Boolean = productDataProvider.isAuthRequired()
                 val productIds = productDataProvider.getProductIds()
-                setSessionParams(isAuthRequired, productIds.orEmpty())
+                setSessionParams(isAuthRequired(isAuthRequired), productIds.orEmpty())
             } else {
                 // if legacyAuthProviderIds is not empty we should init CamFlow.AUTH_AND_STOREFRONT
                 // otherwise CamFlow.EMPTY
-                setSessionParams(legacyAuthProviderIds.isNotEmpty(), legacyAuthProviderIds)
+                setSessionParams(isAuthRequired(authProviders = legacyAuthProviderIds), legacyAuthProviderIds)
             }
         }
     }
@@ -226,12 +223,22 @@ class CleengService {
                 CamFlow.EMPTY
             }
             (true to Option.SOME) -> {
-                if (!isUserLogged())
-                    return CamFlow.AUTH_AND_STOREFRONT
-                CamFlow.STOREFRONT
+                if (Session.pluginConfigurator?.isPaymentRequired() == true) {
+                    if (!isUserLogged())
+                        CamFlow.AUTH_AND_STOREFRONT
+                    else CamFlow.STOREFRONT
+                } else {
+                    if (!isUserLogged())
+                        CamFlow.AUTHENTICATION
+                    else CamFlow.EMPTY
+                }
             }
             (false to Option.SOME) -> {
-                CamFlow.STOREFRONT
+                if (Session.pluginConfigurator?.isPaymentRequired() == true) {
+                    CamFlow.STOREFRONT
+                } else {
+                    CamFlow.EMPTY
+                }
             }
             (false to Option.NONE) -> {
                 CamFlow.EMPTY
@@ -239,6 +246,16 @@ class CleengService {
             else -> {
                 CamFlow.AUTHENTICATION
             }
+        }
+    }
+
+    fun isAuthRequired(dspAuthRequired: Boolean = false, authProviders: List<String>? = null): Boolean {
+        return when (Session.pluginConfigurator?.getAuthRequirement()) {
+            AuthenticationRequirement.ALWAYS -> true
+            AuthenticationRequirement.NEVER -> false
+            AuthenticationRequirement.REQUIRE_ON_PURCHASABLE_ITEMS -> authProviders?.isNotEmpty() ?: false
+            AuthenticationRequirement.REQUIRE_WHEN_SPECIFIED_IN_DATA_SOURCE -> dspAuthRequired
+            else -> false
         }
     }
 
