@@ -1,8 +1,9 @@
 package com.applicaster.cleeng
 
+import com.applicaster.cam.CamFlow
+import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.data.User
-import com.applicaster.cleeng.network.error.WebServiceError
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.isNullOrEmpty
 
@@ -16,6 +17,8 @@ object Session {
     val availableProductIds: ArrayList<String> = arrayListOf()
 
     var pluginConfigurator: PluginConfigurator? = null
+
+    private var camFlow: CamFlow = CamFlow.EMPTY
 
     fun setUserOffers(offers: ArrayList<Offer>) {
         user?.userOffers = offers
@@ -36,8 +39,15 @@ object Session {
 
     fun isAccessGranted(): Boolean = user?.ownedProductIds?.intersect(availableProductIds)?.isNotEmpty() ?: false
 
-    fun getErrorMessage(webError: WebServiceError?): String {
-        return pluginConfigurator?.getCleengErrorMessage(webError ?: WebServiceError.DEFAULT).orEmpty()
+
+    fun getCamFlow(): CamFlow = camFlow
+
+    /**
+     * This one sets CAM flow value obtained form playable item after login call.
+     * You MUST! call this method BEFORE! [ContentAccessManager.onProcessStarted] method
+     */
+    fun setCamFlow(camFlow: CamFlow) {
+        this.camFlow = camFlow
     }
 
     fun drop() {
