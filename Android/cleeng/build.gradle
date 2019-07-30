@@ -54,7 +54,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.4'
+    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.5'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         implementation project(':cam')

@@ -33,7 +33,7 @@ object Session {
     fun parseAccessGranted(subscriptionData: SubscriptionsResponseData) {
 //        save current authId if access granted
         if (subscriptionData.accessGranted == true && !subscriptionData.authId.isNullOrEmpty()) {
-            user?.ownedProductIds?.add(subscriptionData.authId!!)
+            subscriptionData.authId?.let { user?.ownedProductIds?.add(it) }
         }
     }
 
