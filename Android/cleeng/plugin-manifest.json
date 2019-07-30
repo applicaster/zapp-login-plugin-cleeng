@@ -80,7 +80,7 @@
                 "options": [
                   {"text": "Never require","value": "never_require"},
                   {"text": "Always require", "value": "always_require"},
-                  {"text": "Require on all purchasable items", "value": "require_on_ all_purchasable_items"},
+                  {"text": "Require on all purchasable items", "value": "require_on_all_purchasable_items"},
                   {"text": "Require when specified on the data source", "value": "require_when_specified_on_the_data_source"}
                 ],
                 "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication.</p>",
