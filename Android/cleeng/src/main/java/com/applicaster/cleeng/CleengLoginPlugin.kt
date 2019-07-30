@@ -3,9 +3,8 @@ package com.applicaster.cleeng
 import android.content.Context
 import android.support.v4.app.Fragment
 import android.util.Log
-import com.applicaster.cam.CamFlow
-import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.network.executeRequest
+import com.applicaster.cleeng.screenmetadata.ScreensDataLoader
 import com.applicaster.hook_screen.HookScreen
 import com.applicaster.hook_screen.HookScreenListener
 import com.applicaster.hook_screen.HookScreenManager
@@ -13,7 +12,6 @@ import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
-import com.applicaster.cleeng.screenmetadata.ScreensDataLoader
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -50,41 +48,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         callback: LoginContract.Callback?
     ) {
         context?.let {
-            cleengService.fetchProductData(playable)
-            if (cleengService.camContract.getCamFlow() != CamFlow.EMPTY) {
-                if (!isTokenValid) {
-                    ContentAccessManager.onProcessStarted(cleengService.camContract, it)
-                } else {
-                    if (Session.isAccessGranted())
-                        hookListener.hookCompleted(hashMapOf())
-                    else
-                        ContentAccessManager.onProcessStarted(cleengService.camContract, it)
-                }
-            } else {
-                hookListener.hookCompleted(mutableMapOf())
-            }
-        }
-    }
-
-    private fun login(
-            context: Context?,
-            model: Any?,
-            additionalParams: MutableMap<Any?, Any?>? = mutableMapOf()
-    ) {
-        context?.let {
-            cleengService.fetchProductData(model)
-            if (cleengService.camContract.getCamFlow() != CamFlow.EMPTY) {
-                if (!isTokenValid) {
-                    ContentAccessManager.onProcessStarted(cleengService.camContract, it)
-                } else {
-                    if (Session.isAccessGranted())
-                        hookListener.hookCompleted(hashMapOf())
-                    else
-                        ContentAccessManager.onProcessStarted(cleengService.camContract, it)
-                }
-            } else {
-                hookListener.hookCompleted(mutableMapOf())
-            }
+            cleengService.handleLogin(playable, this, it)
         }
     }
 
@@ -95,11 +59,11 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     }
 
     override fun isItemLocked(model: Any?): Boolean {
-        return cleengService.isItemLocked(model)
+        return cleengService.itemAccessHandler.isItemLocked(model)
     }
 
     override fun isItemLocked(context: Context?, model: Any?, callback: LoginContract.Callback?) {
-        cleengService.checkItemLocked(model, callback)
+        cleengService.itemAccessHandler.checkItemLocked(model, callback)
     }
 
     override fun executeOnStartup(context: Context?, listener: HookListener?) {
@@ -149,7 +113,9 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
 
     override var hook: HashMap<String, String?> = hashMapOf()
         get() = field
-        set(value) { field = value }
+        set(value) {
+            field = value
+        }
 
     override fun executeHook(
         context: Context,
@@ -158,21 +124,29 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     ) {
         this.hookListener = hookListener
         val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
-        val config: MutableMap<Any?, Any?>? =
-                getPluginConfiguration(hook["screenMap"].orEmpty())?.get("general") as? MutableMap<Any?, Any?>
-
-        //transform MutableMap<Any?, Any?>? to Map<String, String>?
-        val pluginConfig = config?.entries?.associate { entry ->
-            entry.key.toString() to entry.value.toString()
+        fetchPluginConfig()
+        context?.let {
+            cleengService.handleLogin(dataSource, this, it)
         }
-
-        if (pluginConfig != null)
-            Session.pluginConfigurator = PluginConfigurator(pluginConfig)
-        login(context, dataSource)
     }
 
-    private fun getPluginConfiguration(data: String): Map<String, Any>? =
-            Gson().fromJson(data, Map::class.java) as? Map<String, Any>
+    private fun fetchPluginConfig() {
+        val pluginConfig = getPluginConfiguration()
+        if (pluginConfig != null)
+            Session.pluginConfigurator = PluginConfigurator(pluginConfig)
+    }
+
+    private fun getPluginConfiguration(): Map<String, String>? {
+        val fullPluginConfig =
+            Gson().fromJson(hook["screenMap"].orEmpty(), Map::class.java) as? Map<String, Any>
+        val generalConfig: MutableMap<Any?, Any?>? =
+            fullPluginConfig?.get("general") as? MutableMap<Any?, Any?>
+
+        //transform MutableMap<Any?, Any?>? to Map<String, String>?
+        return generalConfig?.entries?.associate { entry ->
+            entry.key.toString() to entry.value.toString()
+        }
+    }
 
     override fun getListener(): HookScreenListener = hookListener
 
