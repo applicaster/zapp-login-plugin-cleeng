@@ -860,7 +860,7 @@
           },
           {
             "text": "Require on all purchasable items",
-            "value": "require_on_ all_purchasable_items"
+            "value": "require_on_all_purchasable_items"
           },
           {
             "text": "Require when specified on the data source",
