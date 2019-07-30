@@ -1,0 +1,7 @@
+*.iml
+Android/.gradle
+Android/.idea
+Android/build
+Android/sample/build
+Android/.DS_Store
+.DS_Store
