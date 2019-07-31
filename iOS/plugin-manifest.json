@@ -11,8 +11,8 @@
   "platform": "ios",
   "author_name": "Roman Karpievich, Egor Brel",
   "author_email": "r.karpievich@applicaster.com",
-  "manifest_version": "0.0.5",
-  "dependency_version": "0.0.2",
+  "manifest_version": "0.0.6",
+  "dependency_version": "0.0.3",
   "name": "Cleeng Test",
   "description": "Cleeng Test",
   "cover_image": "",
@@ -869,6 +869,18 @@
         ],
         "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication.</p>",
         "initial_value": "Always require"
+      },
+      {
+        "key": "no_purchases_to_restore_alert_text",
+        "type": "text_input",
+        "label_tooltip": "The text presented to the user when they’ve tried to restore a purchase, but the store returns that there are no valid purchases to restore",
+        "initial_value": "The store did not return any valid purchases that can be restored"
+      },
+      {
+        "key": "non_matching_restored_purchases_alert_text",
+        "type": "text_input",
+        "label_tooltip": "The text presented to the user when they’ve successfully restored one or more purchases, but none of them provide access to the requested content",
+        "initial_value": "You’ve successfully restored any valid previously made purchases, however, none of them provide access to the requested content"
       }
     ]
   },
