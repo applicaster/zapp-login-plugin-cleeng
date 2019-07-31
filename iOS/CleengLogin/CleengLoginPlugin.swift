@@ -33,13 +33,7 @@ typealias OfferID = String
     private var flow: CAMFlow = .no
     private var currentPlaybleItem: ZPPlayable?
     
-    private var pluginConfiguration: [String: Any] = [:] {
-        didSet {
-            for case let (key, value) as (String, String) in pluginConfiguration {
-                camConfiguration[key] = value
-            }
-        }
-    }
+    private var pluginConfiguration: [String: Any] = [:]
     private var camConfiguration: [String: String] = [:]
     
     public var isFlowBlocker: Bool {
@@ -79,7 +73,6 @@ typealias OfferID = String
     
     public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
         super.init()
-        
         self.pluginConfiguration = screenModel.general
         for (key, value) in pluginConfiguration {
             switch value {
@@ -164,18 +157,14 @@ typealias OfferID = String
                                      completion: { (result) in
             switch result {
             case .success(let data):
-                let offer = self.parseCleengOffersResponse(json: data)
-                guard let verifiedOffer = offer.first else {
+                guard let offer = self.parseCleengOffersResponse(json: data).first,
+                    offer.accessGranted == true else {
                     completion(.failure(.serverError))
                     return
                 }
-                if let access = verifiedOffer.accessGranted, access {
-                    self.accessChecker.userPermissionEntitlementsIds.insert(verifiedOffer.authID)
-                    completion(.success)
-                } else {
-                    completion(.failure(.serverError))
-                    return
-                }
+                
+                AccessChecker.userPermissionEntitlementsIds.insert(offer.authID)
+                completion(.success)
             case .failure(let error):
                 completion(.failure(error))
                 return
@@ -316,7 +305,7 @@ typealias OfferID = String
                 UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
             } else {
                 if let authID = item.authID {
-                    accessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
+                    AccessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
                                                                  //subscription token in dicrionary by authId
                 }
             }
@@ -360,7 +349,7 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func isPurchaseNeeded() -> Bool {
-        return accessChecker.isPurchaseNeeded()
+        return accessChecker.isPurchaseNeeded
     }
     
     public func facebookLogin(userData: (email: String, userId: String),
@@ -408,7 +397,7 @@ extension CleengLoginPlugin: CAMDelegate {
             case .success(let data):
                 let offers = self.parseCleengOffersResponse(json: data)
                 self.offers = offers
-                self.currentAvailableOfferIDs = offers.reduce([String: String]()) { (dict, item) -> [String: String] in
+                self.currentAvailableOfferIDs = offers.reduce([:]) { (dict, item) -> [String: String] in
                     var dict = dict
                     dict[item.appleProductID] = item.offerID
                     return dict
@@ -495,7 +484,7 @@ extension CleengLoginPlugin: CAMDelegate {
     
     public func purchaseProperties(for productIdentifier: String) -> PurchaseProperties {
         var purchaseProperties = PurchaseProperties(productIdentifier: productIdentifier,
-                                                    isSubscriber: (accessChecker.userPermissionEntitlementsIds.isEmpty == false))
+                                                    isSubscriber: (AccessChecker.userPermissionEntitlementsIds.isEmpty == false))
         
         guard let offer = self.offers.first(where: { $0.appleProductID == productIdentifier }) else {
             return purchaseProperties
