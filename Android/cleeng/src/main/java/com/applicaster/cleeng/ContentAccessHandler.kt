@@ -27,12 +27,8 @@ class ContentAccessHandler(private val cleengService: CleengService) {
         // constructing flow based on content data
         val productsOption = Purchase.fromValue(Session.availableProductIds)
         val authOption = Auth.fromValue(isAuthRequired)
-        val flowFromData = matchAuthFlowValues(authOption to productsOption)
-
-        //updating flow based on configuration data
-        val authRequirement = Session.pluginConfigurator?.getAuthRequirement() ?: AuthenticationRequirement.UNDEFINED
-        val paymentRequired = Session.pluginConfigurator?.isPaymentRequired() ?: false
-        Session.setCamFlow(updateFlowFromConfig(flowFromData, authRequirement, paymentRequired))
+        val camFlow = matchAuthFlowValues(authOption to productsOption)
+        Session.setCamFlow(camFlow)
     }
 
     /**
@@ -59,47 +55,6 @@ class ContentAccessHandler(private val cleengService: CleengService) {
             else -> {
                 CamFlow.AUTHENTICATION
             }
-        }
-    }
-
-    /**
-     * Updating [CamFlow] based on data from plugin configuration, [AuthenticationRequirement] and check is
-     * payment required
-     */
-    private fun updateFlowFromConfig(
-        originalFlow: CamFlow,
-        authRequirement: AuthenticationRequirement,
-        paymentRequired: Boolean
-    ): CamFlow {
-        return when (authRequirement) {
-            AuthenticationRequirement.NEVER -> {
-                when (originalFlow) {
-                    CamFlow.AUTHENTICATION, CamFlow.EMPTY -> CamFlow.EMPTY
-                    CamFlow.STOREFRONT, CamFlow.AUTH_AND_STOREFRONT ->
-                        if (paymentRequired) CamFlow.STOREFRONT else CamFlow.EMPTY
-                }
-            }
-            AuthenticationRequirement.ALWAYS -> {
-                when (originalFlow) {
-                    CamFlow.AUTHENTICATION, CamFlow.EMPTY -> originalFlow
-                    CamFlow.STOREFRONT, CamFlow.AUTH_AND_STOREFRONT ->
-                        if (paymentRequired) CamFlow.AUTH_AND_STOREFRONT else CamFlow.EMPTY
-                }
-            }
-            AuthenticationRequirement.REQUIRE_ON_PURCHASABLE_ITEMS -> {
-                when (originalFlow) {
-                    CamFlow.AUTHENTICATION, CamFlow.AUTH_AND_STOREFRONT, CamFlow.EMPTY -> originalFlow
-                    CamFlow.STOREFRONT -> if (paymentRequired) CamFlow.AUTH_AND_STOREFRONT else CamFlow.EMPTY
-                }
-            }
-            AuthenticationRequirement.REQUIRE_WHEN_SPECIFIED_IN_DATA_SOURCE -> {
-                when (originalFlow) {
-                    CamFlow.AUTHENTICATION, CamFlow.EMPTY -> originalFlow
-                    CamFlow.STOREFRONT, CamFlow.AUTH_AND_STOREFRONT ->
-                        if (paymentRequired) originalFlow else CamFlow.EMPTY
-                }
-            }
-            else -> originalFlow
         }
     }
 
@@ -133,6 +88,7 @@ class ContentAccessHandler(private val cleengService: CleengService) {
                         override fun onComplete(result: APChannel) {
                             callback?.onResult(isItemLocked(itemChannelLoader?.bean))
                         }
+
                         override fun onError() {
                             callback?.onResult(false)
                         }
