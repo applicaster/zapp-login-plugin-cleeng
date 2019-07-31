@@ -4,7 +4,8 @@
   "app_level_product_ids":"",
   "default_login_screen":"Login",
 
-  "facebook_login_required": "true",
+  "require_authentication": "require_on_all_purchasable_items",
+  "require_payment": "true",
 
   "design_assets":"",
 
@@ -15,7 +16,6 @@
   "alternative_authentication_prompt_text":"Login with:",
 
   "restore_help_message_text":"If you’ve already made a purchase, you will be able to restore that purchase at no cost once you’ve logged in.",
-
 
   "login_title_text":"Login to Your Account",
   "login_button_text":"Login",
