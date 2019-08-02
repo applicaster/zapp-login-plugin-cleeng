@@ -6,8 +6,8 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.applicaster.cleeng.sample"
-        minSdkVersion 17
-        targetSdkVersion 27
+        minSdkVersion 19
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -28,7 +28,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.0'
+    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.6'
     def devSDK = findProject(':cam')
     if (devSDK != null) {
         implementation project(':cam')
