@@ -28,7 +28,7 @@
     ],
     "min_zapp_sdk": "10.0.0",
     "deprecated_since_zapp_sdk": "",
-    "unsupported_since_zapp_sdk": "8.2.1",
+    "unsupported_since_zapp_sdk": "",
     "react_native": false,
     "general": {
         "fields": [
