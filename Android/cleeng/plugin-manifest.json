@@ -58,7 +58,7 @@
             {
                 "key": "default_authentication_screen",
                 "type": "select",
-				"options": [{"text": "Login","value": "Login"},{"text": "Sign-Up", "value": "Sign-Up"}],
+				"options": [{"text": "Login","value": "Login"},{"text": "Sign-Up", "value": "Sign-up"}],
 				"label_tooltip": "<p>When the authentication process begins, this field determines what to present first.</p><p>By selecting “Login”, the plugin will prompt login first, with an option to switch to the sign-up screen in case the user does not have an account.</p><p>By selecting “Sign-Up”, the plugin will present the user with the sign-up (aka registration) screen first, with an option to switch to login in case the user already has an account.</p>",
 				"initial_value": "Login"
             },
