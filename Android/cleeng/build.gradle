@@ -64,12 +64,13 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // Cam framework
+    def camPath = 'com.applicaster:applicaster-cam-framework:1.0.7'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         devImplementation project(':cam')
-        publishApi 'com.applicaster:applicaster-cam-framework:1.0.7'
+        publishApi(camPath)
     } else {
-        publishApi 'com.applicaster:applicaster-cam-framework:1.0.7'
+        publishApi(camPath)
     }
 
     // Applicaster SDK
