@@ -125,9 +125,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         this.hookListener = hookListener
         val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
         fetchPluginConfig()
-        context?.let {
-            cleengService.handleLogin(dataSource, this, it)
-        }
+        cleengService.handleLogin(dataSource, this, context)
     }
 
     private fun fetchPluginConfig() {

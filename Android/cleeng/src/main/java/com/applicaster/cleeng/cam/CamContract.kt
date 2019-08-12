@@ -7,6 +7,7 @@ import com.applicaster.cam.params.billing.BillingOffer
 import com.applicaster.cam.params.billing.ProductType
 import com.applicaster.cleeng.CleengService
 import com.applicaster.cleeng.Session
+import com.applicaster.cleeng.analytics.AnalyticsDataProvider
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.WebServiceError
 import com.applicaster.cleeng.network.executeRequest
@@ -52,6 +53,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                             if (it.period.isNullOrEmpty()) ProductType.INAPP else ProductType.SUBS
                         )
                         billingOfferList.add(billingOffer)
+                        Log.i(TAG, "Billing offer: ${billingOfferList[0].productId}")
                         if (!it.androidProductId.isNullOrEmpty() && !it.id.isNullOrEmpty()) {
                             currentOffers[it.androidProductId!!] = it.id!!
                         }
@@ -269,5 +271,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun onCamFinished() {
         cleengService.startUpHookListener?.onHookFinished()
+    }
+
+    override fun getAnalyticsDataProvider(): IAnalyticsDataProvider {
+        return AnalyticsDataProvider()
     }
 }
