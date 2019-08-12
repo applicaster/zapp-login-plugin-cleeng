@@ -84,6 +84,7 @@ dependencies {
 //---------------------------------- Bintray ----------------------------------//
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'org.jetbrains.dokka-android'
 
 buildscript {
     repositories {
@@ -93,7 +94,8 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
-        classpath 'com.github.dcendents:android-maven-plugin:1.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.17"
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     }
 }
@@ -116,6 +118,7 @@ def getVersionName = { ->
         return arr[0]
     }
     catch (ignored) {
+        println 'catch'
         return null
     }
 }
@@ -140,7 +143,7 @@ publishing {
 
                 artifactId ARTIFACT_ID
                 artifact ("build/outputs/aar/${project.getName()}-release.aar") {
-                    builtBy assembleRelease
+                    builtBy assemble
                 }
                 artifact androidJavadocsJar
                 artifact androidSourcesJar
@@ -232,15 +235,15 @@ bintray {
     }
 }
 
-task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    failOnError false
+dokka {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+    reportUndocumented = false
 }
 
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+task androidJavadocsJar(type: Jar, dependsOn: dokka) {
     classifier = 'javadoc'
-    from androidJavadocs.destinationDir
+    from "$buildDir/javadoc"
 }
 
 task androidSourcesJar(type: Jar) {
