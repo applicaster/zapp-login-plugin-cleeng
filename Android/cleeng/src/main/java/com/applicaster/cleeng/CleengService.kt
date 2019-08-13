@@ -1,6 +1,7 @@
 package com.applicaster.cleeng
 
 import android.content.Context
+import com.applicaster.authprovider.AuthenticationProviderUtil
 import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
@@ -111,6 +112,7 @@ class CleengService {
                 saveUserToken(authData.token.orEmpty())
             } else {//parse owned offers
                 offers.add(Offer(authData.offerId, authData.token, authData.authId))
+                AuthenticationProviderUtil.addToken(authData.authId, authData.token)
                 ownedProductIds.add(authData.authId.orEmpty())
             }
         }

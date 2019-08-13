@@ -200,7 +200,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             val result = cleengService.networkHelper.subscribe(subscribeRequestData)
             when (result) {
                 is Result.Success -> {
-                    finishPurchaseFlow(entry?.value.orEmpty(), callback)
+                    finishPurchaseFlow(callback)
                 }
 
                 is Result.Failure -> {
@@ -211,26 +211,18 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    private fun finishPurchaseFlow(offerId: String, callback: ActionCallback) {
-        val requestData = SubscriptionsRequestData(
-            null,
-            listOf(offerId),
-            cleengService.getUserToken()
-        )
-
+    private fun finishPurchaseFlow(callback: ActionCallback) {
         executeRequest {
-            val result = cleengService.networkHelper.requestSubscriptions(requestData)
+            val result = cleengService.networkHelper.extendToken(cleengService.getUserToken())
             when (result) {
                 is Result.Success -> {
-                    val responseDataResult: List<SubscriptionsResponseData>? = result.value
-                    responseDataResult?.forEach {
-                        Session.parseAccessGranted(it)
-                        callback.onSuccess()
-                    }
+                    val responseDataResult: List<AuthResponseData>? = result.value
+                    cleengService.parseAuthResponse(responseDataResult.orEmpty())
+                    callback.onSuccess()
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure("")
+                    callback.onFailure(Session.pluginConfigurator?.getCleengErrorMessage(WebServiceError.DEFAULT).orEmpty())
                     Log.e(TAG, result.value.toString())
                 }
             }
