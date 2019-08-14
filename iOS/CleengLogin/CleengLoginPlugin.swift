@@ -178,10 +178,10 @@ typealias OfferID = String
         let invalidCredentialsAlertKey = "invalid_credentials_alert_text"
         let defaultAlertKey = "default_alert_text"
         
-        let nonexistentAlertMessage = configurationJSON?[nonexistentAlertKey] as? String ?? ""
-        let existingUserAlertMessage = configurationJSON?[existingUserAlertKey] as? String ?? ""
-        let invalidCredentialsAlertMessage = configurationJSON?[invalidCredentialsAlertKey] as? String ?? ""
-        let defaultAlertMessage = configurationJSON?[defaultAlertKey] as? String ?? ""
+        let nonexistentAlertMessage = pluginConfiguration[nonexistentAlertKey] as? String ?? ""
+        let existingUserAlertMessage = pluginConfiguration[existingUserAlertKey] as? String ?? ""
+        let invalidCredentialsAlertMessage = pluginConfiguration[invalidCredentialsAlertKey] as? String ?? ""
+        let defaultAlertMessage = pluginConfiguration[defaultAlertKey] as? String ?? ""
         
         let result: (ErrorCodes) -> String = { errorCode in
             var errorMessage = ""
@@ -216,7 +216,7 @@ typealias OfferID = String
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
                                                      completion: (() -> Swift.Void)?) {
         flowTrigger = .appLaunch
-        let flow = accessChecker.getStartupFlow(for: configurationJSON as? [String: Any],
+        let flow = accessChecker.getStartupFlow(for: pluginConfiguration,
                                                 isAuthenticated: isAuthenticated())
         if flow != .no {
             guard let controller = displayViewController else {
