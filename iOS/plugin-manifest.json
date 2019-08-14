@@ -40,21 +40,92 @@
         "initial_value": "5b3cc7c2fed4fa00149037d6"
       },
       {
+        "key": "authentication_requirement",
+        "type": "select",
+        "options": [
+          {
+            "text": "Never require",
+            "value": "never_require"
+          },
+          {
+            "text": "Always require",
+            "value": "always_require"
+          },
+          {
+            "text": "Require on all purchasable items",
+            "value": "require_on_all_purchasable_items"
+          },
+          {
+            "text": "Require when specified on the data source",
+            "value": "require_when_specified_on_the_data_source"
+          }
+        ],
+        "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication.</p>",
+        "initial_value": "Always require"
+      },
+      {
+        "key": "require_payment",
+        "type": "switch",
+        "label_tooltip": "<p>When this field is on, the plugin will check if content requires payment (an entitlement or purchasable product) when given content is triggered.</p><p>This field also influences what configuration fields are available for the plugin.</p>",
+        "initial_value": "true"
+      },
+      {
         "key": "trigger_on_app_launch",
         "type": "switch",
-        "label_tooltip": "If checked, the plugin UI will be launched when the user launches the app, unless the device is already authorized to access the app.",
-        "initial_value": "false"
+        "label_tooltip": "If switched on, the plugin UI will be launched when the user launches the app, unless the device is already authorized to access the app.",
+        "initial_value": "true"
+      },
+      {
+        "key": "present_storefront_upon_launch",
+        "type": "switch",
+        "label_tooltip": "<p>Determine whether to present storefront upon app launch after authentication.</p><p>If switched off, only sign-up/login will be required for app-level access.</p>",
+        "initial_value": "false",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/trigger_on_app_launch"
+          },
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+
+          }
+        ],
+        "rules": "all_conditions"
       },
       {
         "key": "app_level_product_ids",
         "type": "text_input",
-        "label_tooltip": "Enter here, in a comma-separated list, any entitlements which should provide users access to the home screen of the app. If no entitlements are entered here but 'Trigger on App Launch' is set, only sign-up/login will be required for app-level access."
+        "label_tooltip": "<p>Enter here, in a comma-separated list, the product ids specified by the service provider for any entitlements which provide users access to the home screen of the app.</p><p>At least one value must be provided in order to present the storefront screen upon launch.</p>",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/present_storefront_upon_launch"
+          },
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/trigger_on_app_launch"
+          },
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ],
+        "rules": "all_conditions"
       },
       {
         "key": "default_authentication_screen",
         "type": "select",
-        "label_tooltip": "<p>When the authentication process begins, this field determines what to present first.</p><p>By selecting “Login”, the plugin will prompt login first, with an option to switch to the sign-up screen in case the user does not have an account.</p><p>By selecting “Sign-Up”, the plugin will present the user with the sign-up (aka registration) screen first, with an option to switch to login in case the user already has an account.</p>",
-        "initial_value": "Login",
         "options": [
           {
             "text": "Login",
@@ -62,7 +133,34 @@
           },
           {
             "text": "Sign-Up",
-            "value": "Sign-Up"
+            "value": "Sign-up"
+          }
+        ],
+        "label_tooltip": "<p>When the authentication process begins, this field determines what to present first.</p><p>By selecting “Login”, the plugin will prompt login first, with an option to switch to the sign-up screen in case the user does not have an account.</p><p>By selecting “Sign-Up”, the plugin will present the user with the sign-up (aka registration) screen first, with an option to switch to login in case the user already has an account.</p>",
+        "initial_value": "Login",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
+        "key": "authentication_input_fields",
+        "type": "text_input",
+        "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://example.com)",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
           }
         ]
       },
@@ -76,7 +174,103 @@
         "key": "expired_purchase_alert_text",
         "type": "text_input",
         "label_tooltip": "<p>The text that will be displayed in the alert message presented when the user tries to access content and has a relevant voucher which has expired.</p><p>This will lead to the payment options screen</p>",
-        "initial_value": "The applicable purchase you’ve made has expired. Please make a valid purchase to access this content."
+        "initial_value": "The applicable purchase you’ve made has expired. Please make a valid purchase to access this content.",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
+        "group": true,
+        "label": "Input Field Label Text",
+        "tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+        "folded": true,
+        "fields": [
+          {
+            "key": "input_field_label_font_ios",
+            "type": "ios_font_selector",
+            "label_tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_font_android",
+            "type": "android_font_selector",
+            "label_tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_size_phone",
+            "type": "number_input",
+            "label_tooltip": "The font-size for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+            "initial_value": "13",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_size_pad",
+            "type": "number_input",
+            "label_tooltip": "The font-size for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+            "initial_value": "13",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_color",
+            "type": "color_picker",
+            "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+            "initial_value": "#4a4a4a",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          }
+        ]
       },
       {
         "group": true,
@@ -147,48 +341,6 @@
             "type": "color_picker",
             "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
             "initial_value": "#ffffff"
-          }
-        ]
-      },
-      {
-        "key": "authentication_input_fields",
-        "type": "text_input",
-        "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://example.com)",
-        "initial_value": "{\"Sign-up\":[{\"type\":\"EMAIL\",\"key\":\"email\",\"title\":\"Email\",\"hint\":\"Email\",\"mandatory\":true},{\"type\":\"PASSWORD\",\"key\":\"password\",\"title\":\"Password\",\"hint\":\"Password\",\"mandatory\":true}],\"Login\":[{\"type\":\"EMAIL\",\"key\":\"email\",\"title\":\"Email\",\"hint\":\"Email\",\"mandatory\":true},{\"type\":\"PASSWORD\",\"key\":\"password\",\"title\":\"Password\",\"hint\":\"Password\",\"mandatory\":true}],\"Password-reset\":[{\"type\":\"EMAIL\",\"key\":\"email\",\"title\":\"Email\",\"hint\":\"Email\",\"mandatory\":true}]}"
-      },
-      {
-        "group": true,
-        "label": "Input Field Label Text",
-        "tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
-        "folded": true,
-        "fields": [
-          {
-            "key": "input_field_label_font_ios",
-            "type": "ios_font_selector",
-            "label_tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value."
-          },
-          {
-            "key": "input_field_label_font_android",
-            "type": "android_font_selector",
-            "label_tooltip": "The font for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value."
-          },
-          {
-            "key": "input_field_label_size_phone",
-            "type": "number_input",
-            "label_tooltip": "The font-size for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
-            "initial_value": "13"
-          },
-          {
-            "key": "input_field_label_size_pad",
-            "type": "number_input",
-            "label_tooltip": "The font-size for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
-            "initial_value": "13"
-          },
-          {
-            "key": "input_field_label_color",
-            "type": "color_picker",
-            "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
-            "initial_value": "#4a4a4a"
           }
         ]
       },
@@ -301,16 +453,48 @@
         ]
       },
       {
+        "key": "offer_alternative_authentication",
+        "type": "switch",
+        "label_tooltip": "<p>Determine whether to offer alternative methods of authentication outside of the custom form determined by the custom “Authentication Input Fields” configuration field.</p><p>If this field is switched on, whatever alternative authentication options that are supported (e.g. Facebook, Apple) will be offered as an option to the end-users.</p>",
+        "initial_value": "false",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
         "key": "alternative_authentication_priority",
         "type": "switch",
-        "label_tooltip": "<p>The login and signup screens can enable third party options (e.g. Facebook) for user authentication, if the relevant assets and fields are configured.</p><p>Checking this field sets the alternative authentication as highest priority and will display it above the custom form. Which option to take depends on your priorities - having the alternative logins at the top of the screen may make conversion more likely but will also lead to the collection of the data the third party uses rather than the data specified by your custom form.</p><p>For design purposes, we recommend checking this field if the custom form includes more than three fields.</p>",
-        "initial_value": "false"
+        "label_tooltip": "<p>Checking this field sets alternative authentication as higher priority than the custom form and will present these options above the custom form.</p><p>Which option to take depends on your priorities - having the alternative logins at the top of the screen may make conversion more likely but will also lead to the collection of the data the third party uses rather than the data specified by your custom form.</p><p>For design purposes, we recommend switching this field on if the custom form includes more than three fields.</p>",
+        "initial_value": "false",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/offer_alternative_authentication"
+          }
+        ]
       },
       {
         "key": "alternative_authentication_separator_text",
         "type": "text_input",
-        "label_tooltip": "<p>If assets are provided in the Design Assets file (field above) for any alternative methods of user authentication (e.g. Facebook), then below the input fields for standard login/sign-up, there is a design separating the standard login/sign-up form from alternative options, with text in the middle of the design.</p><p>Depending on the main language of the app, we recommend putting a version of the word “Or” here to distinguish between the two modes of authentication.</p>",
-        "initial_value": "Or"
+        "label_tooltip": "<p>There is a design separating the standard login/sign-up form from alternative options, with text in the middle of the design.</p><p>Depending on the main language of the app, we recommend putting a version of the word “Or” here to distinguish between the two modes of authentication.</p>",
+        "initial_value": "Or",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/offer_alternative_authentication"
+          }
+        ]
       },
       {
         "group": true,
@@ -321,38 +505,86 @@
           {
             "key": "alternative_authentication_separator_font_ios",
             "type": "ios_font_selector",
-            "label_tooltip": "The font for the alternative authorization separator text."
+            "label_tooltip": "The font for the alternative authorization separator text.",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_separator_font_android",
             "type": "android_font_selector",
-            "label_tooltip": "The font for the alternative authorization separator text."
+            "label_tooltip": "The font for the alternative authorization separator text.",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_separator_size_phone",
             "type": "number_input",
             "label_tooltip": "The font-size for the alternative authorization separator text.",
-            "initial_value": "12"
+            "initial_value": "12",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_separator_size_pad",
             "type": "number_input",
             "label_tooltip": "The font-size for the alternative authorization separator text.",
-            "initial_value": "12"
+            "initial_value": "12",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_separator_color",
             "type": "color_picker",
             "label_tooltip": "The font-color for the alternative authorization separator text.",
-            "initial_value": "#ffffff"
+            "initial_value": "#ffffff",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           }
         ]
       },
       {
         "key": "alternative_authentication_prompt_text",
         "type": "text_input",
-        "label_tooltip": "The optional text presented above the options for alternative methods of login/sign-up via third party providers (Facebook, Google, or Twitter)",
-        "initial_value": "Login with:"
+        "label_tooltip": "The optional text presented above the options for alternative methods of login/sign-up via third party providers (e.g. Facebook)",
+        "initial_value": "Login with:",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/offer_alternative_authentication"
+          }
+        ]
       },
       {
         "group": true,
@@ -363,86 +595,214 @@
           {
             "key": "alternative_authentication_prompt_font_ios",
             "type": "ios_font_selector",
-            "label_tooltip": "The font prompting the user to use a third party option (e.g. Facebook) to login or sign-up."
+            "label_tooltip": "The font prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_prompt_font_android",
             "type": "android_font_selector",
-            "label_tooltip": "The font prompting the user to use a third party option (e.g. Facebook) to login or sign-up."
+            "label_tooltip": "The font prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_prompt_size_phone",
             "type": "number_input",
             "label_tooltip": "The font-size prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
-            "initial_value": "12"
+            "initial_value": "12",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_prompt_size_pad",
             "type": "number_input",
             "label_tooltip": "The font-size prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
-            "initial_value": "12"
+            "initial_value": "12",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           },
           {
             "key": "alternative_authentication_prompt_color",
             "type": "color_picker",
             "label_tooltip": "The font-color prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
-            "initial_value": "#ffffff"
+            "initial_value": "#ffffff",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/offer_alternative_authentication"
+              }
+            ]
           }
         ]
       },
       {
         "key": "restore_help_message_text",
         "type": "text_input",
-        "label_tooltip": "<p>If you supported in-app purchases before SSO/login, you may want to notify users that they can restore old purchases on the storefront screen once they authenticate. This field provides a message for users to understand this.</p><p>This field is left blank by default, but an example message would be “If you’ve already made a purchase, you will be able to restore that purchase at no cost once you’ve logged in.</p>",
-        "initial_value": ""
+        "label_tooltip": "<p>If you supported in-app purchases before SSO/login, you may want to notify users that they can restore old purchases on the storefront screen once they authenticate. This field provides a message for users to understand this.</p><p>This field is left blank by default, but an example message would be “If you’ve already made a purchase, you will be able to restore that purchase at no cost once you’ve logged in.”</p><p>If left blank, no such message will be presented. If this is not a relevant use-case for you, it would be better to keep blank to keep the design and UX as clean as possible.</p>",
+        "initial_value": "",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "invalid_email_alert_text",
         "type": "text_input",
         "label_tooltip": "Various screens include an email input. This field determines The text that will be displayed in an in-screen error alert bubble when a user doesn’t provide a valid email address.",
-        "initial_value": "Please enter a valid email address"
+        "initial_value": "Please enter a valid email address",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "required_field_alert_text",
         "type": "text_input",
         "label_tooltip": "Various screens include manual input fields. If a required field is not populated, the user will not be able to proceed to the next screen. This field provides the text the user will see when clicking on the error icon for the given field.",
-        "initial_value": "Required Field"
+        "initial_value": "Required Field",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "facebook_permissions_alert_text",
         "type": "text_input",
         "label_tooltip": "Given login via Facebook is supported, this field provides the text that will be displayed in the alert message presented when the user tries to login or sign up via Facebook and does not provide the Facebook app permissions to share email information.",
-        "initial_value": "Please provide Facebook permission to share email information in order to login with Facebook."
+        "initial_value": "Please provide Facebook permission to share email information in order to login with Facebook.",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/offer_alternative_authentication"
+          }
+        ]
       },
       {
         "key": "login_title_text",
         "type": "text_input",
         "label_tooltip": "The title text presented at the top of the login screen",
-        "initial_value": "Login to Your Account"
+        "initial_value": "Login to Your Account",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "login_button_text",
         "type": "text_input",
         "label_tooltip": "The text within the main call-to-action button of the login screen, triggering the login process",
-        "initial_value": "Login"
+        "initial_value": "Login",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "password_reset_link_text",
         "type": "text_input",
         "label_tooltip": "The link (call-to-action) which leads to the password reset screen",
-        "initial_value": "Forgot Your Password?"
+        "initial_value": "Forgot Your Password?",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "sign_up_prompt_text",
         "type": "text_input",
         "label_tooltip": "The prompt text just before the link which leads to the sign-up screen",
-        "initial_value": "Don’t have an account?"
+        "initial_value": "Don’t have an account?",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "sign_up_link_text",
         "type": "text_input",
         "label_tooltip": "The link (call-to-action) which leads to the sign-up screen, following the value put in the field titled Sign Up Prompt Text",
-        "initial_value": "Sign Up"
+        "initial_value": "Sign Up",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "group": true,
@@ -453,30 +813,80 @@
           {
             "key": "reset_password_font_ios",
             "type": "ios_font_selector",
-            "label_tooltip": "The font for the text that will be displayed to prompt the user to restore their password"
+            "label_tooltip": "The font for the text that will be displayed to prompt the user to restore their password",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
           },
           {
             "key": "reset_password_font_android",
             "type": "android_font_selector",
-            "label_tooltip": "The font for the text that will be displayed to prompt the user to restore their password"
+            "label_tooltip": "The font for the text that will be displayed to prompt the user to restore their password",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
           },
           {
             "key": "reset_password_size_phone",
             "type": "number_input",
             "label_tooltip": "The font-size for the text that will be displayed to prompt the user to restore their password",
-            "initial_value": "11"
+            "initial_value": "11",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
           },
           {
             "key": "reset_password_size_pad",
             "type": "number_input",
             "label_tooltip": "The font-size for the text that will be displayed to prompt the user to restore their password",
-            "initial_value": "11"
+            "initial_value": "11",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
           },
           {
             "key": "reset_password_color",
             "type": "color_picker",
             "label_tooltip": "The font-color for the text that will be displayed to prompt the user to restore their password",
-            "initial_value": "#ffffff"
+            "initial_value": "#ffffff",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
           }
         ]
       },
@@ -484,67 +894,169 @@
         "key": "nonexistent_user_alert_text",
         "type": "text_input",
         "label_tooltip": "The text that will be displayed in the alert message presented when the user tries to login and the username/email they’ve entered is returned as not existing.",
-        "initial_value": "No user exists for this email"
+        "initial_value": "No user exists for this email",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "invalid_credentials_alert_text",
         "type": "text_input",
         "label_tooltip": "The text that will be displayed in the alert message presented when the user tries to login and the credentials (e.g. password/pin) they’ve entered is returned as not existing.",
-        "initial_value": "Invalid password was entered"
-      },
-      {
-        "key": "sign_up_title_text",
-        "type": "text_input",
-        "label_tooltip": "The title text presented at the top of the sign-up screen",
-        "initial_value": "Create an Account"
-      },
-      {
-        "key": "sign_up_button_text",
-        "type": "text_input",
-        "label_tooltip": "The text within the main call-to-action button of the sign-up screen, triggering the sign-up (aka registration) process",
-        "initial_value": "Sign Up"
-      },
-      {
-        "key": "login_prompt_text",
-        "type": "text_input",
-        "label_tooltip": "The prompt text just before the link which leads to the login screen",
-        "initial_value": "Already have an account?"
-      },
-      {
-        "key": "login_link_text",
-        "type": "text_input",
-        "label_tooltip": "The link which leads to the login screen, following the Login Prompt Text",
-        "initial_value": "Log In"
+        "initial_value": "Invalid password was entered",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "existing_user_alert_text",
         "type": "text_input",
         "label_tooltip": "The text that will be displayed in the alert message presented when the user tries to sign-up with a user which already exists.",
-        "initial_value": "This user already exists. Try logging in."
+        "initial_value": "This user already exists. Try logging in.",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
+        "key": "sign_up_title_text",
+        "type": "text_input",
+        "label_tooltip": "The title text presented at the top of the sign-up screen",
+        "initial_value": "Create an Account",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
+        "key": "sign_up_button_text",
+        "type": "text_input",
+        "label_tooltip": "The text within the main call-to-action button of the sign-up screen, triggering the sign-up (aka registration) process",
+        "initial_value": "Sign Up",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
+        "key": "login_prompt_text",
+        "type": "text_input",
+        "label_tooltip": "The prompt text just before the link which leads to the login screen",
+        "initial_value": "Already have an account?",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
+        "key": "login_link_text",
+        "type": "text_input",
+        "label_tooltip": "The link which leads to the login screen, following the Login Prompt Text",
+        "initial_value": "Log In",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "storefront_screen_title_text",
         "type": "text_input",
         "label_tooltip": "The title text at the top of the purchase options screen. If you are supporting payment options other than subscriptions, make sure to change the default value",
-        "initial_value": "Choose a Subscription"
+        "initial_value": "Choose a Subscription",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "storefront_screen_description_text",
         "type": "text_input",
         "label_tooltip": "If populated, the text presented to the user below the title and above the input fields of the payment options screen. This value is defaulted to blank",
-        "initial_value": ""
+        "initial_value": "",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "restore_prompt_text",
         "type": "text_input",
-        "label_tooltip": "If you already purchased an account -",
-        "initial_value": "If you already purchased an account -"
+        "label_tooltip": "The prompt text just before the link which triggers the restore purchase process",
+        "initial_value": "If you already purchased an account -",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "restore_link_text",
         "type": "text_input",
-        "label_tooltip": "The link which leads to the restore screen, following the Restore Prompt Text",
-        "initial_value": "Restore Your Account"
+        "label_tooltip": "The text for the link which triggers the restore purchase process, following the Restore Prompt Text",
+        "initial_value": "Restore Your Account",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "group": true,
@@ -555,30 +1067,70 @@
           {
             "key": "payment_option_title_font_ios",
             "type": "ios_font_selector",
-            "label_tooltip": "The font used in the title of each payment option"
+            "label_tooltip": "The font used in the title of each payment option",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_title_font_android",
             "type": "android_font_selector",
-            "label_tooltip": "The font used in the title of each payment option"
+            "label_tooltip": "The font used in the title of each payment option",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_title_size_phone",
             "type": "number_input",
             "label_tooltip": "The font-size used in the title of each payment option",
-            "initial_value": "20"
+            "initial_value": "20",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_title_size_pad",
             "type": "number_input",
             "label_tooltip": "The font-size used in the title of each payment option",
-            "initial_value": "20"
+            "initial_value": "20",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_title_color",
             "type": "color_picker",
             "label_tooltip": "The font-color used in the title of each payment option",
-            "initial_value": "#1f2021"
+            "initial_value": "#1f2021",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           }
         ]
       },
@@ -591,30 +1143,70 @@
           {
             "key": "payment_option_description_font_ios",
             "type": "ios_font_selector",
-            "label_tooltip": "The font used in the description of each payment option (below the title and above the button for selecting the given payment option)"
+            "label_tooltip": "The font used in the description of each payment option (below the title and above the button for selecting the given payment option)",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_description_font_android",
             "type": "android_font_selector",
-            "label_tooltip": "The font used in the description of each payment option (below the title and above the button for selecting the given payment option)"
+            "label_tooltip": "The font used in the description of each payment option (below the title and above the button for selecting the given payment option)",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_description_size_phone",
             "type": "number_input",
             "label_tooltip": "The font-size used in the description of each payment option (below the title and above the button for selecting the given payment option)",
-            "initial_value": "14"
+            "initial_value": "14",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_description_size_pad",
             "type": "number_input",
             "label_tooltip": "The font-size used in the description of each payment option (below the title and above the button for selecting the given payment option)",
-            "initial_value": "14"
+            "initial_value": "14",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "payment_option_description_color",
             "type": "color_picker",
             "label_tooltip": "The font-color used in the description of each payment option (below the title and above the button for selecting the given payment option)",
-            "initial_value": "#1f2021"
+            "initial_value": "#1f2021",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           }
         ]
       },
@@ -622,13 +1214,29 @@
         "key": "payment_option_button_text",
         "type": "text_input",
         "label_tooltip": "<p>The text that will appear before the price of a payment option in the button of a payment option card. A space character will be automatically placed between this field and the price value.</p><p>For example, if the price of an item is $3.99 and this field is defaulted to “Subscribe for”, then the button will read “Subscribe for $3.99</p>",
-        "initial_value": "Subscribe for"
+        "initial_value": "Subscribe for",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "legal_details_text",
         "type": "text_input",
         "label_tooltip": "The legal text presented at the bottom of the payment option screen. Used only on iOS.",
-        "initial_value": "Payment will be charged to iTunes Account at confirmation of purchase. Subscription automatically renews unless auto-renew is turned off at least 24-hours before the end of the current period.Account will be charged for renewal within 24-hours prior to the end of the current period, and identify the cost of the renewal. Subscriptions may be managed by the user and auto-renewal may be turned off by going to the user's Account Settings after purchase.Any unused portion of a free trial period, if offered, will be forfeited when the user purchases a subscription to that publication, where applicable."
+        "initial_value": "Payment will be charged to iTunes Account at confirmation of purchase. Subscription automatically renews unless auto-renew is turned off at least 24-hours before the end of the current period.Account will be charged for renewal within 24-hours prior to the end of the current period, and identify the cost of the renewal. Subscriptions may be managed by the user and auto-renewal may be turned off by going to the user's Account Settings after purchase.Any unused portion of a free trial period, if offered, will be forfeited when the user purchases a subscription to that publication, where applicable.",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "group": true,
@@ -639,30 +1247,70 @@
           {
             "key": "legal_details_font_ios",
             "type": "ios_font_selector",
-            "label_tooltip": "The font used for the payment options screen legal text"
+            "label_tooltip": "The font used for the payment options screen legal text",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "legal_details_font_android",
             "type": "android_font_selector",
-            "label_tooltip": "The font used for the payment options screen legal text"
+            "label_tooltip": "The font used for the payment options screen legal text",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "legal_details_size_phone",
             "type": "number_input",
             "label_tooltip": "The font-size used for the payment options screen legal text",
-            "initial_value": "10"
+            "initial_value": "10",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "legal_details_size_pad",
             "type": "number_input",
             "label_tooltip": "The font-size used for the payment options screen legal text",
-            "initial_value": "10"
+            "initial_value": "10",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           },
           {
             "key": "legal_details_color",
             "type": "color_picker",
             "label_tooltip": "The font-color used for the payment options screen legal text",
-            "initial_value": "#ffffff"
+            "initial_value": "#ffffff",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  true
+                ],
+                "key": "general/require_payment"
+              }
+            ]
           }
         ]
       },
@@ -670,25 +1318,63 @@
         "key": "legal_details_background",
         "type": "color_picker",
         "label_tooltip": "The payment options screen presents legal information to the user on iOS. This field sets the color for the bottom banner area where this text is presented",
-        "initial_value": "#122040"
+        "initial_value": "#122040",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "password_reset_title_text",
         "type": "text_input",
         "label_tooltip": "The title text at the top of the password reset screen",
-        "initial_value": "Reset Your Password"
+        "initial_value": "Reset Your Password",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "password_reset_description_text",
         "type": "text_input",
         "label_tooltip": "The text presented to the user below the title and above the input field of the password reset screen",
-        "initial_value": "Enter your email to reset your password:"
+        "initial_value": "Enter your email to reset your password:",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "password_reset_button_text",
         "type": "text_input",
         "label_tooltip": "The text within the main call-to-action button of the password reset screen, triggering the password reset process",
-        "initial_value": "Reset Password"
+        "initial_value": "Reset Password",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "group": true,
@@ -808,79 +1494,126 @@
         "key": "payment_confirmation_title_text",
         "type": "text_input",
         "label_tooltip": "<p>The title text at the top of confirmation notice after a payment was successful.</p><p>This field is required in order for a confirmation alert to be displayed.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
-        "initial_value": "Congratulations!"
+        "initial_value": "Congratulations!",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "payment_confirmation_description_text",
         "type": "text_input",
         "label_tooltip": "<p>The descriptive text below the title in the payment confirmation notice. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
-        "initial_value": "You can now access locked content with this purchase"
+        "initial_value": "You can now access locked content with this purchase",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "restore_purchase_confirmation_title_text",
         "type": "text_input",
         "label_tooltip": "<p>The title text at the top of confirmation notice after a purchase was successfully restored.</p><p>This field is required in order for a confirmation alert to be displayed.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
-        "initial_value": "Congratulations!"
+        "initial_value": "Congratulations!",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "restore_purchase_confirmation_description_text",
         "type": "text_input",
         "label_tooltip": "<p>The descriptive text below the title in the payment confirmation notice. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
-        "initial_value": "Any pre-existing purchases you’ve made have been restored and assigned to your account."
+        "initial_value": "Any pre-existing purchases you’ve made have been restored and assigned to your account.",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              true
+            ],
+            "key": "general/require_payment"
+          }
+        ]
       },
       {
         "key": "password_reset_confirmation_title_text",
         "type": "text_input",
         "label_tooltip": "<p>The title text at the top of confirmation notice after a password reset email was delivered to the user.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
-        "initial_value": "Password Reset Delivered"
+        "initial_value": "Password Reset Delivered",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "password_reset_confirmation_description_text",
         "type": "text_input",
         "label_tooltip": "<p>The descriptive text below the title in the password reset confirmation notice. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app. </p><p>This field is required in order for a confirmation alert to be displayed.</p>",
-        "initial_value": "Check your email in order reset your password for this account"
-      },
-      {
-        "key": "require_payment",
-        "type": "switch",
-        "label_tooltip": "<p>When this field is on, the plugin will check if content requires payment (an entitlement or purchasable product) when given content is triggered.</p><p>This field also influences what configuration fields are available for the plugin.</p>",
-        "initial_value": "true"
-      },
-      {
-        "key": "authentication_requirement",
-        "type": "select",
-        "options": [
+        "initial_value": "Check your email in order reset your password for this account",
+        "conditional_fields": [
           {
-            "text": "Never require",
-            "value": "never_require"
-          },
-          {
-            "text": "Always require",
-            "value": "always_require"
-          },
-          {
-            "text": "Require on all purchasable items",
-            "value": "require_on_all_purchasable_items"
-          },
-          {
-            "text": "Require when specified on the data source",
-            "value": "require_when_specified_on_the_data_source"
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
           }
-        ],
-        "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication.</p>",
-        "initial_value": "Always require"
+        ]
       },
       {
         "key": "no_purchases_to_restore_alert_text",
         "type": "text_input",
         "label_tooltip": "The text presented to the user when they’ve tried to restore a purchase, but the store returns that there are no valid purchases to restore",
-        "initial_value": "The store did not return any valid purchases that can be restored"
+        "initial_value": "The store did not return any valid purchases that can be restored",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
       },
       {
         "key": "non_matching_restored_purchases_alert_text",
         "type": "text_input",
         "label_tooltip": "The text presented to the user when they’ve successfully restored one or more purchases, but none of them provide access to the requested content",
-        "initial_value": "You’ve successfully restored any valid previously made purchases, however, none of them provide access to the requested content"
+        "initial_value": "You’ve successfully restored any valid previously made purchases, however, none of them provide access to the requested content",
+        "conditional_fields": [
+          {
+            "condition_value": [
+              "always_require",
+              "require_on_all_purchasable_items",
+              "require_when_specified_on_the_data_source"
+            ],
+            "key": "general/authentication_requirement"
+          }
+        ]
+      },
+      {
+        "key": "design_assets",
+        "type": "uploader",
+        "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here."
       }
     ]
   },
