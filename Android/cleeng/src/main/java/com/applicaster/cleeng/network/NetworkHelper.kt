@@ -3,6 +3,7 @@ package com.applicaster.cleeng.network
 import com.applicaster.cleeng.network.error.WebServiceError
 import com.applicaster.cleeng.network.interceptor.PublisherInfoInterceptor
 import com.applicaster.cleeng.network.request.RegisterRequestData
+import com.applicaster.cleeng.network.request.RestoreSubscriptionsRequestData
 import com.applicaster.cleeng.network.request.SubscribeRequestData
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
@@ -98,6 +99,15 @@ class NetworkHelper {
     suspend fun subscribe(requestData: SubscribeRequestData): Result<Unit, WebServiceError> {
         return try {
             val response = retrofitService.subscribe(requestData).await()
+            handleResponse(response)
+        } catch (t: Throwable) {
+            Result.Failure(WebServiceError.DEFAULT)
+        }
+    }
+
+    suspend fun restoreSubscriptions(requestData: RestoreSubscriptionsRequestData): Result<Unit, WebServiceError> {
+        return try {
+            val response = retrofitService.restoreSubscriptions(requestData).await()
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)

@@ -1,5 +1,6 @@
 package com.applicaster.cleeng.network
 
+import com.applicaster.cleeng.network.request.RestoreSubscriptionsRequestData
 import com.applicaster.cleeng.network.request.SubscribeRequestData
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
@@ -68,5 +69,10 @@ interface RestService {
     @POST("subscription")
     fun subscribe(
         @Body subscribeRequestData: SubscribeRequestData
+    ): Deferred<Response<Unit>>
+
+    @POST("restoreSubscriptions")
+    fun restoreSubscriptions(
+        @Body restoreSubscriptionsData: RestoreSubscriptionsRequestData
     ): Deferred<Response<Unit>>
 }
