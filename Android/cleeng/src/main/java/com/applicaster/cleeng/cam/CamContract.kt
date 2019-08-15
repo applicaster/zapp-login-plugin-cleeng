@@ -11,9 +11,7 @@ import com.applicaster.cleeng.analytics.AnalyticsDataProvider
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.WebServiceError
 import com.applicaster.cleeng.network.executeRequest
-import com.applicaster.cleeng.network.request.RegisterRequestData
-import com.applicaster.cleeng.network.request.SubscribeRequestData
-import com.applicaster.cleeng.network.request.SubscriptionsRequestData
+import com.applicaster.cleeng.network.request.*
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
@@ -169,7 +167,53 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     }
 
     override fun onPurchasesRestored(purchases: List<Purchase>, callback: RestoreCallback) {
+        //Test fun for new restore API.
+        // TODO: Uncomment when server-side implementation will be finished
+//        sendRestoredSubscriptions(purchases, callback)
+        //Restore implementation based on regular purchase server API (i.e. /subscription)
+        //TODO: Remove this when server-side implementation will be finished
         purchases.forEach { subscribeOn(it, callback) }
+    }
+
+    /**
+     *  Test fun for new restore API. Use it in onPurchasesRestored callback
+     */
+    private fun sendRestoredSubscriptions(
+        purchases: List<Purchase>,
+        callback: RestoreCallback
+    ) {
+        val receipts = arrayListOf<PaymentReceipt>()
+        purchases.forEach { purchaseItem ->
+            val purchaseState = JSONObject(purchaseItem.originalJson).getDouble("purchaseState").toInt()
+            receipts.add(
+                PaymentReceipt(
+                    "",
+                    purchaseItem.orderId,
+                    purchaseItem.packageName,
+                    purchaseItem.sku,
+                    purchaseState,
+                    purchaseItem.purchaseTime.toString(),
+                    purchaseItem.purchaseToken
+                )
+            )
+        }
+        val restoreSubsData = RestoreSubscriptionsRequestData(
+            receipts,
+            cleengService.getUserToken()
+        )
+        executeRequest {
+            val result = cleengService.networkHelper.restoreSubscriptions(restoreSubsData)
+            when (result) {
+                is Result.Success -> {
+                    finishPurchaseFlow(callback)
+                }
+
+                is Result.Failure -> {
+                    callback.onFailure("")
+                    Log.e(TAG, result.value?.name)
+                }
+            }
+        }
     }
 
     private fun subscribeOn(purchaseItem: Purchase, callback: ActionCallback) {
@@ -179,7 +223,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
         val purchaseState = JSONObject(purchaseItem.originalJson).getDouble("purchaseState").toInt()
 
-        val receipt = SubscribeRequestData.Receipt(
+        val receipt = PaymentReceipt(
             "",
             purchaseItem.orderId,
             purchaseItem.packageName,
@@ -188,7 +232,6 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             purchaseItem.purchaseTime.toString(),
             purchaseItem.purchaseToken
         )
-
 
         val subscribeRequestData = SubscribeRequestData(
             entry?.value,
