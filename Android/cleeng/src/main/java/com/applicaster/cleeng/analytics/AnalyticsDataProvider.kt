@@ -7,17 +7,22 @@ import com.applicaster.cleeng.Session
 
 class AnalyticsDataProvider : IAnalyticsDataProvider {
 
-    override fun getEntityType(): String  = ""
+    override var entityType: String = ""
+        get() = field
+        set(value) { field = value }
 
-    override fun getEntityName(): String = ""
+    override var entityName: String = ""
+        get() = field
+        set(value) { field = value }
 
-    override fun getTrigger(): Trigger {
-        return Trigger.OTHER //TODO("Some mock stuff")
-    }
+    override var trigger: Trigger = Trigger.OTHER
+        get() = field
+        set(value) { field = value }
 
-    override fun isUserSubscribed(): Boolean = Session.isAccessGranted()
+    override val isUserSubscribed: Boolean
+        get() = Session.isAccessGranted()
 
-    override fun getPurchaseData(): List<PurchaseData> {
-        return listOf()
-    }
+    override var purchaseData: MutableList<PurchaseData> = arrayListOf()
+        get() = field
+        set(value) { field = value }
 }
