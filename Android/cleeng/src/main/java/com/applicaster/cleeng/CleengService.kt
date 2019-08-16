@@ -112,8 +112,9 @@ class CleengService {
                 saveUserToken(authData.token.orEmpty())
             } else {//parse owned offers
                 offers.add(Offer(authData.offerId, authData.token, authData.authId))
-                AuthenticationProviderUtil.addToken(authData.authId, authData.token)
                 ownedProductIds.add(authData.authId.orEmpty())
+                //saving token in the applicaster SDK. Later this token will be used by the player
+                AuthenticationProviderUtil.addToken(authData.authId, authData.token)
             }
         }
         Session.setUserOffers(offers)
@@ -127,7 +128,7 @@ class CleengService {
         return Session.user?.token.orEmpty()
     }
 
-    private fun saveUserToken(token: String) {
+    fun saveUserToken(token: String) {
         Session.user?.token = token
         preferences.saveUserToken(token)
     }
