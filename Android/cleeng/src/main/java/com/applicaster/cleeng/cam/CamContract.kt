@@ -4,6 +4,7 @@ import android.util.Log
 import com.android.billingclient.api.Purchase
 import com.applicaster.authprovider.AuthenticationProviderUtil
 import com.applicaster.cam.*
+import com.applicaster.cam.analytics.PurchaseType
 import com.applicaster.cam.params.billing.BillingOffer
 import com.applicaster.cam.params.billing.ProductType
 import com.applicaster.cleeng.CleengService
@@ -30,6 +31,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     //pending offers, androidProductId as key and Cleeng offerID as value
     private val currentOffers: HashMap<String, String> = hashMapOf()
+    private var analyticsDataProvider: IAnalyticsDataProvider? = null
 
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
 //        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -65,6 +67,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                         }
                     }
                     callback.onSuccess(billingOfferList)
+
+                    // collect analytics data
+                    collectPurchaseDataForAnalytics(responseDataResult)
                 }
 
                 is Result.Failure -> {
@@ -353,7 +358,23 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     }
 
     override fun getAnalyticsDataProvider(): IAnalyticsDataProvider {
-        return AnalyticsDataProvider()
+        return this.analyticsDataProvider ?: AnalyticsDataProvider()
+    }
+
+    private fun collectPurchaseDataForAnalytics(subscriptionsData: List<SubscriptionsResponseData>?) {
+        subscriptionsData?.forEach {
+            val purchaseData = PurchaseData(
+                    it.title.orEmpty(),
+                    it.price?.toString() ?: "",
+                    it.description.orEmpty(),
+                    it.androidProductId.orEmpty(),
+                    it.period.orEmpty(),
+                    if (it.period.isNullOrEmpty()) PurchaseType.CONSUMABLE else PurchaseType.SUBSCRIPTION,
+                    it.freeDays.orEmpty(),
+                    "VOD"
+            )
+            analyticsDataProvider?.purchaseData?.add(purchaseData)
+        }
     }
 
     companion object {
