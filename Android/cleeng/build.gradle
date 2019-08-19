@@ -69,9 +69,9 @@ dependencies {
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         devImplementation project(':cam')
-        publishApi (camPath)
+        publishApi(camPath)
     } else {
-        publishApi (camPath)
+        publishApi(camPath)
     }
 
     // Applicaster SDK
@@ -187,16 +187,16 @@ publishing {
                     developer.appendNode('email', POM_DEVELOPER_EMAIL)
 
                     def dependenciesNode = asNode().appendNode('dependencies')
-                    configurations.compile.allDependencies.each {
-                        if (!it.name.is('unspecified')) {
+                    configurations.api.allDependencies.each {
+                        if (!it.name.contains('unspecified')) {
                             def dependencyNode = dependenciesNode.appendNode('dependency')
                             dependencyNode.appendNode('groupId', it.group)
                             dependencyNode.appendNode('artifactId', it.name)
                             dependencyNode.appendNode('version', it.version)
                         }
                     }
-                    configurations.api.allDependencies.each {
-                        if (!it.name.is('unspecified')) {
+                    configurations.publishApi.allDependencies.each {
+                        if (!it.name.contains('unspecified')) {
                             def dependencyNode = dependenciesNode.appendNode('dependency')
                             dependencyNode.appendNode('groupId', it.group)
                             dependencyNode.appendNode('artifactId', it.name)
@@ -204,7 +204,15 @@ publishing {
                         }
                     }
                     configurations.implementation.allDependencies.each {
-                        if (!it.name.is('unspecified')) {
+                        if (!it.name.contains('unspecified')) {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                        }
+                    }
+                    configurations.publishImplementation.allDependencies.each {
+                        if (!it.name.contains('unspecified')) {
                             def dependencyNode = dependenciesNode.appendNode('dependency')
                             dependencyNode.appendNode('groupId', it.group)
                             dependencyNode.appendNode('artifactId', it.name)
