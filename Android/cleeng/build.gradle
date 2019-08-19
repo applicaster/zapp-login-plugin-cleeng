@@ -31,6 +31,16 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    flavorDimensions "publishing"
+    productFlavors {
+        publish {
+            dimension "publishing"
+        }
+        dev {
+            dimension "publishing"
+        }
+    }
+
 }
 
 repositories {
@@ -54,21 +64,25 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def camFramework = 'com.applicaster:applicaster-cam-framework:1.0.7'
+    // Cam framework
+    def camPath = 'com.applicaster:applicaster-cam-framework:1.0.8'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
-        implementation project(':cam')
+        devImplementation project(':cam')
+        publishApi (camPath)
     } else {
-        api(camFramework)
+        publishApi (camPath)
     }
+
     // Applicaster SDK
     def applicasterSDKPath = 'com.applicaster:applicaster-android-sdk:4.0.0'
     // Check if an open SDK is defined - if not use the closed one.
     def devSDK = findProject(':applicaster-android-sdk')
     if (devSDK != null) {
-        implementation project(':applicaster-android-sdk')
+        devImplementation project(':applicaster-android-sdk')
+        publishApi(applicasterSDKPath)
     } else {
-        api(applicasterSDKPath)
+        publishApi(applicasterSDKPath)
     }
 
     implementation ('com.github.LiquidPlayer:LiquidCore:0.6.2'){
