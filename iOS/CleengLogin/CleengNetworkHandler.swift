@@ -82,7 +82,7 @@ class CleengNetworkHandler {
                 default:
                     let errorCode = (try? JSONDecoder().decode(ErrorCodes.self, from: data)) ?? .unknown
                     let errorMessage = self.errorMessage(errorCode)
-                    let error = LoginError(from: errorCode,
+                    let error = RequestError(from: errorCode,
                                            with: errorMessage)
                     completion(.failure(.requestError(error)))
                 }
