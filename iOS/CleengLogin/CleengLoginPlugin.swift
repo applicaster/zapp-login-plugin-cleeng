@@ -139,7 +139,7 @@ typealias OfferID = String
                               isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
         networkAdapter.purchaseItem(token: CleengLoginPlugin.userToken, offerId: offerId,
                                     transactionId: transactionId, receiptData: receiptData,
-                                    isRestored: false) { (result) in
+                                    isRestored: isRestored) { (result) in
             switch result {
             case .success:
                 self.verifyOnCleeng(offerId: offerId, completion: completion)
