@@ -19,7 +19,7 @@ typealias OfferID = String
     
     public var screenPluginDelegate: ZPPlugableScreenDelegate?
     private var accessChecker = AccessChecker()
-    private var userToken: String?
+    private static var userToken: String?
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     private var offers: [CleengOffer] = []
     private var flowTrigger: Trigger = .appLaunch
@@ -137,9 +137,9 @@ typealias OfferID = String
                               transactionId: String,
                               receiptData: Data,
                               isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
-        networkAdapter.purchaseItem(token: userToken, offerId: offerId,
+        networkAdapter.purchaseItem(token: CleengLoginPlugin.userToken, offerId: offerId,
                                     transactionId: transactionId, receiptData: receiptData,
-                                    isRestored: false) { (result) in
+                                    isRestored: isRestored) { (result) in
             switch result {
             case .success:
                 self.verifyOnCleeng(offerId: offerId, completion: completion)
@@ -148,28 +148,44 @@ typealias OfferID = String
                 return
             }
         }
+        
     }
     
     private func verifyOnCleeng(offerId: String, completion: @escaping (ItemPurchasingResult) -> Void) {
-        networkAdapter.subscriptions(token: userToken,
-                                     byAuthId: 0,
-                                     offers: [offerId],
-                                     completion: { (result) in
-            switch result {
-            case .success(let data):
-                guard let offer = self.parseCleengOffersResponse(json: data).first,
-                    offer.accessGranted == true else {
-                    completion(.failure(.serverError))
-                    return
-                }
-                
-                AccessChecker.userPermissionEntitlementsIds.insert(offer.authID)
-                completion(.success)
-            case .failure(let error):
-                completion(.failure(error))
+        let timerStartTime = Date()
+        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
+            if Date().timeIntervalSince(timerStartTime) > 60 {
+                timer.invalidate()
+                let errorMessage = self.pluginConfiguration["default_alert_text"] as? String ?? ""
+                let error = RequestError(from: ErrorCodes.unknown, with: errorMessage)
+                completion(.failure(.serverDoesntVerifyPurchase(error)))
                 return
             }
-        })
+            guard let userToken = CleengLoginPlugin.userToken else {
+                timer.invalidate()
+                completion(.failure(.authTokenNotParsed))
+                return
+            }
+            self.networkAdapter.extendToken(token: userToken, completion: { (result) in
+                switch result {
+                case .success(let data):
+                    let _ = self.parseAuthTokensResponse(json: data)
+                    guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: data) else {
+                        return
+                    }
+                    let isOfferVerified = cleengTokens.contains(where: { (item) -> Bool in
+                        return item.offerID == offerId
+                    })
+                    if isOfferVerified {
+                        timer.invalidate()
+                        completion(.success)
+                        return
+                    }
+                case .failure:
+                    break
+                }
+            })
+        }
     }
 
     private func errorMessage() -> (ErrorCodes) -> String {
@@ -274,7 +290,7 @@ typealias OfferID = String
     }
     
     public func isAuthenticated() -> Bool {
-        return userToken != nil
+        return CleengLoginPlugin.userToken != nil
     }
     
     public func isPerformingAuthorizationFlow() -> Bool {
@@ -283,7 +299,7 @@ typealias OfferID = String
     }
     
     public func getUserToken() -> String {
-        return userToken ?? ""
+        return CleengLoginPlugin.userToken ?? ""
     }
     
     // MARK: - JSON Response parsing
@@ -301,12 +317,14 @@ typealias OfferID = String
         }
         for item in cleengTokens {
             if item.offerID.isEmpty {
-                userToken = item.token // if offerID empty than we retrieve user token
+                CleengLoginPlugin.userToken = item.token // if offerID empty than we retrieve user token
                 UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
             } else {
                 if let authID = item.authID {
                     AccessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
                                                                  //subscription token in dicrionary by authId
+                    APAuthorizationManager.sharedInstance().setAuthorizationToken(item.token,
+                                                                                  withAuthorizationProviderID: authID) //set auth token for auth id. Need for applicaster player.
                 }
             }
         }
@@ -391,7 +409,7 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
-        networkAdapter.subscriptions(token: userToken, byAuthId: 1,
+        networkAdapter.subscriptions(token: CleengLoginPlugin.userToken, byAuthId: 1,
                                      offers: accessChecker.currentItemEntitlementsIds, completion: { (result) in
             switch result {
             case .success(let data):
@@ -416,7 +434,7 @@ extension CleengLoginPlugin: CAMDelegate {
                 return
         }
         
-        self.purchaseItem(token: userToken ?? "",
+        self.purchaseItem(token: CleengLoginPlugin.userToken ?? "",
                           offerId: offerId,
                           transactionId: transactionId,
                           receiptData: purchasedItem.receipt,
@@ -447,7 +465,7 @@ extension CleengLoginPlugin: CAMDelegate {
         
         restoredOffers.forEach { (item) in
             dispatchGroup.enter()
-            self.purchaseItem(token: userToken ?? "",
+            self.purchaseItem(token: CleengLoginPlugin.userToken ?? "",
                               offerId: item.offerId,
                               transactionId: item.restoredItem.transaction.transactionIdentifier ?? "",
                               receiptData: item.restoredItem.receipt,

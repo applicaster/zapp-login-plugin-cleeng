@@ -7,7 +7,7 @@
 
 import Foundation
 
-class LoginError: Error, LocalizedError {
+class RequestError: Error, LocalizedError {
     let errorCode: ErrorCodes
     var message: String = ""
     
@@ -58,8 +58,9 @@ enum ErrorCodes: Int, Codable {
 }
 
 enum CleengError: Error {
-    case requestError(LoginError)
+    case requestError(RequestError)
     case networkError(Error)
     case serverError
     case authTokenNotParsed
+    case serverDoesntVerifyPurchase(RequestError)
 }
