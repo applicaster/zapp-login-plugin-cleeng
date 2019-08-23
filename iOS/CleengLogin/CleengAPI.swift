@@ -96,7 +96,7 @@ extension CleengAPI {
         case .purchaseItem(let publisherID, let offerId, let token, let transactionId, let receiptData, let isRestored):
             let receiptInfo: [String: Any] = [
                 "transactionId": transactionId,
-                "receiptData": receiptData
+                "receiptData": receiptData.base64EncodedString(),
             ]
             let params: [String: Any] = [
                 "publisherId": publisherID,
