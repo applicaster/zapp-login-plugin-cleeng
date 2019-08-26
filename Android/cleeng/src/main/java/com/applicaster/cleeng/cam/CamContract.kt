@@ -355,6 +355,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun onCamFinished() {
         cleengService.startUpHookListener?.onHookFinished()
+        cleengService.screenHookListener?.hookCompleted(mutableMapOf())
     }
 
     override fun getAnalyticsDataProvider(): IAnalyticsDataProvider {

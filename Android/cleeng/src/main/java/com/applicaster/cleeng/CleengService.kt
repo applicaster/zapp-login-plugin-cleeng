@@ -13,6 +13,7 @@ import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.utils.SharedPreferencesUtil
 import com.applicaster.cleeng.utils.isNullOrEmpty
 import com.applicaster.hook_screen.HookScreen
+import com.applicaster.hook_screen.HookScreenListener
 import com.applicaster.plugin_manager.hook.HookListener
 
 class CleengService {
@@ -23,6 +24,7 @@ class CleengService {
     private val preferences: SharedPreferencesUtil by lazy { SharedPreferencesUtil() }
 
     var startUpHookListener: HookListener? = null
+    var screenHookListener: HookScreenListener? = null
 
     fun mockStart(context: Context) {
         ContentAccessManager.onProcessStarted(camContract, context)
@@ -62,9 +64,13 @@ class CleengService {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     parseAuthResponse(responseDataResult.orEmpty())
                     if (Session.pluginConfigurator?.isTriggerOnAppLaunch() == true) {
-                        Session.availableProductIds.addAll(Session.pluginConfigurator?.getAppLevelEntitlements().orEmpty())
+                        val availableProductsIds = Session.pluginConfigurator?.getAppLevelEntitlements().orEmpty()
+                        // we should add obtained available products to session to check if access was granted
+                        // 'cause when we'll call setSessionParams function all available products will be removed
+                        // and added to session from data that was passed as parameter
+                        Session.availableProductIds.addAll(availableProductsIds)
                         if (!Session.isAccessGranted()) {
-                            itemAccessHandler.setSessionParams(false, Session.availableProductIds)
+                            itemAccessHandler.setSessionParams(false, availableProductsIds)
                             ContentAccessManager.onProcessStarted(camContract, context)
                         } else {
                             startUpHookListener?.onHookFinished()
@@ -89,18 +95,19 @@ class CleengService {
     }
 
     fun handleLogin(model: Any?, hookScreen: HookScreen, context: Context) {
+        screenHookListener = hookScreen.getListener()
         itemAccessHandler.fetchProductData(model)
         if (camContract.getCamFlow() != CamFlow.EMPTY) {
             if (getUserToken().isEmpty()) {
                 ContentAccessManager.onProcessStarted(camContract, context)
             } else {
                 if (Session.isAccessGranted())
-                    hookScreen.getListener().hookCompleted(hashMapOf())
+                    screenHookListener?.hookCompleted(mutableMapOf())
                 else
                     ContentAccessManager.onProcessStarted(camContract, context)
             }
         } else {
-            hookScreen.getListener().hookCompleted(mutableMapOf())
+            screenHookListener?.hookCompleted(mutableMapOf())
         }
     }
 
