@@ -7,19 +7,13 @@
 
 import Foundation
 
-class RequestError: Error, LocalizedError {
+class RequestError: Error {
     let errorCode: ErrorCodes
     var message: String = ""
     
     init(from code: ErrorCodes, with message: String) {
         self.errorCode = code
         self.message = message
-    }
-    
-    // MARK: - LocalizedError
-    
-    var errorDescription: String? {
-        return NSLocalizedString(message, comment: "")
     }
 }
 
@@ -57,10 +51,25 @@ enum ErrorCodes: Int, Codable {
     }
 }
 
-enum CleengError: Error {
+enum CleengError: Error, LocalizedError {
     case requestError(RequestError)
     case networkError(Error)
-    case serverError
-    case authTokenNotParsed
+    case serverError(RequestError)
+    case authTokenNotParsed(RequestError)
     case serverDoesntVerifyPurchase(RequestError)
+    
+    public var errorDescription: String? {
+        switch self {
+        case .requestError(let error):
+            return NSLocalizedString(error.message, comment: "")
+        case .networkError(let error):
+            return NSLocalizedString(error.localizedDescription, comment: "")
+        case .serverError(let error):
+            return NSLocalizedString(error.message, comment: "")
+        case .authTokenNotParsed(let error):
+            return NSLocalizedString(error.message, comment: "")
+        case .serverDoesntVerifyPurchase(let error):
+            return NSLocalizedString(error.message, comment: "")
+        }
+    }
 }

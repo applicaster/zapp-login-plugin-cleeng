@@ -125,7 +125,15 @@ typealias OfferID = String
             switch result {
             case .success(let data):
                 let isParsed = self.parseAuthTokensResponse(json: data)
-                isParsed == true ? completion(.success) : completion(.failure(CleengError.authTokenNotParsed))
+                if isParsed {
+                    completion(.success)
+                } else {
+                    let errorCode = ErrorCodes.unknown
+                    let errorMessage = self.pluginConfiguration["default_alert_text"] as? String ?? ""
+                    let error = RequestError(from: errorCode,
+                                             with: errorMessage)
+                    completion(.failure(CleengError.authTokenNotParsed(error)))
+                }
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -163,7 +171,11 @@ typealias OfferID = String
             }
             guard let userToken = CleengLoginPlugin.userToken else {
                 timer.invalidate()
-                completion(.failure(.authTokenNotParsed))
+                let errorCode = ErrorCodes.unknown
+                let errorMessage = self.pluginConfiguration["default_alert_text"] as? String ?? ""
+                let error = RequestError(from: errorCode,
+                                         with: errorMessage)
+                completion(.failure(.authTokenNotParsed(error)))
                 return
             }
             self.networkAdapter.extendToken(token: userToken, completion: { (result) in

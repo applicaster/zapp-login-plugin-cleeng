@@ -73,7 +73,11 @@ class CleengNetworkHandler {
             switch response.result {
             case .success:
                 guard let code = response.response?.statusCode, let data = response.data else {
-                    completion(.failure(.serverError))
+                    let errorCode = ErrorCodes.unknown
+                    let errorMessage = self.errorMessage(errorCode)
+                    let error = RequestError(from: errorCode,
+                                             with: errorMessage)
+                    completion(.failure(.serverError(error)))
                     return
                 }
                 switch code {
