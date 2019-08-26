@@ -269,6 +269,7 @@ typealias OfferID = String
         guard let controller = UIViewController.topmostViewController() else {
             assert(false, "No topmost controller")
             completion(.failed)
+            return
         }
         
         var flow = self.flow
