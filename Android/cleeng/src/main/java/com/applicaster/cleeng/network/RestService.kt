@@ -46,7 +46,7 @@ interface RestService {
     @POST("login")
     fun loginFacebook(
         @Field("email") email: String,
-        @Field("FacebookId") facebookId: String
+        @Field("facebookId") facebookId: String
     ): Deferred<Response<List<AuthResponseData>>>
 
     @FormUrlEncoded

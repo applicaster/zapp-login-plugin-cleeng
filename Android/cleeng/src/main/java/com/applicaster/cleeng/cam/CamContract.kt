@@ -90,7 +90,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
-                    callback.onSuccess()
+                    callback.onActionSuccess()
                 }
 
                 is Result.Failure -> {
@@ -111,7 +111,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
-                    callback.onSuccess()
+                    callback.onActionSuccess()
                 }
 
                 is Result.Failure -> {
@@ -138,7 +138,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
-                    callback.onSuccess()
+                    callback.onActionSuccess()
                 }
 
                 is Result.Failure -> {
@@ -165,7 +165,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
-                    callback.onSuccess()
+                    callback.onActionSuccess()
                 }
 
                 is Result.Failure -> {
@@ -313,7 +313,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
             Session.setUserOffers(offers)
             Session.addOwnedProducts(ownedProductIds)
-            callback.onSuccess()
+            callback.onActionSuccess()
         } else {
             Log.d(TAG, "saveOwnedUserProducts with ${registeredOffers}")
             callback.onFailure(Session.pluginConfigurator?.getCleengErrorMessage(WebServiceError.DEFAULT).orEmpty())
@@ -331,7 +331,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 is Result.Success -> {
                     val responseDataResult: ResetPasswordResponseData? = result.value
                     if (responseDataResult?.success == true)
-                        callback.onSuccess()
+                        callback.onActionSuccess()
                     else
                         callback.onFailure("Error")
 
