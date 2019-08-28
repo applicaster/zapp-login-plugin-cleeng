@@ -231,6 +231,23 @@ typealias OfferID = String
     
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
                                                      completion: (() -> Swift.Void)?) {
+        #if DEBUG
+        let alert = UIAlertController(title: "", message: "Logout?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default) { _ in
+            CleengLoginPlugin.userToken = nil
+            UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
+            self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default) { _ in
+            self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
+        })
+        UIViewController.topmostViewController()?.present(alert, animated: true, completion: nil)
+        #else
+        executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
+        #endif
+    }
+    
+    private func executeTriggerOnAppLaunchFlow(displayViewController: UIViewController?, completion: (() -> Swift.Void)?) {
         flowTrigger = .appLaunch
         let flow = accessChecker.getStartupFlow(for: pluginConfiguration,
                                                 isAuthenticated: isAuthenticated())
