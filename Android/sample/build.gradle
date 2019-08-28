@@ -24,16 +24,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    flavorDimensions "publishing"
-    productFlavors {
-        publish {
-            dimension "publishing"
-        }
-        dev {
-            dimension "publishing"
-        }
-    }
 }
 
 dependencies {
