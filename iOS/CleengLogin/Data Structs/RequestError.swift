@@ -57,10 +57,21 @@ enum ErrorCodes: Int, Codable {
     }
 }
 
-enum CleengError: Error {
+enum CleengError: Error, LocalizedError {
     case requestError(RequestError)
     case networkError(Error)
     case serverError
     case authTokenNotParsed
     case serverDoesntVerifyPurchase(RequestError)
+    
+    var errorDescription: String? {
+        switch self {
+        case .requestError(let error), .serverDoesntVerifyPurchase(let error):
+            return error.localizedDescription
+        case .networkError(let error):
+            return error.localizedDescription
+        default:
+            return self.localizedDescription
+        }
+    }
 }
