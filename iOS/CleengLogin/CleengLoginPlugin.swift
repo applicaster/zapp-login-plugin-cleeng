@@ -236,6 +236,7 @@ typealias OfferID = String
         alert.addAction(UIAlertAction(title: "Ok", style: .default) { _ in
             CleengLoginPlugin.userToken = nil
             UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
+            AccessChecker.userPermissionEntitlementsIds.removeAll()
             self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
         })
         alert.addAction(UIAlertAction(title: "Cancel", style: .default) { _ in
