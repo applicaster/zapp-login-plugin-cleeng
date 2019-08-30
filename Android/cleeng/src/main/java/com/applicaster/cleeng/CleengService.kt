@@ -64,7 +64,11 @@ class CleengService {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     parseAuthResponse(responseDataResult.orEmpty())
                     if (Session.pluginConfigurator?.isTriggerOnAppLaunch() == true) {
-                        val availableProductsIds = Session.pluginConfigurator?.getAppLevelEntitlements().orEmpty()
+                        val availableProductsIds = mutableListOf<String>()
+                        // we should filter product id's in case applicaster sends them as empty strings
+                        Session.pluginConfigurator?.getAppLevelEntitlements()?.filterTo(availableProductsIds) {
+                            it.isNotEmpty()
+                        }
                         // we should add obtained available products to session to check if access was granted
                         // 'cause when we'll call setSessionParams function all available products will be removed
                         // and added to session from data that was passed as parameter
@@ -83,7 +87,11 @@ class CleengService {
                 is Result.Failure -> {
                     // handle error and open loginEmail or sign up screen
                     if (Session.pluginConfigurator?.isTriggerOnAppLaunch() == true) {
-                        val appLevelEntitlements = Session.pluginConfigurator?.getAppLevelEntitlements().orEmpty()
+                        val appLevelEntitlements = mutableListOf<String>()
+                        // we should filter entitlements in case applicaster sends them as empty strings
+                        Session.pluginConfigurator?.getAppLevelEntitlements()?.filterTo(appLevelEntitlements) {
+                            it.isNotEmpty()
+                        }
                         itemAccessHandler.setSessionParams(true, appLevelEntitlements)
                         ContentAccessManager.onProcessStarted(camContract, context)
                     } else {
