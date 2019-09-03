@@ -479,12 +479,6 @@ extension CleengLoginPlugin: CAMDelegate {
             array.append((offerId: offerId, restoredItem: item))
             return array
         }
-        if restoredOffers.isEmpty {
-            let errorMessage = self.pluginConfiguration["no_purchases_to_restore_alert_text"] as? String ?? ""
-            let error = RequestError(from: ErrorCodes.unknown, with: errorMessage)
-            completion(.failure(CleengError.noPurchasesToRestore(error)))
-            return
-        }
         let dispatchGroup = DispatchGroup()
         var hasAccess = false
         
