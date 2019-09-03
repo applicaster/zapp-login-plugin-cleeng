@@ -237,6 +237,8 @@ typealias OfferID = String
             CleengLoginPlugin.userToken = nil
             UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
             AccessChecker.userPermissionEntitlementsIds.removeAll()
+            APAuthorizationManager.sharedInstance().setAuthorizationToken("",
+                                                                          withAuthorizationProviderID: "48")
             self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
         })
         alert.addAction(UIAlertAction(title: "Cancel", style: .default) { _ in
@@ -476,6 +478,12 @@ extension CleengLoginPlugin: CAMDelegate {
             }
             array.append((offerId: offerId, restoredItem: item))
             return array
+        }
+        if restoredOffers.isEmpty {
+            let errorMessage = self.pluginConfiguration["no_purchases_to_restore"] as? String ?? ""
+            let error = RequestError(from: ErrorCodes.unknown, with: errorMessage)
+            completion(.failure(CleengError.noPurchasesToRestore(error)))
+            return
         }
         let dispatchGroup = DispatchGroup()
         var hasAccess = false

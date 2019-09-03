@@ -63,6 +63,7 @@ enum CleengError: Error, LocalizedError {
     case serverError
     case authTokenNotParsed
     case serverDoesntVerifyPurchase(RequestError)
+    case noPurchasesToRestore(RequestError)
     
     var errorDescription: String? {
         switch self {
