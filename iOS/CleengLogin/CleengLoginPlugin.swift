@@ -480,7 +480,7 @@ extension CleengLoginPlugin: CAMDelegate {
             return array
         }
         if restoredOffers.isEmpty {
-            let errorMessage = self.pluginConfiguration["no_purchases_to_restore"] as? String ?? ""
+            let errorMessage = self.pluginConfiguration["no_purchases_to_restore_alert_text"] as? String ?? ""
             let error = RequestError(from: ErrorCodes.unknown, with: errorMessage)
             completion(.failure(CleengError.noPurchasesToRestore(error)))
             return
