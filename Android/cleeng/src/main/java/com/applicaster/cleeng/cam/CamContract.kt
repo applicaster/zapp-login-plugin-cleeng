@@ -19,10 +19,8 @@ import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.isNullOrEmpty
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.cancel
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import org.json.JSONObject
 import kotlin.coroutines.experimental.CoroutineContext
 
@@ -355,7 +353,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun onCamFinished() {
         cleengService.startUpHookListener?.onHookFinished()
-        cleengService.screenHookListener?.hookFailed(mutableMapOf())
+        cleengService.screenHookListener?.hookCompleted(mutableMapOf())
     }
 
     override fun getAnalyticsDataProvider(): IAnalyticsDataProvider {
