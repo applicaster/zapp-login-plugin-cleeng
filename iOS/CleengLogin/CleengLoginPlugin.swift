@@ -237,8 +237,7 @@ typealias OfferID = String
             CleengLoginPlugin.userToken = nil
             UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
             AccessChecker.userPermissionEntitlementsIds.removeAll()
-            APAuthorizationManager.sharedInstance().setAuthorizationToken("",
-                                                                          withAuthorizationProviderID: "48")
+            APAuthorizationManager.sharedInstance()?.updateAuthorizationTokens(withAuthorizationProviders: [])
             self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
         })
         alert.addAction(UIAlertAction(title: "Cancel", style: .default) { _ in
