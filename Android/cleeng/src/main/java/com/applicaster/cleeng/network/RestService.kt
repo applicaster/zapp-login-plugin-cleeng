@@ -5,6 +5,7 @@ import com.applicaster.cleeng.network.request.SubscribeRequestData
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
+import com.applicaster.cleeng.network.response.RestoreSubscriptionsResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import kotlinx.coroutines.experimental.Deferred
 import retrofit2.Response
@@ -74,5 +75,5 @@ interface RestService {
     @POST("restoreSubscriptions")
     fun restoreSubscriptions(
         @Body restoreSubscriptionsData: RestoreSubscriptionsRequestData
-    ): Deferred<Response<Unit>>
+    ): Deferred<Response<List<RestoreSubscriptionsResponseData>>>
 }

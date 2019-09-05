@@ -25,7 +25,7 @@ interface ScreenMetaDataService {
 class ScreensDataLoader {
 
     private val TAG = ScreensDataLoader::class.java.canonicalName
-    private val cleengCamScreenType = "cleeng_cam"
+    private val cleengCamScreenType = "cleeng"
 
     private lateinit var retrofit: Retrofit
     private val httpClient: OkHttpClient.Builder = OkHttpClient.Builder()
@@ -80,7 +80,7 @@ class ScreensDataLoader {
             val response = retrofitService?.loadScreensJson(builder.path)?.await()
             val screensDataList: List<ScreenData>? = response?.body()
             screensDataList?.forEach {
-                if (it.type == cleengCamScreenType) {
+                if (it.type?.contains(cleengCamScreenType, ignoreCase = true) == true) {
                     return parseScreenConfig(it.general as? Map<String, Any>)
                 }
             }
