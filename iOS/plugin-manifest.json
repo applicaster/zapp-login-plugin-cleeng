@@ -18,7 +18,7 @@
   "cover_image": "",
   "type": "login",
   "screen": true,
-  "identifier": "cleeng_cam",
+  "identifier": "Cleeng",
   "ui_builder_support": true,
   "dependency_name": "CleengLogin",
   "whitelisted_account_ids": [

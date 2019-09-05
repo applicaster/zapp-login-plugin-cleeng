@@ -50,8 +50,7 @@ typealias OfferID = String
         super.init()
         
         self.configurationJSON = configurationJSON
-        
-        if var pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("cleeng_cam")?.general {
+        if var pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("Cleeng")?.general {
             self.pluginConfiguration = pluginConfiguration
             for (key, value) in pluginConfiguration {
                 switch value {
