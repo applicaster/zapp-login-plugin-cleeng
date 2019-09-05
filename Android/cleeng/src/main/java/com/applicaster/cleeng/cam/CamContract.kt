@@ -280,7 +280,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                         is Result.Success -> {
                             result.value?.forEach {
                                 if (it.offerId.isNullOrEmpty()) {
-                                    cleengService.saveUserToken(it.token!!)
+                                    it.token?.let { token -> cleengService.saveUserToken(token) }
                                 } else if (it.offerId == purchasedOfferId) {
                                     registeredOffers = result.value
                                     coroutineContext.cancel()

@@ -8,6 +8,7 @@ import com.applicaster.cleeng.network.request.SubscribeRequestData
 import com.applicaster.cleeng.network.request.SubscriptionsRequestData
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
+import com.applicaster.cleeng.network.response.RestoreSubscriptionsResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 
 class NetworkHelper {
@@ -105,7 +106,8 @@ class NetworkHelper {
         }
     }
 
-    suspend fun restoreSubscriptions(requestData: RestoreSubscriptionsRequestData): Result<Unit, WebServiceError> {
+    suspend fun restoreSubscriptions(requestData: RestoreSubscriptionsRequestData):
+            Result<List<RestoreSubscriptionsResponseData>, WebServiceError> {
         return try {
             val response = retrofitService.restoreSubscriptions(requestData).await()
             handleResponse(response)
