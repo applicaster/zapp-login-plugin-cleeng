@@ -468,39 +468,55 @@ extension CleengLoginPlugin: CAMDelegate {
         }
     }
     
-    public func itemsRestored(restoredItems: [PurchasedProduct], completion: @escaping (PurchaseResult) -> Void) {
-        let restoredOffers = restoredItems.reduce([]) { (array, item) -> [(offerId: String, restoredItem: PurchasedProduct)] in
-            var array = array
-            
-            guard let offerId = currentAvailableOfferIDs[item.productIdentifier] else {
-                    return array
+    public func itemsRestored(restoredItems: [PurchasedProduct],
+                              completion: @escaping (PurchaseResult) -> Void) {
+        let purchases = restoredItems.compactMap { (product) -> RestorePurchaseData? in
+            guard let transactionId = product.transaction.transactionIdentifier else {
+                return nil
             }
-            array.append((offerId: offerId, restoredItem: item))
-            return array
+            return RestorePurchaseData(transactionId: transactionId,
+                                       productId: product.productIdentifier)
         }
-        let dispatchGroup = DispatchGroup()
-        var hasAccess = false
         
-        var restoreError: Error?
-        
-        restoredOffers.forEach { (item) in
-            dispatchGroup.enter()
-            self.purchaseItem(token: CleengLoginPlugin.userToken ?? "",
-                              offerId: item.offerId,
-                              transactionId: item.restoredItem.transaction.transactionIdentifier ?? "",
-                              receiptData: item.restoredItem.receipt,
-                              isRestored: true) { (result) in
-                switch result {
-                case .success:
-                    hasAccess = true
-                case .failure(let error):
-                    restoreError = error
+        networkAdapter.restore(purchases: purchases,
+                               token: CleengLoginPlugin.userToken!,
+                               receipt: restoredItems.first?.receipt.base64EncodedString() ?? "") { (apiResult) in
+            switch apiResult {
+            case .success(let data):
+                let decoder = JSONDecoder()
+                if let restoredOffers = try? decoder.decode([RestoredCleengOffer].self, from: data) {
+                    let uniqueOffers = Dictionary(grouping: restoredOffers, by: { $0.offerId }).keys
+                    
+                    var restoreError: Error?
+                    var isRestoreAtLeastOneItem = false
+                    let group = DispatchGroup()
+
+                    for offer in uniqueOffers {
+                        group.enter()
+                        
+                        self.verifyOnCleeng(offerId: offer, completion: { (result) in
+                            switch result {
+                            case .success:
+                                isRestoreAtLeastOneItem = true
+                            case .failure(let error):
+                                restoreError = error
+                            }
+                            group.leave()
+                        })
+                    }
+                    
+                    group.notify(queue: .main, execute: {
+                        if let error = restoreError, isRestoreAtLeastOneItem == false {
+                            completion(.failure(error))
+                        } else {
+                            completion(.success(()))
+                        }
+                    })
                 }
-                dispatchGroup.leave()
+                completion(.failure(CleengError.serverError))
+            case .failure(let error):
+                completion(.failure(error))
             }
-        }
-        dispatchGroup.notify(queue: DispatchQueue.main) {
-            hasAccess == true ? completion(.success) : completion(.failure(restoreError!))
         }
     }
     
