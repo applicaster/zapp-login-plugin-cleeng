@@ -174,16 +174,16 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     }
 
     override fun onItemPurchased(purchase: List<Purchase>, callback: PurchaseCallback) {
-        purchase.forEach { subscribeOn(it, callback) }
+        purchase.forEachIndexed { index, item ->  subscribeOn(item, callback, index == purchase.lastIndex) }
     }
 
     override fun onPurchasesRestored(purchases: List<Purchase>, callback: RestoreCallback) {
         //Test fun for new restore API.
         // TODO: Uncomment when server-side implementation will be finished
-//        sendRestoredSubscriptions(purchases, callback)
+        sendRestoredSubscriptions(purchases, callback)
         //Restore implementation based on regular purchase server API (i.e. /subscription)
         //TODO: Remove this when server-side implementation will be finished
-        purchases.forEach { subscribeOn(it, callback) }
+//        purchases.forEachIndexed { index, item ->  subscribeOn(item, callback, index == purchase.lastIndex) }
     }
 
     /**
@@ -216,7 +216,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             val result = cleengService.networkHelper.restoreSubscriptions(restoreSubsData)
             when (result) {
                 is Result.Success -> {
-                    finishPurchaseFlow("", callback)
+                    result.value?.forEachIndexed { index, subscriptionsData ->
+                        subscriptionsData.offerId?.let {
+                            finishPurchaseFlow(it, callback, index == result.value.lastIndex)
+                        }
+                    }
                 }
 
                 is Result.Failure -> {
@@ -227,7 +231,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    private fun subscribeOn(purchaseItem: Purchase, callback: ActionCallback) {
+    private fun subscribeOn(purchaseItem: Purchase, callback: ActionCallback, shouldSendCallback: Boolean) {
         val offerEntry = currentOffers.entries.find {
             purchaseItem.sku == it.key
         }
@@ -254,7 +258,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             val result = cleengService.networkHelper.subscribe(subscribeRequestData)
             when (result) {
                 is Result.Success -> {
-                    finishPurchaseFlow(offerEntry!!.value, callback)
+                    finishPurchaseFlow(offerEntry!!.value, callback, shouldSendCallback)
                 }
 
                 is Result.Failure -> {
@@ -269,7 +273,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
      * Registering purchases on the Cleeng server and waiting until it will return response with updated
      * offerIDs, authIDs and purchase tokens
      */
-    private fun finishPurchaseFlow(purchasedOfferId: String, callback: ActionCallback) {
+    private fun finishPurchaseFlow(purchasedOfferId: String, callback: ActionCallback, shouldSendCallback: Boolean) {
         var registeredOffers: List<AuthResponseData> = arrayListOf()
         val coroutineContext: CoroutineContext = UI
         launch(coroutineContext) {
@@ -292,14 +296,14 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     delay(PURCHASE_VERIFICATION_DELAY_MILLIS)
                 }
             } finally {
-                saveOwnedUserProducts(registeredOffers, callback)
+                saveOwnedUserProducts(registeredOffers, callback, shouldSendCallback)
             }
         }
     }
 
-    private fun saveOwnedUserProducts(registeredOffers: List<AuthResponseData>, callback: ActionCallback) {
+    private fun saveOwnedUserProducts(registeredOffers: List<AuthResponseData>, callback: ActionCallback, shouldSendCallback: Boolean) {
         if (registeredOffers.isNotEmpty()) {
-            Log.d(TAG, "saveOwnedUserProducts with ${registeredOffers}")
+            Log.d(TAG, "saveOwnedUserProducts with $registeredOffers")
             val offers = arrayListOf<Offer>()
             val ownedProductIds = hashSetOf<String>()
             registeredOffers.forEach { authData ->
@@ -311,9 +315,10 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
             Session.setUserOffers(offers)
             Session.addOwnedProducts(ownedProductIds)
-            callback.onActionSuccess()
+            if (shouldSendCallback)
+                callback.onActionSuccess()
         } else {
-            Log.d(TAG, "saveOwnedUserProducts with ${registeredOffers}")
+            Log.d(TAG, "saveOwnedUserProducts with $registeredOffers")
             callback.onFailure(Session.pluginConfigurator?.getCleengErrorMessage(WebServiceError.DEFAULT).orEmpty())
         }
     }
