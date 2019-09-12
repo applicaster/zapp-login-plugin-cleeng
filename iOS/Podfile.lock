@@ -17,10 +17,11 @@ PODS:
     - ZappPushPluginsSDK (~> 8.0.2)
   - ApplicasterUIKit (7.0.4):
     - ZappPlugins (~> 9.1.8)
-  - CAM (1.0.3):
+  - CAM (1.0.7):
     - ApplicasterIAP
+    - ApplicasterSDK
     - ZappPlugins
-  - CleengLogin (0.0.4):
+  - CleengLogin (0.0.9):
     - Alamofire
     - CAM
     - ComponentsSDK
@@ -104,8 +105,8 @@ SPEC CHECKSUMS:
   ApplicasterIAP: 3e02eab421049bae6a12e4dcfd03b467e7dac847
   ApplicasterSDK: 8b7bd6161d5ceae9499563a98cd631302cd38f5c
   ApplicasterUIKit: 0636c94e9cbd1af7f212f4e3d0b3bc658110fb42
-  CAM: b8156ccd2304f571c0119c74914953cdf30e1908
-  CleengLogin: 467f0faaa16b1a2953c9a3ae96593fcfb2c175fc
+  CAM: bbc3d01123124eeb7655592cc95ab3735c2b57c7
+  CleengLogin: a8d3f2828c28833370ac4b4907c4bcd626255d55
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   ComponentsSDK: 5a2b3df071967f34c872d7355ec54b14d8b334bc
   FBSDKCoreKit: 5154c35d9058fd7dfa0445ba19e194c4b172fc32

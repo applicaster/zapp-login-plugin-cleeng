@@ -119,8 +119,8 @@ extension CleengAPI {
                 "couponCode": couponCode
             ]
         case .restore(let publisherID, let restoreData, let userToken, let receipt):
-            let receipts = restoreData.map({["productId": $0.productId,
-                                             "transactionId": $0.transactionId]})
+            let receipts: [[String: String]] = restoreData.map({["productId": $0.productId,
+                                                                 "transactionId": $0.transactionId]})
             
             return ["publisherId": publisherID,
                     "appType": "ios",

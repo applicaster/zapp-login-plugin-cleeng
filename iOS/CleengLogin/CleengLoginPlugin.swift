@@ -512,8 +512,9 @@ extension CleengLoginPlugin: CAMDelegate {
                             completion(.success(()))
                         }
                     })
+                } else {
+                    completion(.failure(CleengError.serverError))
                 }
-                completion(.failure(CleengError.serverError))
             case .failure(let error):
                 completion(.failure(error))
             }
