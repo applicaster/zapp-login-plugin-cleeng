@@ -20,6 +20,7 @@ enum CleengAPI {
     case purchaseItem(publisherID: String, offerId: String, token: String, transactionId: String,
                       receiptData: Data, isRestored: Bool)
     case purchaseItemUsingCode(publisherID: String, offerId: String, token: String, reedeemCode: String)
+    case restore(publisherID: String, receipts: [RestorePurchaseData], token: String, receipt: String)
 }
     
 extension CleengAPI {
@@ -41,6 +42,8 @@ extension CleengAPI {
             return "subscriptions"
         case .purchaseItem, .purchaseItemUsingCode:
             return "subscription"
+        case .restore:
+            return "restoreSubscriptions"
         }
     }
     
@@ -115,6 +118,15 @@ extension CleengAPI {
                 "token": token,
                 "couponCode": couponCode
             ]
+        case .restore(let publisherID, let restoreData, let userToken, let receipt):
+            let receipts: [[String: String]] = restoreData.map({["productId": $0.productId,
+                                                                 "transactionId": $0.transactionId]})
+            
+            return ["publisherId": publisherID,
+                    "appType": "ios",
+                    "receipts": receipts,
+                    "token": userToken,
+                    "receiptData": receipt]
         }
     }
 }

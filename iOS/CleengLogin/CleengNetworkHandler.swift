@@ -68,8 +68,19 @@ class CleengNetworkHandler {
         performRequest(api: api, completion: completion)
     }
     
+    func restore(purchases: [RestorePurchaseData],
+                 token: String,
+                 receipt: String,
+                 completion: @escaping (CleengAPIResult) -> Void) {
+        let api = CleengAPI.restore(publisherID: publisherID,
+                                    receipts: purchases,
+                                    token: token,
+                                    receipt: receipt)
+        performRequest(api: api, completion: completion)
+    }
+    
     func performRequest(api: CleengAPI, completion: @escaping (CleengAPIResult) -> Void) {
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params).responseJSON { (response) in
+        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params, encoding: JSONEncoding.default).responseJSON { (response) in
             switch response.result {
             case .success:
                 guard let code = response.response?.statusCode, let data = response.data else {
