@@ -29,7 +29,6 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     //pending offers, androidProductId as key and Cleeng offerID as value
     private val currentOffers: HashMap<String, String> = hashMapOf()
-    private var analyticsDataProvider: IAnalyticsDataProvider? = null
 
     override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
 //        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -361,9 +360,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         cleengService.screenHookListener?.hookCompleted(mutableMapOf())
     }
 
-    override fun getAnalyticsDataProvider(): IAnalyticsDataProvider {
-        return this.analyticsDataProvider ?: AnalyticsDataProvider()
-    }
+    override fun getAnalyticsDataProvider(): IAnalyticsDataProvider = Session.analyticsDataProvider
 
     private fun collectPurchaseDataForAnalytics(subscriptionsData: List<SubscriptionsResponseData>?) {
         subscriptionsData?.forEach {
@@ -375,9 +372,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     it.period.orEmpty(),
                     if (it.period.isNullOrEmpty()) PurchaseType.CONSUMABLE else PurchaseType.SUBSCRIPTION,
                     it.freeDays.orEmpty(),
-                    "VOD"
+                    Session.analyticsDataProvider.entityType
             )
-            analyticsDataProvider?.purchaseData?.add(purchaseData)
+            Session.analyticsDataProvider.purchaseData.add(purchaseData)
         }
     }
 

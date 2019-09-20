@@ -25,4 +25,11 @@ class AnalyticsDataProvider : IAnalyticsDataProvider {
     override var purchaseData: MutableList<PurchaseData> = arrayListOf()
         get() = field
         set(value) { field = value }
+
+    fun dropAllData() {
+        entityType = ""
+        entityName = ""
+        trigger = Trigger.OTHER
+        purchaseData = arrayListOf()
+    }
 }

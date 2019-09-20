@@ -2,6 +2,7 @@ package com.applicaster.cleeng
 
 import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
+import com.applicaster.cleeng.analytics.AnalyticsDataProvider
 import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.data.User
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
@@ -10,6 +11,8 @@ import com.applicaster.cleeng.utils.isNullOrEmpty
 object Session {
 
     var user: User? = User()
+
+    val analyticsDataProvider: AnalyticsDataProvider = AnalyticsDataProvider()
 
     /**
      * List of productId available to be bought (in old cleeng implementation named authId)
@@ -53,6 +56,7 @@ object Session {
     fun drop() {
         user = null
         pluginConfigurator = null
+        analyticsDataProvider.dropAllData()
         availableProductIds.clear()
     }
 }

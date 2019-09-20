@@ -9,6 +9,8 @@ interface ProductDataProvider {
     fun getLegacyProviderIds(): List<String>?
     fun isAuthRequired(): Boolean
     fun getProductIds(): ArrayList<String>?
+    fun getEntityType(): String
+    fun getEntityName(): String
 
     fun <T> getSafety(function: () -> T): T? {
         return try {
@@ -47,6 +49,14 @@ class ProductAPChannelItem(private val playable: APChannel) : ProductDataProvide
     override fun getProductIds(): ArrayList<String>? {
         return getSafety { playable.getExtension(ProductDataProvider.KEY_DS_PRODUCT_ID) as? ArrayList<String> }
     }
+
+    override fun getEntityType(): String {
+       return getSafety { playable.playableType.name }.orEmpty()
+    }
+
+    override fun getEntityName(): String {
+        return getSafety { playable.name }.orEmpty()
+    }
 }
 
 class ProductAPAtomEntryPlayableItem(private val playable: APAtomEntry.APAtomEntryPlayable) : ProductDataProvider {
@@ -67,6 +77,14 @@ class ProductAPAtomEntryPlayableItem(private val playable: APAtomEntry.APAtomEnt
             List::class.java
         ) as? ArrayList<String> }
     }
+
+    override fun getEntityType(): String {
+        return getSafety { playable.playableType.name }.orEmpty()
+    }
+
+    override fun getEntityName(): String {
+        return getSafety { playable.playableName }.orEmpty()
+    }
 }
 
 class ProductAPModelItem(private val apModel: APModel) : ProductDataProvider {
@@ -85,6 +103,14 @@ class ProductAPModelItem(private val apModel: APModel) : ProductDataProvider {
 
     override fun getProductIds(): ArrayList<String>? {
         return getSafety { apModel.getExtension(ProductDataProvider.KEY_DS_PRODUCT_ID) as? ArrayList<String> }
+    }
+
+    override fun getEntityType(): String {
+        return "None Provided"
+    }
+
+    override fun getEntityName(): String {
+        return getSafety { apModel.name }.orEmpty()
     }
 }
 
@@ -108,5 +134,13 @@ class ProductAPAtomEntryItem(private val playable: APAtomEntry) : ProductDataPro
             ProductDataProvider.KEY_DS_PRODUCT_ID,
             List::class.java
         ) as? ArrayList<String> }
+    }
+
+    override fun getEntityType(): String {
+        return getSafety { playable.type.toString() }.orEmpty()
+    }
+
+    override fun getEntityName(): String {
+        return getSafety { playable.playable.playableName }.orEmpty()
     }
 }

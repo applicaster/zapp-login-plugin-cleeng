@@ -3,6 +3,8 @@ package com.applicaster.cleeng
 import com.applicaster.app.APProperties
 import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.CamFlow
+import com.applicaster.cam.ContentAccessManager
+import com.applicaster.cam.Trigger
 import com.applicaster.cleeng.data.playable.ProductDataProvider
 import com.applicaster.cleeng.utils.CleengAsyncTaskListener
 import com.applicaster.cleeng.utils.isNullOrEmpty
@@ -75,6 +77,12 @@ class ContentAccessHandler(private val cleengService: CleengService) {
                 // otherwise CamFlow.EMPTY
                 setSessionParams(legacyAuthProviderIds.isNotEmpty(), legacyAuthProviderIds)
             }
+
+            //analytics data
+            setAnalyticsSessionParams(
+                    productDataProvider.getEntityType(),
+                    productDataProvider.getEntityName()
+            )
         }
     }
 
@@ -151,6 +159,18 @@ class ContentAccessHandler(private val cleengService: CleengService) {
                 return true
         }
         return false
+    }
+
+    private fun setAnalyticsSessionParams(entityType: String, entityName: String) {
+        Session.analyticsDataProvider.apply {
+            this.entityType = entityType
+            this.entityName = entityName
+            this.trigger =
+                    if (ContentAccessManager.pluginConfigurator.isTriggerOnAppLaunch())
+                        Trigger.APP_LAUNCH
+                    else
+                        Trigger.TAP_SELL
+        }
     }
 
     /**
