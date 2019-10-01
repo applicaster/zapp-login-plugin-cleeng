@@ -22,7 +22,7 @@ class AnalyticsDataProvider : IAnalyticsDataProvider {
     override val isUserSubscribed: Boolean
         get() = Session.isAccessGranted()
 
-    override var purchaseData: MutableList<PurchaseData> = arrayListOf()
+    override var purchaseData: MutableList<PurchaseData> = mutableListOf()
         get() = field
         set(value) { field = value }
 

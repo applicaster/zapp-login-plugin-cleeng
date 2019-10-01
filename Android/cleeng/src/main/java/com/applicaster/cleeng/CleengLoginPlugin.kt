@@ -3,6 +3,7 @@ package com.applicaster.cleeng
 import android.content.Context
 import android.support.v4.app.Fragment
 import android.util.Log
+import com.applicaster.cam.Trigger
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.screenmetadata.ScreensDataLoader
 import com.applicaster.hook_screen.HookScreen
@@ -126,6 +127,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
         fetchPluginConfig()
         cleengService.handleLogin(dataSource, this, context)
+        Session.analyticsDataProvider.trigger = Trigger.TAP_SELL
     }
 
     private fun fetchPluginConfig() {
