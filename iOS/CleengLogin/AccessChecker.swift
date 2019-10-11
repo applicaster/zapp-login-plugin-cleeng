@@ -40,7 +40,7 @@ class AccessChecker {
         return isComply
     }
     
-    public func getStartupFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
+    public func getStartupFlow(for dictionary: [String: Any]?) -> CAMFlow {
         var isTriggerOnAppLaunch = false
         if let startOnAppLaunch = dictionary?["trigger_on_app_launch"] {
             if let flag = startOnAppLaunch as? Bool {
@@ -59,39 +59,22 @@ class AccessChecker {
                 setItemAuthIDs(from: ids)
             }
         }
-        switch (isAuthenticated, isTriggerOnAppLaunch, shouldPresentStorefront) {
-        case (false, true, false):
-            return .authentication
-        case (false, true, true):
-            return .authAndStorefront
-        case (true, true, true):
-            return isPurchaseNeeded ? .storefront : .no
-        default:
-            return .no
+        
+        if isTriggerOnAppLaunch, shouldPresentStorefront {
+            return .storefront
         }
+        
+        return .no
     }
     
-    public func getCamFlow(for dictionary: [String: Any]?, isAuthenticated: Bool) -> CAMFlow {
+    public func getCamFlow(for dictionary: [String: Any]?) -> CAMFlow {
         guard let dictionary = dictionary else {
             return .no
         }
         let authIds = flowParser.parseEntitlements(from: dictionary)
         setItemAuthIDs(from: authIds)
         let flow = flowParser.parseFlow(from: dictionary)
-        switch flow {
-        case .authentication:
-            return isAuthenticated ? .no : .authentication
-        case .authAndStorefront:
-            let updatedFlow = isAuthenticated ? CAMFlow.storefront : CAMFlow.authAndStorefront
-            if updatedFlow == .storefront {
-                return isPurchaseNeeded ? .storefront : .no
-            }
-            return updatedFlow
-        case .storefront:
-            return isPurchaseNeeded ? .storefront : .no
-        default:
-            return flow
-        }
+        return flow
     }
     
     private func setItemAuthIDs(from authIDs: [String]) {

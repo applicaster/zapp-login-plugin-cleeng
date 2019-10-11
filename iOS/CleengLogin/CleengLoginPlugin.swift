@@ -91,8 +91,7 @@ typealias OfferID = String
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
         self.currentPlaybleItem = playableItems.first
-        flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any],
-                                        isAuthenticated: isAuthenticated())
+        flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any])
     }
     
     public required init?(pluginModel: ZPPluginModel, dataSourceModel: NSObject?) {
@@ -175,6 +174,7 @@ typealias OfferID = String
                     let isOfferVerified = cleengTokens.contains(where: { (item) -> Bool in
                         return item.offerID == offerId
                     })
+                    print("\(cleengTokens) KEK")
                     if isOfferVerified {
                         timer.invalidate()
                         completion(.success)
@@ -250,8 +250,7 @@ typealias OfferID = String
     
     private func executeTriggerOnAppLaunchFlow(displayViewController: UIViewController?, completion: (() -> Swift.Void)?) {
         flowTrigger = .appLaunch
-        let flow = accessChecker.getStartupFlow(for: pluginConfiguration,
-                                                isAuthenticated: isAuthenticated())
+        let flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         if flow != .no {
             guard let controller = displayViewController else {
                 completion?()
@@ -293,7 +292,7 @@ typealias OfferID = String
         var flow = self.flow
         
         if additionalParameters != nil {
-            flow = accessChecker.getCamFlow(for: additionalParameters, isAuthenticated: isAuthenticated())
+            flow = accessChecker.getCamFlow(for: additionalParameters)
         }
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
@@ -387,6 +386,10 @@ extension CleengLoginPlugin: CAMDelegate {
     
     public func isPurchaseNeeded() -> Bool {
         return accessChecker.isPurchaseNeeded
+    }
+    
+    public func IsUserLoggedIn() -> Bool {
+        return isAuthenticated()
     }
     
     public func facebookLogin(userData: (email: String, userId: String),
@@ -521,10 +524,18 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func itemName() -> String {
+        if flowTrigger == .appLaunch {
+            return Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? ""
+        }
+        
         return currentPlaybleItem?.playableName() ?? ""
     }
     
     public func itemType() -> String {
+        if flowTrigger == .appLaunch {
+            return "App"
+        }
+        
         guard let item = currentPlaybleItem else {
             return ""
         }
