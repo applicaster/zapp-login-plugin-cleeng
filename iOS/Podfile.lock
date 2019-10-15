@@ -17,11 +17,11 @@ PODS:
     - ZappPushPluginsSDK (~> 8.0.2)
   - ApplicasterUIKit (7.0.4):
     - ZappPlugins (~> 9.1.8)
-  - CAM (1.0.7):
+  - CAM (1.0.10):
     - ApplicasterIAP
     - ApplicasterSDK
     - ZappPlugins
-  - CleengLogin (0.0.9):
+  - CleengLogin (0.0.11):
     - Alamofire
     - CAM
     - ComponentsSDK
@@ -30,7 +30,7 @@ PODS:
   - CocoaLumberjack/Core (3.5.3)
   - CocoaLumberjack/Swift (3.5.3):
     - CocoaLumberjack/Core
-  - ComponentsSDK (12.0.2):
+  - ComponentsSDK (12.2.0):
     - ApplicasterSDK (~> 10.0.8)
     - ApplicasterUIKit (~> 7.0.4)
     - ZappAnalyticsPluginsSDK (~> 8.0.4)
@@ -56,12 +56,12 @@ PODS:
     - ZappPlugins
   - ZappGeneralPluginsSDK (8.0.2):
     - ZappPlugins
-  - ZappLoginPluginsSDK (8.0.1):
+  - ZappLoginPluginsSDK (8.0.2):
     - Alamofire
     - ZappPlugins
   - ZappNavigationBarPluginsSDK (8.0.1):
     - ZappPlugins
-  - ZappPlugins (9.1.8)
+  - ZappPlugins (9.1.9)
   - ZappPushPluginsSDK (8.0.2):
     - ZappPlugins
 
@@ -105,10 +105,10 @@ SPEC CHECKSUMS:
   ApplicasterIAP: 3e02eab421049bae6a12e4dcfd03b467e7dac847
   ApplicasterSDK: 8b7bd6161d5ceae9499563a98cd631302cd38f5c
   ApplicasterUIKit: 0636c94e9cbd1af7f212f4e3d0b3bc658110fb42
-  CAM: bbc3d01123124eeb7655592cc95ab3735c2b57c7
-  CleengLogin: a8d3f2828c28833370ac4b4907c4bcd626255d55
+  CAM: 38ba9245354452fd7a83fd4023a28807e19477d8
+  CleengLogin: 23f4dc4afbcef013019da142fa465e3d74f8652f
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
-  ComponentsSDK: 5a2b3df071967f34c872d7355ec54b14d8b334bc
+  ComponentsSDK: f821147240dd804afa92ef16a87dad43deadfd02
   FBSDKCoreKit: 5154c35d9058fd7dfa0445ba19e194c4b172fc32
   FBSDKLoginKit: dc98b6bf12334f1a42f28d0457fffc9aa3d1eca5
   FBSDKShareKit: 6f9c622f9a5d051f43f2dab6f753d5198422b89c
@@ -118,9 +118,9 @@ SPEC CHECKSUMS:
   TwitterKit: 5e4f41d70b9abdb41df5467f52d7aa2c0fd26ebb
   ZappAnalyticsPluginsSDK: 6f8edcddc12ae4001098a3fa6fe87e6fe1a013bd
   ZappGeneralPluginsSDK: df966c141975d4b797f147b6c39e972d18aaa4f5
-  ZappLoginPluginsSDK: d3205f72e2fa2ddb24d2ba240591f41fbb8644d8
+  ZappLoginPluginsSDK: 7afb61fa738f1f73666a8250bd14b5dda8cc8f87
   ZappNavigationBarPluginsSDK: 99ac8c1508387f03ea5cc5fd33402ffa8f00bbc9
-  ZappPlugins: 19d19d6fe70d39a4fc5a323e6a9146e0ab629970
+  ZappPlugins: 2bc8f25c9e28711ed5b8754cf1082e7cbc8748bb
   ZappPushPluginsSDK: 2062e2487f3ac877c0ab1a807d1a7f8d357bd333
 
 PODFILE CHECKSUM: bf58afe7249691740fd5fe920977c5d018e49eb5
