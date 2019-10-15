@@ -144,5 +144,6 @@
   "confirmation_button_size_pad":"14",
   "confirmation_button_color":"#ffffff",
 
-  "default_authentication_screen": "Login"
+  "default_authentication_screen": "Login",
+  "no_purchases_to_restore_alert_text": "No purchases to restore"
 }
