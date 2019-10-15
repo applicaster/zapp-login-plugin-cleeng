@@ -3,6 +3,8 @@ package com.applicaster.cleeng
 import android.content.Context
 import android.support.v4.app.Fragment
 import android.util.Log
+import com.applicaster.cam.CamFlow
+import com.applicaster.cam.Trigger
 import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.screenmetadata.ScreensDataLoader
 import com.applicaster.hook_screen.HookScreen
@@ -30,6 +32,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     ) {
         if (Session.getPluginConfigurationParams().isEmpty())
             Session.pluginConfigurator = PluginConfigurator(mockPluginConfiguration)
+        Session.setCamFlow(CamFlow.AUTH_AND_STOREFRONT)
         cleengService.mockStart(context)
     }
 
