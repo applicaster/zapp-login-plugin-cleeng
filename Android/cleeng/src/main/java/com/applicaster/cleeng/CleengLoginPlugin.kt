@@ -129,6 +129,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
         fetchPluginConfig()
         cleengService.handleLogin(dataSource, this, context)
+        Session.analyticsDataProvider.trigger = Trigger.TAP_SELL
     }
 
     private fun fetchPluginConfig() {
