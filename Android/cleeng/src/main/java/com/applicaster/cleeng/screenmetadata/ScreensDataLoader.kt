@@ -55,7 +55,7 @@ class ScreensDataLoader {
     private fun parseScreenConfig(config: Map<String, Any>?): Map<String, String>? {
         //transform MutableMap<Any?, Any?>? to Map<String, String>?
         return config?.entries?.associate { entry ->
-            entry.key to entry.value.toString()
+            entry.key to entry?.value?.toString()
         }
     }
 
