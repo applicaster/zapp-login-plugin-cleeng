@@ -174,7 +174,7 @@ typealias OfferID = String
                     let isOfferVerified = cleengTokens.contains(where: { (item) -> Bool in
                         return item.offerID == offerId
                     })
-                    print("\(cleengTokens) KEK")
+                    
                     if isOfferVerified {
                         timer.invalidate()
                         completion(.success)
@@ -480,9 +480,11 @@ extension CleengLoginPlugin: CAMDelegate {
                                        productId: product.productIdentifier)
         }
         
+        let receipt = restoredItems.first!.receipt.base64EncodedString()
+        
         networkAdapter.restore(purchases: purchases,
                                token: CleengLoginPlugin.userToken!,
-                               receipt: restoredItems.first?.receipt.base64EncodedString() ?? "") { (apiResult) in
+                               receipt: receipt) { (apiResult) in
             switch apiResult {
             case .success(let data):
                 let decoder = JSONDecoder()
@@ -492,7 +494,7 @@ extension CleengLoginPlugin: CAMDelegate {
                     var restoreError: Error?
                     var isRestoreAtLeastOneItem = false
                     let group = DispatchGroup()
-
+                    
                     for offer in uniqueOffers {
                         group.enter()
                         
