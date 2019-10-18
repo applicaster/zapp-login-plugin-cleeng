@@ -165,11 +165,7 @@ class ContentAccessHandler(private val cleengService: CleengService) {
         Session.analyticsDataProvider.apply {
             this.entityType = entityType
             this.entityName = entityName
-            this.trigger =
-                    if (ContentAccessManager.pluginConfigurator.isTriggerOnAppLaunch())
-                        Trigger.APP_LAUNCH
-                    else
-                        Trigger.TAP_SELL
+            this.trigger = Trigger.APP_LAUNCH
         }
     }
 
