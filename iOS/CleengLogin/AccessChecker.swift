@@ -60,11 +60,16 @@ class AccessChecker {
             }
         }
         
-        if isTriggerOnAppLaunch, shouldPresentStorefront {
+        switch (isTriggerOnAppLaunch, shouldPresentStorefront) {
+        case (true, false):
+            return .authentication
+        case (true, true):
+            return .authAndStorefront
+        case (false, false):
+            return .no
+        case (false, true):
             return .storefront
         }
-        
-        return .no
     }
     
     public func getCamFlow(for dictionary: [String: Any]?) -> CAMFlow {
