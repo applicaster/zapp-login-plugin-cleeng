@@ -4,6 +4,7 @@ import android.util.Log
 import com.android.billingclient.api.Purchase
 import com.applicaster.authprovider.AuthenticationProviderUtil
 import com.applicaster.cam.*
+import com.applicaster.cam.analytics.AnalyticsUtil
 import com.applicaster.cam.analytics.PurchaseType
 import com.applicaster.cam.params.billing.BillingOffer
 import com.applicaster.cam.params.billing.ProductType
@@ -366,7 +367,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         subscriptionsData?.forEach {
             val purchaseData = PurchaseData(
                     it.title.orEmpty(),
-                    it.price?.toString() ?: "",
+                    it.price?.toString() ?: AnalyticsUtil.KEY_NON_PROVIDED,
                     it.description.orEmpty(),
                     it.androidProductId.orEmpty(),
                     it.period.orEmpty(),
