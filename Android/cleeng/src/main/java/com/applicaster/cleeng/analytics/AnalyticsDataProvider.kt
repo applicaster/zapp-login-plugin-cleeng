@@ -14,7 +14,7 @@ class AnalyticsDataProvider : IAnalyticsDataProvider {
 
     override var entityType: String = DEFAULT_ENTITY_TYPE
         get() = field
-        set(value) { field = value }
+        set(value) { field = value.capitalize() }
 
     override var entityName: String = DEFAULT_ENTITY_NAME
         get() = field
