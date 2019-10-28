@@ -1,9 +1,9 @@
 package com.applicaster.cleeng.data.playable
 
 import com.applicaster.atom.model.APAtomEntry
+import com.applicaster.cam.analytics.AnalyticsUtil
 import com.applicaster.model.APChannel
 import com.applicaster.model.APModel
-import kotlin.math.roundToInt
 
 interface ProductDataProvider {
     fun getLegacyProviderIds(): List<String>?
@@ -106,7 +106,7 @@ class ProductAPModelItem(private val apModel: APModel) : ProductDataProvider {
     }
 
     override fun getEntityType(): String {
-        return "None Provided"
+        return AnalyticsUtil.KEY_NON_PROVIDED
     }
 
     override fun getEntityName(): String {
