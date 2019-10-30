@@ -78,6 +78,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
             if (context != null && listener != null)
                 cleengService.handleStartupHook(context, listener)
         }
+        Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
     }
 
     override fun getToken(): String = cleengService.getUserToken()

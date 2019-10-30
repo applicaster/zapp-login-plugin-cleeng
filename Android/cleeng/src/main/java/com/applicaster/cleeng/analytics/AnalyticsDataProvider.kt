@@ -1,5 +1,6 @@
 package com.applicaster.cleeng.analytics
 
+import com.applicaster.app.CustomApplication
 import com.applicaster.cam.IAnalyticsDataProvider
 import com.applicaster.cam.PurchaseData
 import com.applicaster.cam.Trigger
@@ -7,11 +8,15 @@ import com.applicaster.cleeng.Session
 
 class AnalyticsDataProvider : IAnalyticsDataProvider {
 
-    override var entityType: String = ""
-        get() = field
-        set(value) { field = value }
+    private val DEFAULT_ENTITY_TYPE = "App"
+    private val DEFAULT_ENTITY_NAME =
+            CustomApplication.getApplication().applicationContext.applicationInfo.nonLocalizedLabel.toString()
 
-    override var entityName: String = ""
+    override var entityType: String = DEFAULT_ENTITY_TYPE
+        get() = field
+        set(value) { field = value.capitalize() }
+
+    override var entityName: String = DEFAULT_ENTITY_NAME
         get() = field
         set(value) { field = value }
 
@@ -27,8 +32,8 @@ class AnalyticsDataProvider : IAnalyticsDataProvider {
         set(value) { field = value }
 
     fun dropAllData() {
-        entityType = ""
-        entityName = ""
+        entityType = DEFAULT_ENTITY_TYPE
+        entityName = DEFAULT_ENTITY_NAME
         trigger = Trigger.OTHER
         purchaseData = arrayListOf()
     }
