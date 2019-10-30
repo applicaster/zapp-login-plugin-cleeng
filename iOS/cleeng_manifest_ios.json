@@ -40,6 +40,12 @@
         "folded": true,
         "fields": [
           {
+            "key": "cleeng_login_publisher_id",
+            "type": "text_input",
+            "label_tooltip": "Cleeng publisher id",
+            "initial_value": ""
+          },
+          {
             "key": "authentication_requirement",
             "type": "select",
             "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication.</p>",
