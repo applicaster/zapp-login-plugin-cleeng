@@ -67,6 +67,13 @@ typealias OfferID = String
                 networkAdapter = CleengNetworkHandler(publisherID: publisherID)
                 networkAdapter.errorMessage = errorMessage()
             }
+            
+            if let authFieldsURLString = pluginConfiguration[CAMKeys.authFields.rawValue] as? String,
+                let authFieldsURL = URL(string: authFieldsURLString),
+                let authFieldsData = try? Data(contentsOf: authFieldsURL),
+                let authFieldsStringData = String(data: authFieldsData, encoding: .utf8) {
+                camConfiguration[CAMKeys.authFields.rawValue] = authFieldsStringData
+            }
         }
     }
     
@@ -87,6 +94,13 @@ typealias OfferID = String
         if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
             networkAdapter = CleengNetworkHandler(publisherID: publisherID)
             networkAdapter.errorMessage = errorMessage()
+        }
+        
+        if let authFieldsURLString = pluginConfiguration[CAMKeys.authFields.rawValue] as? String,
+            let authFieldsURL = URL(string: authFieldsURLString),
+            let authFieldsData = try? Data(contentsOf: authFieldsURL),
+            let authFieldsStringData = String(data: authFieldsData, encoding: .utf8) {
+            camConfiguration[CAMKeys.authFields.rawValue] = authFieldsStringData
         }
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
