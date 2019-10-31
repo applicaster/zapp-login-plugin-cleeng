@@ -41,6 +41,12 @@
         "folded": true,
         "fields": [
           {
+            "key": "cleeng_login_publisher_id",
+            "type": "text_input",
+            "label_tooltip": "Cleeng publisher id",
+            "initial_value": ""
+          },
+          {
             "key": "authentication_requirement",
             "type": "select",
             "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication.</p>",
@@ -196,7 +202,7 @@
             "initial_value": "19"
           },
           {
-            "key": "screen_title_size_pad",
+            "key": "screen_title_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) that will be used for the text at the top of each screen in the gateway process",
             "initial_value": "19"
@@ -224,7 +230,7 @@
             "initial_value": "13"
           },
           {
-            "key": "screen_description_size_pad",
+            "key": "screen_description_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
             "initial_value": "13"
@@ -237,7 +243,7 @@
           },
           {
             "key": "authentication_input_fields",
-            "type": "text_input",
+            "type": "uploader",
             "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://github.com/applicaster/applicaster-cam-framework/wiki/Authentication-Fields-Configuration)",
             "conditional_fields": [
               {
@@ -295,7 +301,7 @@
                 "key": "general/authentication_requirement"
               },
               {
-                "key": "input_field_label_size_pad",
+                "key": "input_field_label_size_tablet",
                 "type": "number_input",
                 "label_tooltip": "The font-size (for tablets) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
                 "initial_value": "13",
@@ -345,7 +351,7 @@
             "initial_value": "14"
           },
           {
-            "key": "action_button_size_pad",
+            "key": "action_button_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
             "initial_value": "14"
@@ -373,7 +379,7 @@
             "initial_value": "13"
           },
           {
-            "key": "prompt_size_pad",
+            "key": "prompt_size_tablet",
             "type": "number_input",
             "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-size (for tablets) used in the prompt prior to the link for such scenarios.</p>",
             "initial_value": "13"
@@ -401,7 +407,7 @@
             "initial_value": "13"
           },
           {
-            "key": "link_size_pad",
+            "key": "link_size_tablet",
             "type": "number_input",
             "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size (for tablets) used for such linkable text in the gateway screens.",
             "initial_value": "13"
@@ -497,7 +503,7 @@
             ]
           },
           {
-            "key": "alternative_authentication_separator_size_pad",
+            "key": "alternative_authentication_separator_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the alternative authorization separator text.",
             "initial_value": "12",
@@ -579,7 +585,7 @@
             "initial_value": "12"
           },
           {
-            "key": "alternative_authentication_prompt_size_pad",
+            "key": "alternative_authentication_prompt_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
             "conditional_fields": [
@@ -803,7 +809,7 @@
             ]
           },
           {
-            "key": "reset_password_size_pad",
+            "key": "reset_password_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the text that will be displayed to prompt the user to restore their password",
             "initial_value": "11",
@@ -1091,7 +1097,7 @@
             ]
           },
           {
-            "key": "payment_option_title_size_pad",
+            "key": "payment_option_title_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used in the title of each payment option",
             "initial_value": "20",
@@ -1159,7 +1165,7 @@
             "initial_value": "14"
           },
           {
-            "key": "payment_option_description_size_pad",
+            "key": "payment_option_description_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used in the description of each payment option (below the title and above the button for selecting the given payment option)",
             "initial_value": "14",
@@ -1255,7 +1261,7 @@
             ]
           },
           {
-            "key": "legal_details_size_pad",
+            "key": "legal_details_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used for the payment options screen legal text",
             "conditional_fields": [
@@ -1377,7 +1383,7 @@
             "initial_value": "25"
           },
           {
-            "key": "confirmation_title_size_pad",
+            "key": "confirmation_title_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used as the title of confirmation screens",
             "initial_value": "25"
@@ -1405,7 +1411,7 @@
             "initial_value": "20"
           },
           {
-            "key": "confirmation_description_size_pad",
+            "key": "confirmation_description_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used in the description of confirmation screens (below the title and above the button)",
             "initial_value": "20"
@@ -1439,7 +1445,7 @@
             "initial_value": "14"
           },
           {
-            "key": "confirmation_button_size_pad",
+            "key": "confirmation_button_size_tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the Confirmation Button Text",
             "initial_value": "14"
