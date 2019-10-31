@@ -6,6 +6,7 @@ import com.applicaster.loader.LoadersConstants
 import com.applicaster.loader.json.APAccountLoader
 import com.applicaster.util.AppData
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import kotlinx.coroutines.experimental.Deferred
 import okhttp3.OkHttpClient
@@ -20,6 +21,9 @@ import retrofit2.http.Url
 interface ScreenMetaDataService {
     @GET
     fun loadScreensJson(@Url url: String): Deferred<Response<List<ScreenData>>>
+
+    @GET
+    fun loadAuthInputFieldsJson(@Url url: String): Deferred<Response<JsonObject>>
 }
 
 class ScreensDataLoader {
@@ -55,6 +59,7 @@ class ScreensDataLoader {
     private fun parseScreenConfig(config: Map<String, Any>?): Map<String, String>? {
         //transform MutableMap<Any?, Any?>? to Map<String, String>?
         return config?.entries?.associate { entry ->
+            //do not remove ? save calls - incorrect transform will occur
             entry.key to entry?.value?.toString()
         }
     }
@@ -86,9 +91,29 @@ class ScreensDataLoader {
             }
 
         } catch (t: Throwable) {
-            t.stackTrace
             Log.e(TAG, t.message)
         }
         return mapOf()
+    }
+
+    suspend fun loadAuthFieldsJson(url: String): String {
+        //recreate service to load auth_input_fields_config
+        retrofitService = retrofitBuilder.apply {
+            addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
+            addCallAdapterFactory(CoroutineCallAdapterFactory())
+            client(getHttpClient())
+        }.build().create(ScreenMetaDataService::class.java)
+
+        var result = ""
+        try {
+            val response = retrofitService?.loadAuthInputFieldsJson(url)?.await()
+            if (response?.isSuccessful == true) {
+                result =  response.body()?.toString() ?: ""
+            }
+
+        } catch (t: Throwable) {
+            Log.e(TAG, t.message)
+        }
+        return result
     }
 }

@@ -1,0 +1,57 @@
+{
+   "Sign-up":[
+      {
+         "type":"EMAIL",
+         "key":"email",
+         "title":"Email",
+         "hint":"Password-Email-999999999999999999999999",
+         "mandatory":true
+      },
+      {
+         "type":"NUMBER",
+         "key":"phone",
+         "title":"Phone number",
+         "hint":"Phone number",
+         "mandatory":false
+      },
+      {
+         "type":"PASSWORD",
+         "key":"password",
+         "title":"Password",
+         "hint":"Password-Email",
+         "mandatory":true
+      }
+   ],
+   "Login":[
+      {
+         "type":"EMAIL",
+         "key":"email",
+         "title":"Email",
+         "hint":"Email",
+         "mandatory":true
+      },
+      {
+         "type":"PASSWORD",
+         "key":"password",
+         "title":"Password",
+         "hint":"Password-Email",
+         "mandatory":true
+      }
+   ],
+   "Password-reset":[
+      {
+         "type":"EMAIL",
+         "key":"email",
+         "title":"Email",
+         "hint":"Email",
+         "mandatory":false
+      },
+      {
+         "type":"NUMBER",
+         "key":"phone",
+         "title":"Phone number",
+         "hint":"Phone number",
+         "mandatory":false
+      }
+   ]
+}

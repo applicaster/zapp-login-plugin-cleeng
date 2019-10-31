@@ -74,11 +74,25 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         executeRequest {
             val pluginConfig = screenLoader.loadScreensData()
             if (pluginConfig != null)
-                Session.pluginConfigurator = PluginConfigurator(pluginConfig)
+                loadAuthConfigJson(screenLoader, pluginConfig)
+
             if (context != null && listener != null)
                 cleengService.handleStartupHook(context, listener)
         }
         Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
+    }
+
+    private suspend fun loadAuthConfigJson(screenLoader: ScreensDataLoader, pluginConfig: Map<String, String>?) {
+            val key = "authentication_input_fields"
+            if (pluginConfig?.containsKey(key) == true) {
+                val authConfigLink = pluginConfig[key]
+                authConfigLink?.let {
+                    val authFields = screenLoader.loadAuthFieldsJson(it)
+                    val mutableConfig = pluginConfig.toMutableMap()
+                    mutableConfig[key] = authFields
+                    Session.pluginConfigurator = PluginConfigurator(mutableConfig)
+                }
+            }
     }
 
     override fun getToken(): String = cleengService.getUserToken()
