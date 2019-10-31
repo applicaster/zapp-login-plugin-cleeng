@@ -16,12 +16,15 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Url
+import java.net.URL
 
 
 interface ScreenMetaDataService {
     @GET
     fun loadScreensJson(@Url url: String): Deferred<Response<List<ScreenData>>>
+}
 
+interface AuthConfigLoaderService {
     @GET
     fun loadAuthInputFieldsJson(@Url url: String): Deferred<Response<JsonObject>>
 }
@@ -35,16 +38,17 @@ class ScreensDataLoader {
     private val httpClient: OkHttpClient.Builder = OkHttpClient.Builder()
     private var retrofitBuilder: Retrofit.Builder = Retrofit.Builder()
 
-    private var retrofitService: ScreenMetaDataService? = null
+    private var screenMetadataService: ScreenMetaDataService? = null
+    private var authInputFieldsLoaderService: AuthConfigLoaderService? = null
 
-    private fun createService(baseUrl: String): ScreenMetaDataService {
+    private fun <S> createRetrofitService(baseUrl: String, serviceClass: Class<S>): S {
         retrofit = retrofitBuilder.apply {
-            baseUrl("$baseUrl/")
+            baseUrl(baseUrl)
             addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
             addCallAdapterFactory(CoroutineCallAdapterFactory())
             client(getHttpClient())
         }.build()
-        return retrofit.create(ScreenMetaDataService::class.java)
+        return retrofit.create(serviceClass)
     }
 
     private fun getHttpClient(): OkHttpClient {
@@ -78,11 +82,11 @@ class ScreensDataLoader {
             metaData
         )
         val builder = ScreenUrlBuilder(zappMetaData)
-
-        retrofitService = createService(builder.baseUrl)
+        val baseUrl = "${builder.baseUrl}/"
+        screenMetadataService = createRetrofitService(baseUrl, ScreenMetaDataService::class.java)
 
         try {
-            val response = retrofitService?.loadScreensJson(builder.path)?.await()
+            val response = screenMetadataService?.loadScreensJson(builder.path)?.await()
             val screensDataList: List<ScreenData>? = response?.body()
             screensDataList?.forEach {
                 if (it.type?.contains(cleengCamScreenType, ignoreCase = true) == true) {
@@ -98,15 +102,12 @@ class ScreensDataLoader {
 
     suspend fun loadAuthFieldsJson(url: String): String {
         //recreate service to load auth_input_fields_config
-        retrofitService = retrofitBuilder.apply {
-            addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            addCallAdapterFactory(CoroutineCallAdapterFactory())
-            client(getHttpClient())
-        }.build().create(ScreenMetaDataService::class.java)
-
+        val decodedUrl = URL(url)
+        val baseUrl = "${decodedUrl.protocol}://${decodedUrl.host}"
+        authInputFieldsLoaderService = createRetrofitService(baseUrl, AuthConfigLoaderService::class.java)
         var result = ""
         try {
-            val response = retrofitService?.loadAuthInputFieldsJson(url)?.await()
+            val response = authInputFieldsLoaderService?.loadAuthInputFieldsJson(url)?.await()
             if (response?.isSuccessful == true) {
                 result =  response.body()?.toString() ?: ""
             }

@@ -22,6 +22,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     private val TAG = CleengLoginPlugin::class.java.simpleName
 
     private val cleengService: CleengService by lazy { CleengService() }
+    private val screenLoader: ScreensDataLoader by lazy { ScreensDataLoader() }
 
     private lateinit var hookListener: HookScreenListener
 
@@ -70,11 +71,10 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     }
 
     override fun executeOnStartup(context: Context?, listener: HookListener?) {
-        val screenLoader = ScreensDataLoader()
         executeRequest {
             val pluginConfig = screenLoader.loadScreensData()
             if (pluginConfig != null)
-                loadAuthConfigJson(screenLoader, pluginConfig)
+                loadAuthConfigJson(pluginConfig)
 
             if (context != null && listener != null)
                 cleengService.handleStartupHook(context, listener)
@@ -82,17 +82,17 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
     }
 
-    private suspend fun loadAuthConfigJson(screenLoader: ScreensDataLoader, pluginConfig: Map<String, String>?) {
-            val key = "authentication_input_fields"
-            if (pluginConfig?.containsKey(key) == true) {
-                val authConfigLink = pluginConfig[key]
-                authConfigLink?.let {
-                    val authFields = screenLoader.loadAuthFieldsJson(it)
-                    val mutableConfig = pluginConfig.toMutableMap()
-                    mutableConfig[key] = authFields
-                    Session.pluginConfigurator = PluginConfigurator(mutableConfig)
-                }
+    private suspend fun loadAuthConfigJson(pluginConfig: Map<String, String>?) {
+        val key = "authentication_input_fields"
+        if (pluginConfig?.containsKey(key) == true) {
+            val authConfigLink = pluginConfig[key]
+            authConfigLink?.let {
+                val authFields = screenLoader.loadAuthFieldsJson(it)
+                val mutableConfig = pluginConfig.toMutableMap()
+                mutableConfig[key] = authFields
+                Session.pluginConfigurator = PluginConfigurator(mutableConfig)
             }
+        }
     }
 
     override fun getToken(): String = cleengService.getUserToken()
@@ -141,16 +141,18 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         hookProps: Map<String, Any>?
     ) {
         this.hookListener = hookListener
-        val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
-        fetchPluginConfig()
-        cleengService.handleLogin(dataSource, this, context)
+        executeRequest {
+            val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
+            fetchPluginConfig()
+            cleengService.handleLogin(dataSource, this, context)
+        }
         Session.analyticsDataProvider.trigger = Trigger.TAP_SELL
     }
 
-    private fun fetchPluginConfig() {
+    private suspend fun fetchPluginConfig() {
         val pluginConfig = getPluginConfiguration()
         if (pluginConfig != null)
-            Session.pluginConfigurator = PluginConfigurator(pluginConfig)
+            loadAuthConfigJson(pluginConfig)
     }
 
     private fun getPluginConfiguration(): Map<String, String>? {
