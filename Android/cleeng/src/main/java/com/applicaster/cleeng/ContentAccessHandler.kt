@@ -165,7 +165,6 @@ class ContentAccessHandler(private val cleengService: CleengService) {
         Session.analyticsDataProvider.apply {
             this.entityType = entityType
             this.entityName = entityName
-            this.trigger = Trigger.APP_LAUNCH
         }
     }
 

@@ -71,6 +71,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     }
 
     override fun executeOnStartup(context: Context?, listener: HookListener?) {
+        Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
         executeRequest {
             val pluginConfig = screenLoader.loadScreensData()
             if (pluginConfig != null)
@@ -79,7 +80,6 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
             if (context != null && listener != null)
                 cleengService.handleStartupHook(context, listener)
         }
-        Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
     }
 
     private suspend fun loadAuthConfigJson(pluginConfig: Map<String, String>?) {
@@ -140,13 +140,13 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         hookListener: HookScreenListener,
         hookProps: Map<String, Any>?
     ) {
+        Session.analyticsDataProvider.trigger = Trigger.TAP_SELL
         this.hookListener = hookListener
         executeRequest {
             val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
             fetchPluginConfig()
             cleengService.handleLogin(dataSource, this, context)
         }
-        Session.analyticsDataProvider.trigger = Trigger.TAP_SELL
     }
 
     private suspend fun fetchPluginConfig() {
