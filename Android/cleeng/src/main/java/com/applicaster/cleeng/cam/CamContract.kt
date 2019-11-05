@@ -5,12 +5,12 @@ import com.android.billingclient.api.Purchase
 import com.applicaster.authprovider.AuthenticationProviderUtil
 import com.applicaster.cam.*
 import com.applicaster.cam.analytics.AnalyticsUtil
+import com.applicaster.cam.analytics.PurchaseEntityType
 import com.applicaster.cam.analytics.PurchaseType
 import com.applicaster.cam.params.billing.BillingOffer
 import com.applicaster.cam.params.billing.ProductType
 import com.applicaster.cleeng.CleengService
 import com.applicaster.cleeng.Session
-import com.applicaster.cleeng.analytics.AnalyticsDataProvider
 import com.applicaster.cleeng.data.Offer
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.error.WebServiceError
@@ -367,13 +367,14 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         subscriptionsData?.forEach {
             val purchaseData = PurchaseData(
                     it.title.orEmpty(),
-                    it.price?.toString() ?: AnalyticsUtil.KEY_NON_PROVIDED,
+                    it.price?.toString() ?: AnalyticsUtil.KEY_NONE_PROVIDED,
                     it.description.orEmpty(),
                     it.androidProductId.orEmpty(),
                     it.period.orEmpty(),
                     if (it.period.isNullOrEmpty()) PurchaseType.CONSUMABLE else PurchaseType.SUBSCRIPTION,
                     it.freeDays.orEmpty(),
-                    Session.analyticsDataProvider.entityType
+                    if (it.accessToTags?.isNotEmpty() == true)
+                        PurchaseEntityType.CATEGORY.value else PurchaseEntityType.VOD_ITEM.value
             )
             Session.analyticsDataProvider.purchaseData.add(purchaseData)
         }
