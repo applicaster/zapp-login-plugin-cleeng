@@ -24,7 +24,14 @@ class ContentAccessHandler(private val cleengService: CleengService) {
      */
     fun setSessionParams(isAuthRequired: Boolean, parsedProductIds: List<String>) {
         Session.availableProductIds.clear()
-        Session.availableProductIds.addAll(parsedProductIds)
+        //check if session started on app launch or tap cell and state of storefront on launch
+        if (
+            (Session.triggerStatus == Session.TriggerStatus.TAP_CELL)
+            || (Session.triggerStatus == Session.TriggerStatus.APP_LAUNCH
+                    && Session.pluginConfigurator?.isPresentStorefrontOnLaunch() == true)
+        ) {
+            Session.availableProductIds.addAll(parsedProductIds)
+        }
 
         // constructing flow based on content data
         val productsOption = Purchase.fromValue(Session.availableProductIds)

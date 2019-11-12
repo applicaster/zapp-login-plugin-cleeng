@@ -71,6 +71,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     }
 
     override fun executeOnStartup(context: Context?, listener: HookListener?) {
+        Session.triggerStatus = Session.TriggerStatus.APP_LAUNCH
         Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
         executeRequest {
             val pluginConfig = screenLoader.loadScreensData()
@@ -140,6 +141,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         hookListener: HookScreenListener,
         hookProps: Map<String, Any>?
     ) {
+        Session.triggerStatus = Session.TriggerStatus.TAP_CELL
         Session.analyticsDataProvider.trigger = Trigger.TAP_SELL
         this.hookListener = hookListener
         executeRequest {

@@ -26,6 +26,9 @@ class PluginConfigurator(private val pluginConfig: Map<String, String>) {
         }
     }
 
+    fun isPresentStorefrontOnLaunch(): Boolean =
+        pluginConfig.getValue(KEY_PRESENT_STOREFRONT_UPON_LAUNCH).toBoolean()
+
     private fun getOrDefault(key: String) = getOrEmpty(key).orEmpty()
 
     private fun getOrEmpty(key: String): String? {
@@ -43,3 +46,4 @@ const val KEY_ERROR_DEFAULT = "default_alert_text"
 const val KEY_ERROR_NO_EXISTING_USER = "nonexistent_user_alert_text"
 const val KEY_ERROR_USER_ALREADY_EXISTS = "existing_user_alert_text"
 const val KEY_ERROR_CREDENTIALS = "invalid_credentials_alert_text"
+const val KEY_PRESENT_STOREFRONT_UPON_LAUNCH = "present_storefront_upon_launch"

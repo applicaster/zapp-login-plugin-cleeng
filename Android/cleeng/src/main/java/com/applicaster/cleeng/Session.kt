@@ -21,7 +21,10 @@ object Session {
 
     var pluginConfigurator: PluginConfigurator? = null
 
+    var triggerStatus: TriggerStatus = TriggerStatus.NOT_SET
+
     private var camFlow: CamFlow = CamFlow.EMPTY
+
 
     fun setUserOffers(offers: ArrayList<Offer>) {
         user?.userOffers = offers
@@ -58,5 +61,11 @@ object Session {
         pluginConfigurator = null
         analyticsDataProvider.dropAllData()
         availableProductIds.clear()
+    }
+
+    enum class TriggerStatus {
+        APP_LAUNCH,
+        TAP_CELL,
+        NOT_SET
     }
 }
