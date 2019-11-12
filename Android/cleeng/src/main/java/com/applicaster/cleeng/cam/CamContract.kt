@@ -109,11 +109,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
-                    callback.onActionSuccess()
+                    callback.onFacebookAuthSuccess()
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure(getErrorMessage(result.value))
+                    callback.onFacebookAuthFailure(getErrorMessage(result.value))
                 }
             }
         }
@@ -163,11 +163,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     if (responseDataResult != null && responseDataResult.isNotEmpty())
                         cleengService.parseAuthResponse(responseDataResult)
-                    callback.onActionSuccess()
+                    callback.onFacebookAuthSuccess()
                 }
 
                 is Result.Failure -> {
-                    callback.onFailure(getErrorMessage(result.value))
+                    callback.onFacebookAuthFailure(getErrorMessage(result.value))
                 }
             }
         }

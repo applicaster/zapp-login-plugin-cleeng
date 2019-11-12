@@ -12,8 +12,8 @@
   "platform": "android",
   "author_name": "Alex Khomich, Denis Razumeev",
   "author_email": "a.khomich@applicaster.com",
-  "manifest_version": "1.0.0",
-  "dependency_version": "1.0.0",
+  "manifest_version": "1.0.1",
+  "dependency_version": "1.0.1",
   "name": "Cleeng Login and Payments",
   "description": "Cleeng Login and Payments",
   "cover_image": "",
@@ -299,38 +299,38 @@
                   "require_when_specified_on_the_data_source"
                 ],
                 "key": "general/authentication_requirement"
-              }
-            ]
-          },
-          {
-            "key": "input_field_label_size_tablet",
-            "type": "number_input",
-            "label_tooltip": "The font-size (for tablets) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
-            "initial_value": "13",
-            "conditional_fields": [
+              },
               {
-                "condition_value": [
-                  "always_require",
-                  "require_on_all_purchasable_items",
-                  "require_when_specified_on_the_data_source"
-                ],
-                "key": "general/authentication_requirement"
-              }
-            ]
-          },
-          {
-            "key": "input_field_label_color",
-            "type": "color_picker",
-            "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
-            "initial_value": "#4a4a4a",
-            "conditional_fields": [
+                "key": "input_field_label_size_tablet",
+                "type": "number_input",
+                "label_tooltip": "The font-size (for tablets) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+                "initial_value": "13",
+                "conditional_fields": [
+                  {
+                    "condition_value": [
+                      "always_require",
+                      "require_on_all_purchasable_items",
+                      "require_when_specified_on_the_data_source"
+                    ],
+                    "key": "general/authentication_requirement"
+                  }
+                ]
+              },
               {
-                "condition_value": [
-                  "always_require",
-                  "require_on_all_purchasable_items",
-                  "require_when_specified_on_the_data_source"
-                ],
-                "key": "general/authentication_requirement"
+                "key": "input_field_label_color",
+                "type": "color_picker",
+                "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+                "initial_value": "#4a4a4a",
+                "conditional_fields": [
+                  {
+                    "condition_value": [
+                      "always_require",
+                      "require_on_all_purchasable_items",
+                      "require_when_specified_on_the_data_source"
+                    ],
+                    "key": "general/authentication_requirement"
+                  }
+                ]
               }
             ]
           },
