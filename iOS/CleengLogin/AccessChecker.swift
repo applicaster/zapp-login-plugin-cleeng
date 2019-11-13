@@ -51,12 +51,26 @@ class AccessChecker {
                 isTriggerOnAppLaunch = (str == "1")
             }
         }
+        
         var shouldPresentStorefront = false
-        if let startupAuthIDs = dictionary?["app_level_product_ids"] as? String {
+        
+        if let storefrontOnAppLaunch = dictionary?["present_storefront_upon_launch"] {
+            if let flag = storefrontOnAppLaunch as? Bool {
+                shouldPresentStorefront = flag
+            } else if let num = storefrontOnAppLaunch as? Int {
+                shouldPresentStorefront = (num == 1)
+            } else if let str = storefrontOnAppLaunch as? String {
+                shouldPresentStorefront = (str == "1")
+            }
+        }
+        
+        if let startupAuthIDs = dictionary?["app_level_product_ids"] as? String, shouldPresentStorefront {
             let ids = startupAuthIDs.split(separator: ",").map(String.init)
             if !ids.isEmpty {
                 shouldPresentStorefront = true
                 setItemAuthIDs(from: ids)
+            } else {
+                shouldPresentStorefront = false
             }
         }
         
