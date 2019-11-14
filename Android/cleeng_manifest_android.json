@@ -400,6 +400,7 @@
           },
           {
             "key": "prompt_color",
+            "label": "Prompt Font Color",
             "type": "color_picker",
             "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-color used in the prompt prior to the link for such scenarios.</p>",
             "initial_value": "#ffffff"
@@ -430,6 +431,7 @@
           },
           {
             "key": "link_color",
+            "label": "Link Font Color",
             "type": "color_picker",
             "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size used for such linkable text in the gateway screens.",
             "initial_value": "#ffffff"
