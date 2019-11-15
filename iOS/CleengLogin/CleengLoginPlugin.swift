@@ -121,27 +121,21 @@ typealias OfferID = String
             completion()
             return
         }
-        networkAdapter.extendToken(token: savedLoginToken, completion: { (result) in
-            switch result {
-            case .success(let data):
-                _ = self.parseAuthTokensResponse(json: data)
-            case .failure:
-                break
-            }
+        
+        networkAdapter.extendToken(token: savedLoginToken) { _ in
             completion()
-        })
+        }
     }
     
     private func authorize(api: CleengAPI, completion: @escaping (CAM.Result<Void>) -> Void) {
-        networkAdapter.authorize(apiRequest: api, completion: { (result) in
+        networkAdapter.authorize(apiRequest: api) { (result) in
             switch result {
-            case .success(let data):
-                let isParsed = self.parseAuthTokensResponse(json: data)
-                isParsed == true ? completion(.success) : completion(.failure(CleengError.authTokenNotParsed))
+            case .success:
+                completion(.success)
             case .failure(let error):
                 completion(.failure(error))
             }
-        })
+        }
     }
 
     private func errorMessage() -> (ErrorCodes) -> String {
@@ -285,27 +279,7 @@ typealias OfferID = String
         }
         return cleengOffers
     }
-    
-    private func parseAuthTokensResponse(json: Data) -> Bool {
-        guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: json) else {
-            return false
-        }
-        for item in cleengTokens {
-            if item.offerID.isEmpty {
-                CleengLoginPlugin.userToken = item.token // if offerID empty than we retrieve user token
-                UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
-            } else {
-                if let authID = item.authID {
-                    AccessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
-                                                                 //subscription token in dicrionary by authId
-                    APAuthorizationManager.sharedInstance().setAuthorizationToken(item.token,
-                                                                                  withAuthorizationProviderID: authID) //set auth token for auth id. Need for applicaster player.
-                }
-            }
-        }
-        return true
-    }
-    
+
     // MARK: - ZPScreenHookAdapterProtocol
     
     public func requestScreenPluginPresentation(completion: @escaping (Bool) -> Void) {

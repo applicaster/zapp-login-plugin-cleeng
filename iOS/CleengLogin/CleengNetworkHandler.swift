@@ -20,15 +20,26 @@ class CleengNetworkHandler {
         self.publisherID = publisherID
     }
     
-    func authorize(apiRequest: CleengAPI, completion: @escaping (CleengAPIResult) -> Void) {
+    func authorize(apiRequest: CleengAPI, completion: @escaping (Result<Void, Error>) -> Void) {
         isPerformingAuthorizationFlow = true
-        let authorizationCompletion: (CleengAPIResult) -> Void = { result in
-            self.isPerformingAuthorizationFlow = false
-            completion(result)
-        }
+
         switch apiRequest {
         case .login, .loginWithFacebook, .register, .registerWithFacebook:
-            performRequest(api: apiRequest, completion: authorizationCompletion)
+            performRequest(api: apiRequest) { (result) in
+                self.isPerformingAuthorizationFlow = false
+                
+                switch result {
+                case .success(let data):
+                    let isParsed = self.parseAuthTokensResponse(json: data)
+                    if isParsed {
+                        completion(.success)
+                    } else {
+                        completion(.failure(CleengError.authTokenNotParsed))
+                    }
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+            }
         default:
             assert(false, "Wrong API passed to authorize")
         }
@@ -39,14 +50,21 @@ class CleengNetworkHandler {
         performRequest(api: api, completion: completion)
     }
     
-    func extendToken(token: String, completion: @escaping (CleengAPIResult) -> Void) {
+    func extendToken(token: String, completion: @escaping (Result<Void, Error>) -> Void) {
         isPerformingAuthorizationFlow = true
-        let extendTokenCompletion: (CleengAPIResult) -> Void = { result in
-            self.isPerformingAuthorizationFlow = false
-            completion(result)
-        }
+
         let api = CleengAPI.extendToken(publisherID: publisherID, token: token)
-        performRequest(api: api, completion: extendTokenCompletion)
+        performRequest(api: api) { (result) in
+            self.isPerformingAuthorizationFlow = false
+            
+            switch result {
+            case .success(let data):
+                self.parseAuthTokensResponse(json: data)
+                completion(.success)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
     func subscriptions(token: String?, byAuthId: Int, offers: [String]?,
