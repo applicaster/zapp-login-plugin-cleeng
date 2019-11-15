@@ -1,6 +1,6 @@
 PODS:
   - Alamofire (4.8.2)
-  - ApplicasterIAP (0.0.3)
+  - ApplicasterIAP (0.0.4)
   - ApplicasterSDK (10.0.9):
     - Alamofire (= 4.8.2)
     - CocoaLumberjack/Swift (= 3.5.3)
@@ -17,20 +17,20 @@ PODS:
     - ZappPushPluginsSDK (~> 8.0.2)
   - ApplicasterUIKit (7.0.4):
     - ZappPlugins (~> 9.1.8)
-  - CAM (1.0.10):
+  - CAM (1.0.16):
     - ApplicasterIAP
     - ApplicasterSDK
     - ZappPlugins
-  - CleengLogin (0.0.11):
+  - CleengLogin (1.0.0):
     - Alamofire
-    - CAM
-    - ComponentsSDK
-    - ZappLoginPluginsSDK
+    - CAM (= 1.0.16)
+    - ComponentsSDK (= 12.1.3)
+    - ZappLoginPluginsSDK (= 8.0.3)
     - ZappPlugins
   - CocoaLumberjack/Core (3.5.3)
   - CocoaLumberjack/Swift (3.5.3):
     - CocoaLumberjack/Core
-  - ComponentsSDK (12.2.0):
+  - ComponentsSDK (12.1.3):
     - ApplicasterSDK (~> 10.0.8)
     - ApplicasterUIKit (~> 7.0.4)
     - ZappAnalyticsPluginsSDK (~> 8.0.4)
@@ -56,11 +56,11 @@ PODS:
     - ZappPlugins
   - ZappGeneralPluginsSDK (8.0.2):
     - ZappPlugins
-  - ZappLoginPluginsSDK (8.0.2):
+  - ZappLoginPluginsSDK (8.0.3):
     - Alamofire
     - ZappPlugins
-  - ZappNavigationBarPluginsSDK (8.0.1):
-    - ZappPlugins
+  - ZappNavigationBarPluginsSDK (8.0.2):
+    - ZappPlugins (~> 9.1.8)
   - ZappPlugins (9.1.9)
   - ZappPushPluginsSDK (8.0.2):
     - ZappPlugins
@@ -76,7 +76,6 @@ SPEC REPOS:
     - ZappAnalyticsPluginsSDK
     - ZappGeneralPluginsSDK
     - ZappLoginPluginsSDK
-    - ZappNavigationBarPluginsSDK
     - ZappPushPluginsSDK
   "git@github.com:applicaster/CocoaPods.git":
     - ApplicasterSDK
@@ -84,6 +83,8 @@ SPEC REPOS:
     - ComponentsSDK
     - TTTAttributedLabel
     - ZappPlugins
+  "git@github.com:applicaster/PluginsBuilderCocoaPods.git":
+    - ZappNavigationBarPluginsSDK
   https://github.com/cocoapods/specs.git:
     - Alamofire
     - CocoaLumberjack
@@ -102,13 +103,13 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
-  ApplicasterIAP: 3e02eab421049bae6a12e4dcfd03b467e7dac847
+  ApplicasterIAP: 7feda96b051aa4e6ab36d2bc1a59e643a1e331a5
   ApplicasterSDK: 8b7bd6161d5ceae9499563a98cd631302cd38f5c
   ApplicasterUIKit: 0636c94e9cbd1af7f212f4e3d0b3bc658110fb42
-  CAM: 38ba9245354452fd7a83fd4023a28807e19477d8
-  CleengLogin: 23f4dc4afbcef013019da142fa465e3d74f8652f
+  CAM: 9996623e41aead9a90a6e12a9af6c67f8cbd429d
+  CleengLogin: 446276b9e4651a9b9fd7b7805564bb59831de9fc
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
-  ComponentsSDK: f821147240dd804afa92ef16a87dad43deadfd02
+  ComponentsSDK: ad295a25fe3782654ceae46002a584f3b7cdb898
   FBSDKCoreKit: 5154c35d9058fd7dfa0445ba19e194c4b172fc32
   FBSDKLoginKit: dc98b6bf12334f1a42f28d0457fffc9aa3d1eca5
   FBSDKShareKit: 6f9c622f9a5d051f43f2dab6f753d5198422b89c
@@ -118,8 +119,8 @@ SPEC CHECKSUMS:
   TwitterKit: 5e4f41d70b9abdb41df5467f52d7aa2c0fd26ebb
   ZappAnalyticsPluginsSDK: 6f8edcddc12ae4001098a3fa6fe87e6fe1a013bd
   ZappGeneralPluginsSDK: df966c141975d4b797f147b6c39e972d18aaa4f5
-  ZappLoginPluginsSDK: 7afb61fa738f1f73666a8250bd14b5dda8cc8f87
-  ZappNavigationBarPluginsSDK: 99ac8c1508387f03ea5cc5fd33402ffa8f00bbc9
+  ZappLoginPluginsSDK: 0759a44470bde15635ec97696d0815154ab4a26a
+  ZappNavigationBarPluginsSDK: 19d9b826dfcdfedc328da7c0615d00ce64a032cc
   ZappPlugins: 2bc8f25c9e28711ed5b8754cf1082e7cbc8748bb
   ZappPushPluginsSDK: 2062e2487f3ac877c0ab1a807d1a7f8d357bd333
 
