@@ -501,38 +501,36 @@ extension CleengLoginPlugin: CAMDelegate {
                                receipt: receipt) { (apiResult) in
             switch apiResult {
             case .success(let data):
-                let decoder = JSONDecoder()
-                if let restoredOffers = try? decoder.decode([RestoredCleengOffer].self, from: data) {
-                    let uniqueOffers = Dictionary(grouping: restoredOffers, by: { $0.offerId }).keys
-                    
-                    var restoreError: Error?
-                    var isRestoreAtLeastOneItem = false
-                    let group = DispatchGroup()
-                    
-                    for offer in uniqueOffers {
-                        group.enter()
-                        
-                        self.verifyOnCleeng(offerId: offer, completion: { (result) in
-                            switch result {
-                            case .success:
-                                isRestoreAtLeastOneItem = true
-                            case .failure(let error):
-                                restoreError = error
-                            }
-                            group.leave()
-                        })
-                    }
-                    
-                    group.notify(queue: .main, execute: {
-                        if let error = restoreError, isRestoreAtLeastOneItem == false {
-                            completion(.failure(error))
-                        } else {
-                            completion(.success(()))
-                        }
-                    })
-                } else {
+                guard let restoredOffers = try? JSONDecoder().decode([RestoredCleengOffer].self,
+                                                                     from: data) else {
                     completion(.failure(CleengError.serverError))
+                    return
                 }
+                
+                var restoreError: Error?
+                var isRestoreAtLeastOneItem = false
+                let group = DispatchGroup()
+                
+                let uniqueOffers = Dictionary(grouping: restoredOffers, by: { $0.offerId }).keys
+                uniqueOffers.forEach({ (offerId) in
+                    self.verifyOnCleeng(offerId: offerId, completion: { result in
+                        switch result {
+                        case .success:
+                            isRestoreAtLeastOneItem = true
+                        case .failure(let error):
+                            restoreError = error
+                        }
+                        group.leave()
+                    })
+                })
+                
+                group.notify(queue: .main, execute: {
+                    if let error = restoreError, isRestoreAtLeastOneItem == false {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                })
             case .failure(let error):
                 completion(.failure(error))
             }
