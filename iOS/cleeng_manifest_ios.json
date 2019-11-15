@@ -11,10 +11,10 @@
   "platform": "ios",
   "author_name": "Roman Karpievich, Egor Brel",
   "author_email": "r.karpievich@applicaster.com",
-  "manifest_version": "0.0.21",
-  "dependency_version": "0.0.18",
-  "name": "Cleeng Test",
-  "description": "Cleeng Test",
+  "manifest_version": "1.0.1",
+  "dependency_version": "1.0.0",
+  "name": "Cleeng Login and Payments",
+  "description": "",
   "cover_image": "",
   "type": "login",
   "screen": true,
@@ -196,18 +196,21 @@
           },
           {
             "key": "screen_title_size_phone",
+            "label": "Screen Title Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) that will be used for the text at the top of each screen in the gateway process",
             "initial_value": "19"
           },
           {
             "key": "screen_title_size_tablet",
+            "label": "Screen Title Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) that will be used for the text at the top of each screen in the gateway process",
             "initial_value": "19"
           },
           {
             "key": "screen_title_color",
+            "label": "Screen Title Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color that will be used for the text at the top of each screen in the gateway process",
             "initial_value": "#ffffff"
@@ -224,25 +227,28 @@
           },
           {
             "key": "screen_description_size_phone",
+            "label": "Screen Description Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
             "initial_value": "13"
           },
           {
             "key": "screen_description_size_tablet",
+            "label": "Screen Description Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
             "initial_value": "13"
           },
           {
             "key": "screen_description_color",
+            "label": "Screen Description Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
             "initial_value": "#ffffff"
           },
           {
             "key": "authentication_input_fields",
-            "type": "text_input",
+            "type": "uploader",
             "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://github.com/applicaster/applicaster-cam-framework/wiki/Authentication-Fields-Configuration)",
             "conditional_fields": [
               {
@@ -287,6 +293,7 @@
           },
           {
             "key": "input_field_label_size_phone",
+            "label": "Input Field Label Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
             "initial_value": "13",
@@ -298,38 +305,40 @@
                   "require_when_specified_on_the_data_source"
                 ],
                 "key": "general/authentication_requirement"
-              },
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_size_tablet",
+            "label": "Input Field Label Font Size Tablet",
+            "type": "number_input",
+            "label_tooltip": "The font-size (for tablets) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+            "initial_value": "13",
+            "conditional_fields": [
               {
-                "key": "input_field_label_size_tablet",
-                "type": "number_input",
-                "label_tooltip": "The font-size (for tablets) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
-                "initial_value": "13",
-                "conditional_fields": [
-                  {
-                    "condition_value": [
-                      "always_require",
-                      "require_on_all_purchasable_items",
-                      "require_when_specified_on_the_data_source"
-                    ],
-                    "key": "general/authentication_requirement"
-                  }
-                ]
-              },
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_color",
+            "label": "Input Field Label Font Color",
+            "type": "color_picker",
+            "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+            "initial_value": "#4a4a4a",
+            "conditional_fields": [
               {
-                "key": "input_field_label_color",
-                "type": "color_picker",
-                "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
-                "initial_value": "#4a4a4a",
-                "conditional_fields": [
-                  {
-                    "condition_value": [
-                      "always_require",
-                      "require_on_all_purchasable_items",
-                      "require_when_specified_on_the_data_source"
-                    ],
-                    "key": "general/authentication_requirement"
-                  }
-                ]
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
               }
             ]
           },
@@ -345,18 +354,21 @@
           },
           {
             "key": "action_button_size_phone",
+            "label": "Action Button Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
             "initial_value": "14"
           },
           {
             "key": "action_button_size_tablet",
+            "label": "Action Button Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
             "initial_value": "14"
           },
           {
             "key": "action_button_color",
+            "label": "Action Button Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color for the button in any screen of the gateway process which has one primary call-to-action button (e.g. login, sign-up, restore password)",
             "initial_value": "#ffffff"
@@ -373,18 +385,21 @@
           },
           {
             "key": "prompt_size_phone",
+            "label": "Prompt Font Size Phone",
             "type": "number_input",
             "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-size (for smartphones) used in the prompt prior to the link for such scenarios.</p>",
             "initial_value": "13"
           },
           {
             "key": "prompt_size_tablet",
+            "label": "Prompt Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-size (for tablets) used in the prompt prior to the link for such scenarios.</p>",
             "initial_value": "13"
           },
           {
             "key": "prompt_color",
+            "label": "Prompt Font Color",
             "type": "color_picker",
             "label_tooltip": "<p>One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Don’t have an account?” may appear before a link which leads to the sign-up screen.</p><p>This field will determine the font-color used in the prompt prior to the link for such scenarios.</p>",
             "initial_value": "#ffffff"
@@ -401,18 +416,21 @@
           },
           {
             "key": "link_size_phone",
+            "label": "Link Font Size Phone",
             "type": "number_input",
             "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size (for smartphones) used for such linkable text in the gateway screens.",
             "initial_value": "13"
           },
           {
             "key": "link_size_tablet",
+            "label": "Link Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size (for tablets) used for such linkable text in the gateway screens.",
             "initial_value": "13"
           },
           {
             "key": "link_color",
+            "label": "Link Font Color",
             "type": "color_picker",
             "label_tooltip": "One screen may present an option to lead to another screen or action. For example, on the login screen, the text “Sign Up” may be lead to the sign-up screen when tapped. This field will determine the font-size used for such linkable text in the gateway screens.",
             "initial_value": "#ffffff"
@@ -489,6 +507,7 @@
           },
           {
             "key": "alternative_authentication_separator_size_phone",
+            "label": "Alternative Authentication Separator Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) for the alternative authorization separator text.",
             "initial_value": "12",
@@ -503,6 +522,7 @@
           },
           {
             "key": "alternative_authentication_separator_size_tablet",
+            "label": "Alternative Authentication Separator Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the alternative authorization separator text.",
             "initial_value": "12",
@@ -517,6 +537,7 @@
           },
           {
             "key": "alternative_authentication_separator_color",
+            "label": "Alternative Authentication Separator Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color for the alternative authorization separator text.",
             "initial_value": "#ffffff",
@@ -571,6 +592,7 @@
           },
           {
             "key": "alternative_authentication_prompt_size_phone",
+            "label": "Alternative Authentication Prompt Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
             "conditional_fields": [
@@ -585,6 +607,7 @@
           },
           {
             "key": "alternative_authentication_prompt_size_tablet",
+            "label": "Alternative Authentication Prompt Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
             "conditional_fields": [
@@ -599,6 +622,7 @@
           },
           {
             "key": "alternative_authentication_prompt_color",
+            "label": "Alternative Authentication Prompt Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color prompting the user to use a third party option (e.g. Facebook) to login or sign-up.",
             "initial_value": "#ffffff",
@@ -793,6 +817,7 @@
           },
           {
             "key": "reset_password_size_phone",
+            "label": "Reset Password Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) for the text that will be displayed to prompt the user to restore their password",
             "initial_value": "11",
@@ -809,6 +834,7 @@
           },
           {
             "key": "reset_password_size_tablet",
+            "label": "Reset Password Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the text that will be displayed to prompt the user to restore their password",
             "initial_value": "11",
@@ -825,6 +851,7 @@
           },
           {
             "key": "reset_password_color",
+            "label": "Reset Password Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color for the text that will be displayed to prompt the user to restore their password",
             "initial_value": "#ffffff",
@@ -1083,6 +1110,7 @@
           },
           {
             "key": "payment_option_title_size_phone",
+            "label": "Payment Option Title Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) used in the title of each payment option",
             "initial_value": "20",
@@ -1097,6 +1125,7 @@
           },
           {
             "key": "payment_option_title_size_tablet",
+            "label": "Payment Option Title Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used in the title of each payment option",
             "initial_value": "20",
@@ -1111,6 +1140,7 @@
           },
           {
             "key": "payment_option_title_color",
+            "label": "Payment Option Title Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color used in the title of each payment option",
             "conditional_fields": [
@@ -1151,6 +1181,7 @@
           },
           {
             "key": "payment_option_description_size_phone",
+            "label": "Payment Option Description Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) used in the description of each payment option (below the title and above the button for selecting the given payment option)",
             "conditional_fields": [
@@ -1165,6 +1196,7 @@
           },
           {
             "key": "payment_option_description_size_tablet",
+            "label": "Payment Option Description Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used in the description of each payment option (below the title and above the button for selecting the given payment option)",
             "initial_value": "14",
@@ -1179,6 +1211,7 @@
           },
           {
             "key": "payment_option_description_color",
+            "label": "Payment Option Description Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color used in the description of each payment option (below the title and above the button for selecting the given payment option)",
             "conditional_fields": [
@@ -1247,6 +1280,7 @@
           },
           {
             "key": "legal_details_size_phone",
+            "label": "Legal Details Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) used for the payment options screen legal text",
             "initial_value": "10",
@@ -1261,6 +1295,7 @@
           },
           {
             "key": "legal_details_size_tablet",
+            "label": "Legal Details Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used for the payment options screen legal text",
             "conditional_fields": [
@@ -1275,6 +1310,7 @@
           },
           {
             "key": "legal_details_color",
+            "label": "Legal Details Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color used for the payment options screen legal text",
             "conditional_fields": [
@@ -1377,18 +1413,21 @@
           },
           {
             "key": "confirmation_title_size_phone",
+            "label": "Confirmation Title Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) used as the title of confirmation screens",
             "initial_value": "25"
           },
           {
             "key": "confirmation_title_size_tablet",
+            "label": "Confirmation Title Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used as the title of confirmation screens",
             "initial_value": "25"
           },
           {
             "key": "confirmation_title_color",
+            "label": "Confirmation Title Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color used as the title of confirmation screens",
             "initial_value": "#000000"
@@ -1405,18 +1444,21 @@
           },
           {
             "key": "confirmation_description_size_phone",
+            "label": "Confirmation Description Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) used in the description of confirmation screens (below the title and above the button)",
             "initial_value": "20"
           },
           {
             "key": "confirmation_description_size_tablet",
+            "label": "Confirmation Description Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) used in the description of confirmation screens (below the title and above the button)",
             "initial_value": "20"
           },
           {
             "key": "confirmation_description_color",
+            "label": "Confirmation Description Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color used in the description of confirmation screens (below the title and above the button)",
             "initial_value": "#000000"
@@ -1439,18 +1481,21 @@
           },
           {
             "key": "confirmation_button_size_phone",
+            "label": "Confirmation Button Font Size Phone",
             "type": "number_input",
             "label_tooltip": "The font-size (for smartphones) for the Confirmation Button Text",
             "initial_value": "14"
           },
           {
             "key": "confirmation_button_size_tablet",
+            "label": "Confirmation Button Font Size Tablet",
             "type": "number_input",
             "label_tooltip": "The font-size (for tablets) for the Confirmation Button Text",
             "initial_value": "14"
           },
           {
             "key": "confirmation_button_color",
+            "label": "Confirmation Button Font Color",
             "type": "color_picker",
             "label_tooltip": "The font-color for the Confirmation Button Text",
             "initial_value": "#ffffff"
@@ -1551,7 +1596,7 @@
     {
       "key": "ios_assets_bundle",
       "type": "uploader",
-      "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource <a href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'>here</a>."
+      "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource \u003ca href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'\u003ehere\u003c/a\u003e."
     }
   ],
   "hooks": {

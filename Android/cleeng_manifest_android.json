@@ -306,40 +306,40 @@
                   "require_when_specified_on_the_data_source"
                 ],
                 "key": "general/authentication_requirement"
-              },
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_size_tablet",
+            "label": "Input Field Label Font Size Tablet",
+            "type": "number_input",
+            "label_tooltip": "The font-size (for tablets) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
+            "initial_value": "13",
+            "conditional_fields": [
               {
-                "key": "input_field_label_size_tablet",
-                "label": "Input Field Label Font Size Tablet",
-                "type": "number_input",
-                "label_tooltip": "The font-size (for tablets) for the labels (aka “hints”) displayed within text input fields prior to the user starting to input a value.",
-                "initial_value": "13",
-                "conditional_fields": [
-                  {
-                    "condition_value": [
-                      "always_require",
-                      "require_on_all_purchasable_items",
-                      "require_when_specified_on_the_data_source"
-                    ],
-                    "key": "general/authentication_requirement"
-                  }
-                ]
-              },
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "input_field_label_color",
+            "label": "Input Field Label Font Color",
+            "type": "color_picker",
+            "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
+            "initial_value": "#4a4a4a",
+            "conditional_fields": [
               {
-                "key": "input_field_label_color",
-                "label": "Input Field Label Font Color",
-                "type": "color_picker",
-                "label_tooltip": "The font-color that will be used for the text describing the purpose of the given screen in the gateway process (below the title text). Note: Not all screens include description text.",
-                "initial_value": "#4a4a4a",
-                "conditional_fields": [
-                  {
-                    "condition_value": [
-                      "always_require",
-                      "require_on_all_purchasable_items",
-                      "require_when_specified_on_the_data_source"
-                    ],
-                    "key": "general/authentication_requirement"
-                  }
-                ]
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
               }
             ]
           },
