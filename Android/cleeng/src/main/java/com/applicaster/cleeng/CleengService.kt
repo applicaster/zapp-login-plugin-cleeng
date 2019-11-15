@@ -137,14 +137,14 @@ class CleengService {
     }
 
     fun getUserToken(): String {
-        if (Session.user?.token.isNullOrEmpty()) {
+        if (Session.userData.token.isNullOrEmpty()) {
             return preferences.getUserToken()
         }
-        return Session.user?.token.orEmpty()
+        return Session.userData.token.orEmpty()
     }
 
     fun saveUserToken(token: String) {
-        Session.user?.token = token
+        Session.userData.token = token
         preferences.saveUserToken(token)
     }
 
