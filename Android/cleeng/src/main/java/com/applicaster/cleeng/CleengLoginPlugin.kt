@@ -51,8 +51,28 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        context?.let {
-            cleengService.handleLogin(playable, this, it)
+        if (isTriggeredByComponent(additionalParams))
+            additionalParams?.let {
+                handleUserAccountComponentTrigger(callback, context)
+            }
+        else
+            context?.let { cleengService.handleLogin(playable, this, it) }
+    }
+
+    private fun isTriggeredByComponent(params: MutableMap<Any?, Any?>?) =
+        params?.containsKey(KEY_USER_ACCOUNT_TRIGGER) ?: false
+                && params?.get(KEY_USER_ACCOUNT_TRIGGER).toString().toBoolean()
+
+    private fun handleUserAccountComponentTrigger(
+        callback: LoginContract.Callback?,
+        context: Context?
+    ) {
+        val completionListener = HookListener { callback?.onResult(true) }
+
+        executeRequest {
+            context?.let {
+                cleengService.handleLaunchWithoutPlayable(it, completionListener, true)
+            }
         }
     }
 
@@ -74,12 +94,14 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         Session.triggerStatus = Session.TriggerStatus.APP_LAUNCH
         Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
         executeRequest {
-            val pluginConfig = screenLoader.loadScreensData()
-            if (pluginConfig != null)
-                loadAuthConfigJson(pluginConfig)
+            loadPluginConfig()
 
             if (context != null && listener != null)
-                cleengService.handleStartupHook(context, listener)
+                cleengService.handleLaunchWithoutPlayable(
+                    context,
+                    listener,
+                    Session.pluginConfigurator?.isTriggerOnAppLaunch() ?: false
+                )
         }
     }
 
@@ -116,6 +138,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     ) {
         Session.drop()
         cleengService.logout()
+        callback?.onResult(true)
     }
 
     override fun generateFragment(screenMap: HashMap<String, Any>?, dataSource: Serializable?): Fragment? =
@@ -146,16 +169,15 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         this.hookListener = hookListener
         executeRequest {
             val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
-            fetchPluginConfig()
+            val pluginConfig = getPluginConfiguration()
+            if (pluginConfig != null)
+                loadAuthConfigJson(pluginConfig)
             cleengService.handleLogin(dataSource, this, context)
         }
     }
 
-    private suspend fun fetchPluginConfig() {
-        val pluginConfig = getPluginConfiguration()
-        if (pluginConfig != null)
-            loadAuthConfigJson(pluginConfig)
-    }
+    private suspend fun loadPluginConfig() =
+        screenLoader.loadScreensData()?.let { loadAuthConfigJson(it) }
 
     private fun getPluginConfiguration(): Map<String, String>? {
         val fullPluginConfig =
@@ -180,4 +202,8 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     override fun isRecurringHook(): Boolean = true
 
     override fun shouldPresent(): Boolean = true
+
+    companion object {
+        const val KEY_USER_ACCOUNT_TRIGGER = "UserAccountTrigger"
+    }
 }

@@ -55,7 +55,7 @@ class CleengService {
      *                        +---------------+                                      no  -------> Launch CamFlow.AUTHENTICATION
      *                           no  ------------>X
      */
-    fun handleStartupHook(context: Context, listener: HookListener?) {
+    fun handleLaunchWithoutPlayable(context: Context, listener: HookListener?, isUITriggerEnabled: Boolean) {
         startUpHookListener = listener
         executeRequest {
             val result = networkHelper.extendToken(getUserToken())
@@ -63,7 +63,7 @@ class CleengService {
                 is Result.Success -> {
                     val responseDataResult: List<AuthResponseData>? = result.value
                     parseAuthResponse(responseDataResult.orEmpty())
-                    if (Session.pluginConfigurator?.isTriggerOnAppLaunch() == true) {
+                    if (isUITriggerEnabled) {
                         val availableProductsIds = mutableListOf<String>()
                         // we should filter product id's in case applicaster sends them as empty strings
                         Session.pluginConfigurator?.getAppLevelEntitlements()?.filterTo(availableProductsIds) {
@@ -86,7 +86,7 @@ class CleengService {
 
                 is Result.Failure -> {
                     // handle error and open loginEmail or sign up screen
-                    if (Session.pluginConfigurator?.isTriggerOnAppLaunch() == true) {
+                    if (isUITriggerEnabled) {
                         val appLevelEntitlements = mutableListOf<String>()
                         // we should filter entitlements in case applicaster sends them as empty strings
                         Session.pluginConfigurator?.getAppLevelEntitlements()?.filterTo(appLevelEntitlements) {
