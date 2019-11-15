@@ -68,11 +68,9 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         context: Context?
     ) {
         val completionListener = HookListener { callback?.onResult(true) }
-
-        executeRequest {
+        Session.triggerStatus = Session.TriggerStatus.USER_ACCOUNT_COMPONENT
             context?.let {
                 cleengService.handleLaunchWithoutPlayable(it, completionListener, true)
-            }
         }
     }
 

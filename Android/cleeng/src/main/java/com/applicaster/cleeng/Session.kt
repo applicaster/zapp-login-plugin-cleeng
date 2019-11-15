@@ -58,7 +58,6 @@ object Session {
 
     fun drop() {
         user = null
-        pluginConfigurator = null
         analyticsDataProvider.dropAllData()
         availableProductIds.clear()
     }
@@ -66,6 +65,7 @@ object Session {
     enum class TriggerStatus {
         APP_LAUNCH,
         TAP_CELL,
+        USER_ACCOUNT_COMPONENT,
         NOT_SET
     }
 }
