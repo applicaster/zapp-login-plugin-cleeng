@@ -10,7 +10,7 @@ import ZappLoginPluginsSDK
 import CAM
 import ComponentsSDK
 
-private let kCleengUserLoginToken = "CleengUserLoginToken"
+let kCleengUserLoginToken = "CleengUserLoginToken"
 
 typealias StoreID = String
 typealias OfferID = String
@@ -19,7 +19,7 @@ typealias OfferID = String
     
     public var screenPluginDelegate: ZPPlugableScreenDelegate?
     private var accessChecker = AccessChecker()
-    private static var userToken: String?
+    static var userToken: String?
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     private var offers: [CleengOffer] = []
     private var flowTrigger: Trigger = .appLaunch
@@ -142,44 +142,6 @@ typealias OfferID = String
                 completion(.failure(error))
             }
         })
-    }
-    
-    private func verifyOnCleeng(offerId: String, completion: @escaping (ItemPurchasingResult) -> Void) {
-        let timerStartTime = Date()
-        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
-            if Date().timeIntervalSince(timerStartTime) > 60 {
-                timer.invalidate()
-                let errorMessage = self.pluginConfiguration["default_alert_text"] as? String ?? ""
-                let error = RequestError(from: ErrorCodes.unknown, with: errorMessage)
-                completion(.failure(.serverDoesntVerifyPurchase(error)))
-                return
-            }
-            guard let userToken = CleengLoginPlugin.userToken else {
-                timer.invalidate()
-                completion(.failure(.authTokenNotParsed))
-                return
-            }
-            self.networkAdapter.extendToken(token: userToken, completion: { (result) in
-                switch result {
-                case .success(let data):
-                    let _ = self.parseAuthTokensResponse(json: data)
-                    guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: data) else {
-                        return
-                    }
-                    let isOfferVerified = cleengTokens.contains(where: { (item) -> Bool in
-                        return item.offerID == offerId
-                    })
-                    
-                    if isOfferVerified {
-                        timer.invalidate()
-                        completion(.success)
-                        return
-                    }
-                case .failure:
-                    break
-                }
-            })
-        }
     }
 
     private func errorMessage() -> (ErrorCodes) -> String {
@@ -455,20 +417,12 @@ extension CleengLoginPlugin: CAMDelegate {
                                     offerId: offerId,
                                     transactionId: transactionId,
                                     receiptData: purchasedItem.receipt,
-                                    isRestored: false) { (result) in
+                                    isRestored: false) { result in
                                         switch result {
                                         case .success:
-                                            self.verifyOnCleeng(offerId: offerId, completion: { result in
-                                                switch result {
-                                                case .success:
-                                                    completion(.success)
-                                                case .failure(let error):
-                                                    completion(.failure(error))
-                                                }
-                                            })
+                                            completion(.success)
                                         case .failure(let error):
                                             completion(.failure(error))
-                                            return
                                         }
         }
     }
@@ -484,42 +438,12 @@ extension CleengLoginPlugin: CAMDelegate {
         }
         
         let receipt = restoredItems.first!.receipt.base64EncodedString()
-        
         networkAdapter.restore(purchases: purchases,
-                               token: CleengLoginPlugin.userToken!,
-                               receipt: receipt) { (apiResult) in
-            switch apiResult {
-            case .success(let data):
-                guard let restoredOffers = try? JSONDecoder().decode([RestoredCleengOffer].self,
-                                                                     from: data) else {
-                    completion(.failure(CleengError.serverError))
-                    return
-                }
-                
-                var restoreError: Error?
-                var isRestoreAtLeastOneItem = false
-                let group = DispatchGroup()
-                
-                let uniqueOffers = Dictionary(grouping: restoredOffers, by: { $0.offerId }).keys
-                uniqueOffers.forEach({ (offerId) in
-                    self.verifyOnCleeng(offerId: offerId, completion: { result in
-                        switch result {
-                        case .success:
-                            isRestoreAtLeastOneItem = true
-                        case .failure(let error):
-                            restoreError = error
-                        }
-                        group.leave()
-                    })
-                })
-                
-                group.notify(queue: .main, execute: {
-                    if let error = restoreError, isRestoreAtLeastOneItem == false {
-                        completion(.failure(error))
-                    } else {
-                        completion(.success(()))
-                    }
-                })
+                               token: CleengLoginPlugin.userToken ?? "",
+                               receipt: receipt) { (result) in
+            switch result {
+            case .success:
+                completion(.success)
             case .failure(let error):
                 completion(.failure(error))
             }

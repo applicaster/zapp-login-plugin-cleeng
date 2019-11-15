@@ -8,6 +8,7 @@
 import Foundation
 import CAM
 import Alamofire
+import ApplicasterSDK
 
 class CleengNetworkHandler {
     var isPerformingAuthorizationFlow = false
@@ -57,26 +58,80 @@ class CleengNetworkHandler {
         performRequest(api: api, completion: completion)
     }
     
-    func purchaseItem(token: String?, offerId: String, transactionId: String, receiptData: Data,
-                      isRestored: Bool, completion: @escaping (CleengAPIResult) -> Void) {
+    func purchaseItem(token: String?,
+                      offerId: String,
+                      transactionId: String,
+                      receiptData: Data,
+                      isRestored: Bool, completion:  @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.purchaseItem(publisherID: publisherID,
                                          offerId: offerId,
                                          token: token ?? "",
                                          transactionId: transactionId,
                                          receiptData: receiptData,
                                          isRestored: isRestored)
-        performRequest(api: api, completion: completion)
+        performRequest(api: api) { (result) in
+            switch result {
+            case .success:
+                self.verify(purchase: offerId, completion: { result in
+                    switch result {
+                    case .success:
+                        completion(.success)
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                })
+            case .failure(let error):
+                completion(.failure(error))
+                return
+            }
+        }
     }
     
     func restore(purchases: [RestorePurchaseData],
                  token: String,
                  receipt: String,
-                 completion: @escaping (CleengAPIResult) -> Void) {
+                 completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.restore(publisherID: publisherID,
                                     receipts: purchases,
                                     token: token,
                                     receipt: receipt)
-        performRequest(api: api, completion: completion)
+            performRequest(api: api) { (result) in
+            switch (result) {
+            case .success(let data):
+                guard let restoredOffers = try? JSONDecoder().decode([RestoredCleengOffer].self,
+                                                                     from: data) else {
+                                                                        completion(.failure(CleengError.serverError))
+                                                                        return
+                }
+                
+                var restoreError: Error?
+                var isRestoreAtLeastOneItem = false
+                let group = DispatchGroup()
+                
+                let uniqueOffers = Dictionary(grouping: restoredOffers, by: { $0.offerId }).keys
+                uniqueOffers.forEach({ (offerId) in
+                    self.verify(purchase: offerId, completion: { result in
+                        switch result {
+                        case .success:
+                            isRestoreAtLeastOneItem = true
+                        case .failure(let error):
+                            restoreError = error
+                        }
+                        group.leave()
+                    })
+                })
+                
+                group.notify(queue: .main, execute: {
+                    if let error = restoreError, isRestoreAtLeastOneItem == false {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                })
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
     func performRequest(api: CleengAPI, completion: @escaping (CleengAPIResult) -> Void) {
@@ -101,5 +156,63 @@ class CleengNetworkHandler {
                 completion(.failure(.networkError(error)))
             }
         }
+    }
+    
+    private func verify(purchase offerId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let timerStartTime = Date()
+        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
+            if Date().timeIntervalSince(timerStartTime) > 60 {
+                timer.invalidate()
+                let errorMessage = self.errorMessage(ErrorCodes.unknown)
+                let error = RequestError(from: ErrorCodes.unknown, with: errorMessage)
+                completion(.failure(CleengError.serverDoesntVerifyPurchase(error)))
+                return
+            }
+            guard let userToken = CleengLoginPlugin.userToken else {
+                timer.invalidate()
+                completion(.failure(CleengError.authTokenNotParsed))
+                return
+            }
+            self.extendToken(token: userToken, completion: { (result) in
+                switch result {
+                case .success(let data):
+                    let _ = self.parseAuthTokensResponse(json: data)
+                    guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: data) else {
+                        return
+                    }
+                    let isOfferVerified = cleengTokens.contains(where: { (item) -> Bool in
+                        return item.offerID == offerId
+                    })
+                    
+                    if isOfferVerified {
+                        timer.invalidate()
+                        completion(.success)
+                        return
+                    }
+                case .failure:
+                    break
+                }
+            })
+        }
+    }
+    
+    private func parseAuthTokensResponse(json: Data) -> Bool {
+        guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: json) else {
+            return false
+        }
+        for item in cleengTokens {
+            if item.offerID.isEmpty {
+                CleengLoginPlugin.userToken = item.token // if offerID empty than we retrieve user token
+                UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
+            } else {
+                if let authID = item.authID {
+                    AccessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
+                    //subscription token in dicrionary by authId
+                    APAuthorizationManager.sharedInstance().setAuthorizationToken(item.token,
+                                                                                  withAuthorizationProviderID: authID) //set auth token for auth id. Need for applicaster player.
+                }
+            }
+        }
+        return true
     }
 }
