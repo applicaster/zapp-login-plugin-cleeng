@@ -318,6 +318,10 @@ typealias OfferID = String
     }
     
     public func logout(_ completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
+        CleengLoginPlugin.userToken = nil
+        UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
+        AccessChecker.userPermissionEntitlementsIds.removeAll()
+        APAuthorizationManager.sharedInstance()?.updateAuthorizationTokens(withAuthorizationProviders: [])
         completion(.completedSuccessfully)
     }
     
