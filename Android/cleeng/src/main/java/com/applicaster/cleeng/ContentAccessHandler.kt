@@ -160,7 +160,7 @@ class ContentAccessHandler(private val cleengService: CleengService) {
     }
 
     private fun isUserOffersComply(productId: String): Boolean {
-        val offersList = Session.user?.userOffers
+        val offersList = Session.userData.userOffers
         offersList?.forEach { offer ->
             if (!offer.authId.isNullOrEmpty() && offer.authId == productId)
                 return true

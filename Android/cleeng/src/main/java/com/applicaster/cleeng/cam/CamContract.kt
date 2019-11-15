@@ -126,9 +126,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                             authFieldsInput["email"].orEmpty(),
                             authFieldsInput["password"].orEmpty(),
                             null,
-                            Session.user?.country.orEmpty(),
-                            Session.user?.locale.orEmpty(),
-                            Session.user?.currency.orEmpty()
+                            Session.userData.country,
+                            Session.userData.locale,
+                            Session.userData.currency
                     )
             )
             when (result) {
@@ -153,9 +153,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                             email,
                             null,
                             id,
-                            Session.user?.country.orEmpty(),
-                            Session.user?.locale.orEmpty(),
-                            Session.user?.currency.orEmpty()
+                            Session.userData.country,
+                            Session.userData.locale,
+                            Session.userData.currency
                     )
             )
             when (result) {

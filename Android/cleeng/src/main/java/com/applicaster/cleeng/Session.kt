@@ -4,13 +4,11 @@ import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.analytics.AnalyticsDataProvider
 import com.applicaster.cleeng.data.Offer
-import com.applicaster.cleeng.data.User
-import com.applicaster.cleeng.network.response.SubscriptionsResponseData
-import com.applicaster.cleeng.utils.isNullOrEmpty
+import com.applicaster.cleeng.data.UserData
 
 object Session {
 
-    var user: User? = User()
+    var userData: UserData = UserData()
 
     val analyticsDataProvider: AnalyticsDataProvider = AnalyticsDataProvider()
 
@@ -27,24 +25,16 @@ object Session {
 
 
     fun setUserOffers(offers: ArrayList<Offer>) {
-        user?.userOffers = offers
+        userData.userOffers = offers
     }
 
     fun addOwnedProducts(ownedProductIds: HashSet<String>) {
-        user?.ownedProductIds?.addAll(ownedProductIds)
+        userData.ownedProductIds?.addAll(ownedProductIds)
     }
 
     fun getPluginConfigurationParams() = pluginConfigurator?.getPluginConfig().orEmpty()
 
-    fun parseAccessGranted(subscriptionData: SubscriptionsResponseData) {
-//        save current authId if access granted
-        if (subscriptionData.accessGranted == true && !subscriptionData.authId.isNullOrEmpty()) {
-            subscriptionData.authId?.let { user?.ownedProductIds?.add(it) }
-        }
-    }
-
-    fun isAccessGranted(): Boolean = user?.ownedProductIds?.intersect(availableProductIds)?.isNotEmpty() ?: false
-
+    fun isAccessGranted(): Boolean = userData.ownedProductIds?.intersect(availableProductIds)?.isNotEmpty() ?: false
 
     fun getCamFlow(): CamFlow = camFlow
 
@@ -57,8 +47,7 @@ object Session {
     }
 
     fun drop() {
-        user = null
-        pluginConfigurator = null
+        userData.dropSessionData()
         analyticsDataProvider.dropAllData()
         availableProductIds.clear()
     }
@@ -66,6 +55,7 @@ object Session {
     enum class TriggerStatus {
         APP_LAUNCH,
         TAP_CELL,
+        USER_ACCOUNT_COMPONENT,
         NOT_SET
     }
 }
