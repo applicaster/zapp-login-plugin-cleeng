@@ -144,25 +144,6 @@ typealias OfferID = String
         })
     }
     
-    private func purchaseItem(token: String,
-                              offerId: String,
-                              transactionId: String,
-                              receiptData: Data,
-                              isRestored: Bool, completion: @escaping (ItemPurchasingResult) -> Void) {
-        networkAdapter.purchaseItem(token: CleengLoginPlugin.userToken, offerId: offerId,
-                                    transactionId: transactionId, receiptData: receiptData,
-                                    isRestored: isRestored) { (result) in
-            switch result {
-            case .success:
-                self.verifyOnCleeng(offerId: offerId, completion: completion)
-            case .failure(let error):
-                completion(.failure(error))
-                return
-            }
-        }
-        
-    }
-    
     private func verifyOnCleeng(offerId: String, completion: @escaping (ItemPurchasingResult) -> Void) {
         let timerStartTime = Date()
         Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
@@ -470,17 +451,25 @@ extension CleengLoginPlugin: CAMDelegate {
                 return
         }
         
-        self.purchaseItem(token: CleengLoginPlugin.userToken ?? "",
-                          offerId: offerId,
-                          transactionId: transactionId,
-                          receiptData: purchasedItem.receipt,
-                          isRestored: false) { (result) in
-            switch result {
-            case .success:
-                completion(.success)
-            case .failure(let error):
-                completion(.failure(error))
-            }
+        networkAdapter.purchaseItem(token: CleengLoginPlugin.userToken,
+                                    offerId: offerId,
+                                    transactionId: transactionId,
+                                    receiptData: purchasedItem.receipt,
+                                    isRestored: false) { (result) in
+                                        switch result {
+                                        case .success:
+                                            self.verifyOnCleeng(offerId: offerId, completion: { result in
+                                                switch result {
+                                                case .success:
+                                                    completion(.success)
+                                                case .failure(let error):
+                                                    completion(.failure(error))
+                                                }
+                                            })
+                                        case .failure(let error):
+                                            completion(.failure(error))
+                                            return
+                                        }
         }
     }
     
