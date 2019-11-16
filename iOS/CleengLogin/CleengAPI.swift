@@ -95,7 +95,7 @@ extension CleengAPI {
         case .purchaseItem(let offerId, let token, let transactionId, let receiptData, let isRestored):
             let receiptInfo: [String: Any] = [
                 "transactionId": transactionId,
-                "receiptData": receiptData.base64EncodedString(),
+                "receiptData": receiptData.base64EncodedString()
             ]
             let params: [String: Any] = [
                 "appType": "ios",

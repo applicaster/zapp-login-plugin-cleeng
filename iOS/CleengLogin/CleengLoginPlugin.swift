@@ -189,7 +189,8 @@ typealias OfferID = String
         #endif
     }
     
-    private func executeTriggerOnAppLaunchFlow(displayViewController: UIViewController?, completion: (() -> Swift.Void)?) {
+    private func executeTriggerOnAppLaunchFlow(displayViewController: UIViewController?,
+                                               completion: (() -> Swift.Void)?) {
         flowTrigger = .appLaunch
         let flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         if flow != .no {
@@ -290,7 +291,7 @@ typealias OfferID = String
         }
     }
     
-    //MARK: ZPPluggableScreenProtocol
+    //MARK: - ZPPluggableScreenProtocol
     
     public func createScreen() -> UIViewController {
         return UIViewController()
@@ -419,8 +420,9 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func purchaseProperties(for productIdentifier: String) -> PurchaseProperties {
+        let isSubsriber = AccessChecker.userPermissionEntitlementsIds.isEmpty == false
         var purchaseProperties = PurchaseProperties(productIdentifier: productIdentifier,
-                                                    isSubscriber: (AccessChecker.userPermissionEntitlementsIds.isEmpty == false))
+                                                    isSubscriber: isSubsriber)
         
         guard let offer = self.offers.first(where: { $0.appleProductID == productIdentifier }) else {
             return purchaseProperties
