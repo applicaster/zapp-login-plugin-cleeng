@@ -31,7 +31,29 @@ typealias OfferID = String
     private var currentPlaybleItem: ZPPlayable?
     
     private var pluginConfiguration: [String: Any] = [:]
-    private var camConfiguration: [String: String] = [:]
+    lazy private var camConfiguration: [String: String] = {
+        var result: [String: String] = [:]
+        
+        for (key, value) in pluginConfiguration {
+            switch value {
+            case let string as String:
+                result[key] = string
+            case let bool as Bool:
+                result[key] = bool.description
+            default:
+                break
+            }
+        }
+        
+        if let authFieldsURLString = pluginConfiguration[CAMKeys.authFields.rawValue] as? String,
+            let authFieldsURL = URL(string: authFieldsURLString),
+            let authFieldsData = try? Data(contentsOf: authFieldsURL),
+            let authFieldsStringData = String(data: authFieldsData, encoding: .utf8) {
+            result[CAMKeys.authFields.rawValue] = authFieldsStringData
+        }
+
+        return result
+    }()
     
     public var isFlowBlocker: Bool {
         return true
@@ -49,27 +71,10 @@ typealias OfferID = String
         self.configurationJSON = configurationJSON
         if var pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("Cleeng")?.general {
             self.pluginConfiguration = pluginConfiguration
-            for (key, value) in pluginConfiguration {
-                switch value {
-                case let string as String:
-                    camConfiguration[key] = string
-                case let bool as Bool:
-                    camConfiguration[key] = bool.description
-                default:
-                    break
-                }
-            }
             
             if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
                 networkAdapter = CleengNetworkHandler(publisherID: publisherID)
                 networkAdapter.errorMessage = errorMessage()
-            }
-            
-            if let authFieldsURLString = pluginConfiguration[CAMKeys.authFields.rawValue] as? String,
-                let authFieldsURL = URL(string: authFieldsURLString),
-                let authFieldsData = try? Data(contentsOf: authFieldsURL),
-                let authFieldsStringData = String(data: authFieldsData, encoding: .utf8) {
-                camConfiguration[CAMKeys.authFields.rawValue] = authFieldsStringData
             }
         }
     }
@@ -77,27 +82,10 @@ typealias OfferID = String
     public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
         super.init()
         self.pluginConfiguration = screenModel.general
-        for (key, value) in pluginConfiguration {
-            switch value {
-            case let string as String:
-                camConfiguration[key] = string
-            case let bool as Bool:
-                camConfiguration[key] = bool.description
-            default:
-                break
-            }
-        }
         
         if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
             networkAdapter = CleengNetworkHandler(publisherID: publisherID)
             networkAdapter.errorMessage = errorMessage()
-        }
-        
-        if let authFieldsURLString = pluginConfiguration[CAMKeys.authFields.rawValue] as? String,
-            let authFieldsURL = URL(string: authFieldsURLString),
-            let authFieldsData = try? Data(contentsOf: authFieldsURL),
-            let authFieldsStringData = String(data: authFieldsData, encoding: .utf8) {
-            camConfiguration[CAMKeys.authFields.rawValue] = authFieldsStringData
         }
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
