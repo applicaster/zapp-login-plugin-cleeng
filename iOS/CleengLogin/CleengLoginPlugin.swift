@@ -24,9 +24,6 @@ typealias OfferID = String
     private var offers: [CleengOffer] = []
     private var flowTrigger: Trigger = .appLaunch
     
-    private var publisherId: String {
-        return networkAdapter.publisherID
-    }
     private var networkAdapter: CleengNetworkHandler!
     public var configurationJSON: NSDictionary?
     
@@ -318,27 +315,26 @@ extension CleengLoginPlugin: CAMDelegate {
     
     public func facebookLogin(userData: (email: String, userId: String),
                               completion: @escaping (Result<Void, Error>) -> Void) {
-        let api = CleengAPI.loginWithFacebook(publisherID: publisherId,
-                                              email: userData.email,
+        let api = CleengAPI.loginWithFacebook(email: userData.email,
                                               facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
     public func facebookSignUp(userData: (email: String, userId: String),
                                completion: @escaping (Result<Void, Error>) -> Void) {
-        let api = CleengAPI.registerWithFacebook(publisherID: publisherId, email: userData.email,
+        let api = CleengAPI.registerWithFacebook(email: userData.email,
                                                  facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
     public func login(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
-        let api = CleengAPI.login(publisherID: publisherId, email: authData["email"] ?? "",
+        let api = CleengAPI.login(email: authData["email"] ?? "",
                                   password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
     
     public func signUp(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
-        let api = CleengAPI.register(publisherID: publisherId, email: authData["email"] ?? "",
+        let api = CleengAPI.register(email: authData["email"] ?? "",
                                      password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }

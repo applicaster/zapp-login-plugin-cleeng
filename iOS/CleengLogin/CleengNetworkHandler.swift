@@ -46,7 +46,7 @@ class CleengNetworkHandler {
     }
     
     func resetPassword(data: [String: String], completion: @escaping (Swift.Result<Void, Error>) -> Void) {
-        let api = CleengAPI.resetPassword(publisherID: publisherID, email: data["email"])
+        let api = CleengAPI.resetPassword(email: data["email"])
         performRequest(api: api) { (result) in
             switch result {
             case .success(_):
@@ -60,7 +60,7 @@ class CleengNetworkHandler {
     func extendToken(token: String, completion: @escaping (Swift.Result<[CleengToken], Error>) -> Void) {
         isPerformingAuthorizationFlow = true
 
-        let api = CleengAPI.extendToken(publisherID: publisherID, token: token)
+        let api = CleengAPI.extendToken(token: token)
         performRequest(api: api) { (result) in
             self.isPerformingAuthorizationFlow = false
             
@@ -76,8 +76,7 @@ class CleengNetworkHandler {
     
     func subscriptions(token: String?, byAuthId: Int, offers: [String]?,
                        completion: @escaping (Swift.Result<Data, Error>) -> Void) { //0 - by offers, 1 by auth ids
-        let api = CleengAPI.subscriptions(publisherID: publisherID,
-                                          token: token,
+        let api = CleengAPI.subscriptions(token: token,
                                           byAuthId: byAuthId,
                                           offers: offers)
         performRequest(api: api, completion: completion)
@@ -88,8 +87,7 @@ class CleengNetworkHandler {
                       transactionId: String,
                       receiptData: Data,
                       isRestored: Bool, completion:  @escaping (Swift.Result<Void, Error>) -> Void) {
-        let api = CleengAPI.purchaseItem(publisherID: publisherID,
-                                         offerId: offerId,
+        let api = CleengAPI.purchaseItem(offerId: offerId,
                                          token: token ?? "",
                                          transactionId: transactionId,
                                          receiptData: receiptData,
@@ -116,8 +114,7 @@ class CleengNetworkHandler {
                  token: String,
                  receipt: String,
                  completion: @escaping (Swift.Result<Void, Error>) -> Void) {
-        let api = CleengAPI.restore(publisherID: publisherID,
-                                    receipts: purchases,
+        let api = CleengAPI.restore(receipts: purchases,
                                     token: token,
                                     receipt: receipt)
             performRequest(api: api) { (result) in
@@ -160,7 +157,8 @@ class CleengNetworkHandler {
     }
     
     func performRequest(api: CleengAPI, completion: @escaping (Swift.Result<Data, Error>) -> Void) {
-        Alamofire.request(api.url, method: api.httpMethod, parameters: api.params, encoding: JSONEncoding.default).responseJSON { (response) in
+        let parameters = api.params.merge(["publisherId": publisherID])
+        Alamofire.request(api.url, method: api.httpMethod, parameters: parameters, encoding: JSONEncoding.default).responseJSON { (response) in
             switch response.result {
             case .success:
                 guard let code = response.response?.statusCode, let data = response.data else {

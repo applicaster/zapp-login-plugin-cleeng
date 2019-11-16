@@ -10,17 +10,17 @@ import CAM
 import Alamofire
 
 enum CleengAPI {
-    case login(publisherID: String, email: String?, password: String?)
-    case loginWithFacebook(publisherID: String, email: String?, facebookId: String?)
-    case register(publisherID: String, email: String?, password: String?)
-    case registerWithFacebook(publisherID: String, email: String?, facebookId: String?)
-    case resetPassword(publisherID: String, email: String?)
-    case extendToken(publisherID: String, token: String?)
-    case subscriptions(publisherID: String, token: String?, byAuthId: Int, offers: [String]?)
-    case purchaseItem(publisherID: String, offerId: String, token: String, transactionId: String,
+    case login(email: String?, password: String?)
+    case loginWithFacebook(email: String?, facebookId: String?)
+    case register(email: String?, password: String?)
+    case registerWithFacebook(email: String?, facebookId: String?)
+    case resetPassword(email: String?)
+    case extendToken(token: String?)
+    case subscriptions(token: String?, byAuthId: Int, offers: [String]?)
+    case purchaseItem(offerId: String, token: String, transactionId: String,
                       receiptData: Data, isRestored: Bool)
-    case purchaseItemUsingCode(publisherID: String, offerId: String, token: String, reedeemCode: String)
-    case restore(publisherID: String, receipts: [RestorePurchaseData], token: String, receipt: String)
+    case purchaseItemUsingCode(offerId: String, token: String, reedeemCode: String)
+    case restore(receipts: [RestorePurchaseData], token: String, receipt: String)
 }
     
 extension CleengAPI {
@@ -57,52 +57,47 @@ extension CleengAPI {
     
     var params: [String: Any] {
         switch self {
-        case .login(let publisherID, let email, let password):
-            return ["publisherId": publisherID, "email": email ?? "", "password": password ?? ""]
-        case .loginWithFacebook(let publisherID,
-                                let email,
+        case .login(let email, let password):
+            return ["email": email ?? "", "password": password ?? ""]
+        case .loginWithFacebook(let email,
                                 let facebookId):
-            return ["publisherId": publisherID, "email": email ?? "", "facebookId": facebookId ?? ""]
-        case .register(let publisherID, let email, let password):
+            return ["email": email ?? "", "facebookId": facebookId ?? ""]
+        case .register(let email, let password):
             let locale = Locale.current
             var country = ""
             if let countryCode = (locale as NSLocale).object(forKey: .countryCode) as? String {
                 country = countryCode
             }
-            return ["publisherId": publisherID,
-                    "email": email ?? "",
+            return ["email": email ?? "",
                     "password": password ?? "",
                     "country": country,
                     "locale": "en_US",
                     "currency": "USD"]
-        case .registerWithFacebook(let publisherID, let email, let facebookId):
+        case .registerWithFacebook(let email, let facebookId):
             let locale = Locale.current
             var country = ""
             if let countryCode = (locale as NSLocale).object(forKey: .countryCode) as? String {
                 country = countryCode
             }
-            return ["publisherId": publisherID,
-                    "email": email ?? "",
+            return ["email": email ?? "",
                     "facebookId": facebookId ?? "",
                     "country": country,
                     "locale": "en_US",
                     "currency": "USD"]
-        case .resetPassword(let publisherID, let email):
-            return ["publisherId": publisherID, "email": email ?? ""]
-        case .extendToken(let publisherID, let token):
-            return ["publisherId": publisherID, "token": token ?? ""]
-        case .subscriptions(let publisherID, let token, let byAuthId, let offers):
-            return ["publisherId": publisherID,
-                    "token": token ?? "",
+        case .resetPassword(let email):
+            return ["email": email ?? ""]
+        case .extendToken(let token):
+            return ["token": token ?? ""]
+        case .subscriptions(let token, let byAuthId, let offers):
+            return ["token": token ?? "",
                     "byAuthId": byAuthId,
                     "offers": offers ?? [String]()]
-        case .purchaseItem(let publisherID, let offerId, let token, let transactionId, let receiptData, let isRestored):
+        case .purchaseItem(let offerId, let token, let transactionId, let receiptData, let isRestored):
             let receiptInfo: [String: Any] = [
                 "transactionId": transactionId,
                 "receiptData": receiptData.base64EncodedString(),
             ]
             let params: [String: Any] = [
-                "publisherId": publisherID,
                 "appType": "ios",
                 "receipt": receiptInfo,
                 "offerId": offerId,
@@ -110,20 +105,18 @@ extension CleengAPI {
                 "isRestored": isRestored
             ]
             return params
-        case .purchaseItemUsingCode(let publisherID, let offerId, let token, let couponCode):
+        case .purchaseItemUsingCode(let offerId, let token, let couponCode):
             return [
-                "publisherId": publisherID,
                 "appType": "ios",
                 "offerId": offerId,
                 "token": token,
                 "couponCode": couponCode
             ]
-        case .restore(let publisherID, let restoreData, let userToken, let receipt):
+        case .restore(let restoreData, let userToken, let receipt):
             let receipts: [[String: String]] = restoreData.map({["productId": $0.productId,
                                                                  "transactionId": $0.transactionId]})
             
-            return ["publisherId": publisherID,
-                    "appType": "ios",
+            return ["appType": "ios",
                     "receipts": receipts,
                     "token": userToken,
                     "receiptData": receipt]
