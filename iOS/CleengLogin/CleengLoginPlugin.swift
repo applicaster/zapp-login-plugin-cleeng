@@ -305,8 +305,8 @@ typealias OfferID = String
         
         var flow = self.flow
         
-        if additionalParameters != nil {
-            flow = accessChecker.getCamFlow(for: additionalParameters)
+        if let _ = additionalParameters?["UserAccountTrigger"] as? Bool { 
+            flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         }
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
