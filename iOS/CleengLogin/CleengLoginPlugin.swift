@@ -305,7 +305,8 @@ typealias OfferID = String
         
         var flow = self.flow
         
-        if let _ = additionalParameters?["UserAccountTrigger"] as? Bool { 
+        if let _ = additionalParameters?["UserAccountTrigger"] as? Bool {
+            flowTrigger = .userAccountComponent
             flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         }
         
@@ -544,7 +545,7 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func itemName() -> String {
-        if flowTrigger == .appLaunch {
+        if flowTrigger == .appLaunch || flowTrigger == .userAccountComponent {
             return Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? ""
         }
         
@@ -554,6 +555,10 @@ extension CleengLoginPlugin: CAMDelegate {
     public func itemType() -> String {
         if flowTrigger == .appLaunch {
             return "App"
+        }
+        
+        if flowTrigger == .userAccountComponent {
+            return "UserAccounts Component"
         }
         
         guard let item = currentPlaybleItem else {
