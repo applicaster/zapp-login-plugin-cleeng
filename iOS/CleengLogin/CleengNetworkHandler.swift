@@ -20,7 +20,7 @@ class CleengNetworkHandler {
         self.publisherID = publisherID
     }
     
-    func authorize(apiRequest: CleengAPI, completion: @escaping (Result<Void, Error>) -> Void) {
+    func authorize(apiRequest: CleengAPI, completion: @escaping (Swift.Result<Void, Error>) -> Void) {
         isPerformingAuthorizationFlow = true
 
         switch apiRequest {
@@ -30,7 +30,7 @@ class CleengNetworkHandler {
                 
                 switch result {
                 case .success(let data):
-                    let isParsed = self.parseAuthTokensResponse(json: data)
+                    let isParsed = (self.parseAuthTokensResponse(json: data).count > 0)
                     if isParsed {
                         completion(.success)
                     } else {
@@ -45,12 +45,19 @@ class CleengNetworkHandler {
         }
     }
     
-    func resetPassword(data: [String: String], completion: @escaping (CleengAPIResult) -> Void) {
+    func resetPassword(data: [String: String], completion: @escaping (Swift.Result<Void, Error>) -> Void) {
         let api = CleengAPI.resetPassword(publisherID: publisherID, email: data["email"])
-        performRequest(api: api, completion: completion)
+        performRequest(api: api) { (result) in
+            switch result {
+            case .success(_):
+                completion(.success)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
-    func extendToken(token: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func extendToken(token: String, completion: @escaping (Swift.Result<[CleengToken], Error>) -> Void) {
         isPerformingAuthorizationFlow = true
 
         let api = CleengAPI.extendToken(publisherID: publisherID, token: token)
@@ -59,8 +66,8 @@ class CleengNetworkHandler {
             
             switch result {
             case .success(let data):
-                self.parseAuthTokensResponse(json: data)
-                completion(.success)
+                let cleengTokens = self.parseAuthTokensResponse(json: data)
+                completion(.success(cleengTokens))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -68,7 +75,7 @@ class CleengNetworkHandler {
     }
     
     func subscriptions(token: String?, byAuthId: Int, offers: [String]?,
-                       completion: @escaping (CleengAPIResult) -> Void) { //0 - by offers, 1 by auth ids
+                       completion: @escaping (Swift.Result<Data, Error>) -> Void) { //0 - by offers, 1 by auth ids
         let api = CleengAPI.subscriptions(publisherID: publisherID,
                                           token: token,
                                           byAuthId: byAuthId,
@@ -80,7 +87,7 @@ class CleengNetworkHandler {
                       offerId: String,
                       transactionId: String,
                       receiptData: Data,
-                      isRestored: Bool, completion:  @escaping (Result<Void, Error>) -> Void) {
+                      isRestored: Bool, completion:  @escaping (Swift.Result<Void, Error>) -> Void) {
         let api = CleengAPI.purchaseItem(publisherID: publisherID,
                                          offerId: offerId,
                                          token: token ?? "",
@@ -108,7 +115,7 @@ class CleengNetworkHandler {
     func restore(purchases: [RestorePurchaseData],
                  token: String,
                  receipt: String,
-                 completion: @escaping (Result<Void, Error>) -> Void) {
+                 completion: @escaping (Swift.Result<Void, Error>) -> Void) {
         let api = CleengAPI.restore(publisherID: publisherID,
                                     receipts: purchases,
                                     token: token,
@@ -152,12 +159,12 @@ class CleengNetworkHandler {
         }
     }
     
-    func performRequest(api: CleengAPI, completion: @escaping (CleengAPIResult) -> Void) {
+    func performRequest(api: CleengAPI, completion: @escaping (Swift.Result<Data, Error>) -> Void) {
         Alamofire.request(api.url, method: api.httpMethod, parameters: api.params, encoding: JSONEncoding.default).responseJSON { (response) in
             switch response.result {
             case .success:
                 guard let code = response.response?.statusCode, let data = response.data else {
-                    completion(.failure(.serverError))
+                    completion(.failure(CleengError.serverError))
                     return
                 }
                 switch code {
@@ -168,15 +175,15 @@ class CleengNetworkHandler {
                     let errorMessage = self.errorMessage(errorCode)
                     let error = RequestError(from: errorCode,
                                            with: errorMessage)
-                    completion(.failure(.requestError(error)))
+                    completion(.failure(CleengError.requestError(error)))
                 }
             case .failure(let error):
-                completion(.failure(.networkError(error)))
+                completion(.failure(CleengError.networkError(error)))
             }
         }
     }
     
-    private func verify(purchase offerId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    private func verify(purchase offerId: String, completion: @escaping (Swift.Result<Void, Error>) -> Void) {
         let timerStartTime = Date()
         Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { timer in
             if Date().timeIntervalSince(timerStartTime) > 60 {
@@ -193,11 +200,7 @@ class CleengNetworkHandler {
             }
             self.extendToken(token: userToken, completion: { (result) in
                 switch result {
-                case .success(let data):
-                    let _ = self.parseAuthTokensResponse(json: data)
-                    guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: data) else {
-                        return
-                    }
+                case .success(let cleengTokens):
                     let isOfferVerified = cleengTokens.contains(where: { (item) -> Bool in
                         return item.offerID == offerId
                     })
@@ -214,23 +217,23 @@ class CleengNetworkHandler {
         }
     }
     
-    private func parseAuthTokensResponse(json: Data) -> Bool {
+    private func parseAuthTokensResponse(json: Data) -> [CleengToken] {
         guard let cleengTokens = try? JSONDecoder().decode([CleengToken].self, from: json) else {
-            return false
+            return []
         }
+        
         for item in cleengTokens {
             if item.offerID.isEmpty {
                 CleengLoginPlugin.userToken = item.token // if offerID empty than we retrieve user token
                 UserDefaults.standard.set(item.token, forKey: kCleengUserLoginToken)
-            } else {
-                if let authID = item.authID {
-                    AccessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
-                    //subscription token in dicrionary by authId
-                    APAuthorizationManager.sharedInstance().setAuthorizationToken(item.token,
-                                                                                  withAuthorizationProviderID: authID) //set auth token for auth id. Need for applicaster player.
-                }
+            } else if let authID = item.authID {
+                AccessChecker.userPermissionEntitlementsIds.insert(authID) // if offerID !empty put
+                //subscription token in dicrionary by authId
+                APAuthorizationManager.sharedInstance().setAuthorizationToken(item.token,
+                                                                              withAuthorizationProviderID: authID) //set auth token for auth id. Need for applicaster player.
             }
         }
-        return true
+        
+        return cleengTokens
     }
 }

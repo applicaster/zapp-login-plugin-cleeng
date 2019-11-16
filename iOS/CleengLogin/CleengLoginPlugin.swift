@@ -127,15 +127,8 @@ typealias OfferID = String
         }
     }
     
-    private func authorize(api: CleengAPI, completion: @escaping (CAM.Result<Void>) -> Void) {
-        networkAdapter.authorize(apiRequest: api) { (result) in
-            switch result {
-            case .success:
-                completion(.success)
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
+    private func authorize(api: CleengAPI, completion: @escaping (Result<Void, Error>) -> Void) {
+        networkAdapter.authorize(apiRequest: api, completion: completion)
     }
 
     private func errorMessage() -> (ErrorCodes) -> String {
@@ -319,12 +312,12 @@ extension CleengLoginPlugin: CAMDelegate {
         return accessChecker.isPurchaseNeeded
     }
     
-    public func IsUserLoggedIn() -> Bool {
+    public func isUserLoggedIn() -> Bool {
         return isAuthenticated()
     }
     
     public func facebookLogin(userData: (email: String, userId: String),
-                              completion: @escaping (LoginResult) -> Void) {
+                              completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.loginWithFacebook(publisherID: publisherId,
                                               email: userData.email,
                                               facebookId: userData.userId)
@@ -332,36 +325,29 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func facebookSignUp(userData: (email: String, userId: String),
-                               completion: @escaping (SignupResult) -> Void) {
+                               completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.registerWithFacebook(publisherID: publisherId, email: userData.email,
                                                  facebookId: userData.userId)
         authorize(api: api, completion: completion)
     }
     
-    public func login(authData: [String: String], completion: @escaping (LoginResult) -> Void) {
+    public func login(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.login(publisherID: publisherId, email: authData["email"] ?? "",
                                   password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
     
-    public func signUp(authData: [String: String], completion: @escaping (SignupResult) -> Void) {
+    public func signUp(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.register(publisherID: publisherId, email: authData["email"] ?? "",
                                      password: authData["password"] ?? "")
         authorize(api: api, completion: completion)
     }
     
-    public func resetPassword(data: [String: String], completion: @escaping (CAM.Result<Void>) -> Void) {
-        networkAdapter.resetPassword(data: data, completion: { (result) in
-            switch result {
-            case .success:
-                completion(.success)
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        })
+    public func resetPassword(data: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
+        networkAdapter.resetPassword(data: data, completion: completion)
     }
     
-    public func availableProducts(completion: @escaping (AvailableProductsResult) -> Void) {
+    public func availableProducts(completion: @escaping (Result<[String], Error>) -> Void) {
         networkAdapter.subscriptions(token: CleengLoginPlugin.userToken, byAuthId: 1,
                                      offers: accessChecker.currentItemEntitlementsIds, completion: { (result) in
             switch result {
@@ -381,7 +367,7 @@ extension CleengLoginPlugin: CAMDelegate {
         })
     }
     
-    public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (PurchaseResult) -> Void) {
+    public func itemPurchased(purchasedItem: PurchasedProduct, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let offerId = currentAvailableOfferIDs[purchasedItem.productIdentifier],
             let transactionId = purchasedItem.transaction.transactionIdentifier else {
                 return
@@ -391,18 +377,12 @@ extension CleengLoginPlugin: CAMDelegate {
                                     offerId: offerId,
                                     transactionId: transactionId,
                                     receiptData: purchasedItem.receipt,
-                                    isRestored: false) { result in
-                                        switch result {
-                                        case .success:
-                                            completion(.success)
-                                        case .failure(let error):
-                                            completion(.failure(error))
-                                        }
-        }
+                                    isRestored: false,
+                                    completion: completion)
     }
     
     public func itemsRestored(restoredItems: [PurchasedProduct],
-                              completion: @escaping (PurchaseResult) -> Void) {
+                              completion: @escaping (Result<Void, Error>) -> Void) {
         let purchases = restoredItems.compactMap { (product) -> RestorePurchaseData? in
             guard let transactionId = product.transaction.transactionIdentifier else {
                 return nil
@@ -414,14 +394,8 @@ extension CleengLoginPlugin: CAMDelegate {
         let receipt = restoredItems.first!.receipt.base64EncodedString()
         networkAdapter.restore(purchases: purchases,
                                token: CleengLoginPlugin.userToken ?? "",
-                               receipt: receipt) { (result) in
-            switch result {
-            case .success:
-                completion(.success)
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
+                               receipt: receipt,
+                               completion: completion)
     }
     
     public func itemName() -> String {
