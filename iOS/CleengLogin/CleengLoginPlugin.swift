@@ -17,12 +17,15 @@ typealias OfferID = String
 
 @objc public class CleengLoginPlugin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol, ZPPluggableScreenProtocol {
     
-    public var screenPluginDelegate: ZPPlugableScreenDelegate?
+    public weak var screenPluginDelegate: ZPPlugableScreenDelegate?
     private var accessChecker = AccessChecker()
     static var userToken: String?
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
-    private var offers: [CleengOffer] = []
-    private var flowTrigger: Trigger = .appLaunch
+    private var offers: [CleengOffer] = [] {
+        didSet {
+            cleengAnalyticsStorage.updatePurchasesProperties(from: offers)
+        }
+    }
     
     lazy private var networkAdapter: CleengNetworkHandler = {
         guard let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String else {
@@ -37,7 +40,13 @@ typealias OfferID = String
     public var configurationJSON: NSDictionary?
     
     private var flow: CAMFlow = .no
-    private var currentPlaybleItem: ZPPlayable?
+    private var currentPlaybleItem: ZPPlayable? {
+        didSet {
+            if let item = currentPlaybleItem {
+                cleengAnalyticsStorage.updateProperties(from: item)
+            }
+        }
+    }
     
     private var pluginConfiguration: [String: Any] = [:]
     lazy private var camConfiguration: [String: String] = {
@@ -67,6 +76,8 @@ typealias OfferID = String
     public var isFlowBlocker: Bool {
         return true
     }
+    
+    private let cleengAnalyticsStorage = AnalyticsStorage()
     
     public required override init() {
         super.init()
@@ -176,7 +187,7 @@ typealias OfferID = String
     
     private func executeTriggerOnAppLaunchFlow(displayViewController: UIViewController?,
                                                completion: (() -> Swift.Void)?) {
-        flowTrigger = .appLaunch
+        cleengAnalyticsStorage.trigger = .appLaunch
         let flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         if flow != .no {
             guard let controller = displayViewController else {
@@ -256,7 +267,7 @@ typealias OfferID = String
     public func executeHook(presentationIndex: NSInteger,
                             dataDict: [String: Any]?,
                             taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
-        flowTrigger = .tapCell
+        cleengAnalyticsStorage.trigger = .tapCell
         login(nil) { (operationStatus) in
             switch operationStatus {
             case .completedSuccessfully:
@@ -276,7 +287,7 @@ typealias OfferID = String
 
 // MARK: - CAMDelegate
 
-extension CleengLoginPlugin: CAMDelegate {    
+extension CleengLoginPlugin: CAMDelegate {
     
     public func getPluginConfig() -> [String: String] {
         return camConfiguration
@@ -372,55 +383,7 @@ extension CleengLoginPlugin: CAMDelegate {
                                completion: completion)
     }
     
-    public func itemName() -> String {
-        if flowTrigger == .appLaunch {
-            return Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? ""
-        }
-        
-        return currentPlaybleItem?.playableName() ?? ""
-    }
-    
-    public func itemType() -> String {
-        if flowTrigger == .appLaunch {
-            return "App"
-        }
-        
-        guard let item = currentPlaybleItem else {
-            return ""
-        }
-        
-        if let isPlaylist = item.isPlaylist, isPlaylist == true {
-            return "Feed"
-        }
-        
-        return "Video"
-    }
-    
-    public func purchaseProperties(for productIdentifier: String) -> PurchaseProperties {
-        let isSubsriber = AccessChecker.userPermissionEntitlementsIds.isEmpty == false
-        var purchaseProperties = PurchaseProperties(productIdentifier: productIdentifier,
-                                                    isSubscriber: isSubsriber)
-        
-        guard let offer = self.offers.first(where: { $0.appleProductID == productIdentifier }) else {
-            return purchaseProperties
-        }
-        
-        purchaseProperties.trialPeriod = offer.freeDays
-        
-        if let period = offer.period, period.isEmpty == false {
-            purchaseProperties.subscriptionDuration = period
-        }
-        
-        if let tags = offer.accessToTags, tags.isEmpty == false {
-            purchaseProperties.purchaseEntityType = .category
-        } else {
-            purchaseProperties.purchaseEntityType = .vod
-        }
-        
-        return purchaseProperties
-    }
-    
-    public func trigger() -> Trigger {
-        return flowTrigger
+    public func analyticsStorage() -> AnalyticsStorageProtocol {
+        return cleengAnalyticsStorage
     }
 }
