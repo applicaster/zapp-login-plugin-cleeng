@@ -49,7 +49,7 @@ class CleengNetworkHandler {
         let api = CleengAPI.resetPassword(email: data["email"])
         performRequest(api: api) { (result) in
             switch result {
-            case .success():
+            case .success(_):
                 completion(.success)
             case .failure(let error):
                 completion(.failure(error))

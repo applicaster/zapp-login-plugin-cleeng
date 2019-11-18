@@ -24,7 +24,16 @@ typealias OfferID = String
     private var offers: [CleengOffer] = []
     private var flowTrigger: Trigger = .appLaunch
     
-    private var networkAdapter: CleengNetworkHandler!
+    lazy private var networkAdapter: CleengNetworkHandler = {
+        guard let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String else {
+            fatalError("Publisher ID must be configured")
+        }
+        let networkAdapter = CleengNetworkHandler(publisherID: publisherID)
+        networkAdapter.errorMessage = errorMessage()
+        
+        return networkAdapter
+    }()
+    
     public var configurationJSON: NSDictionary?
     
     private var flow: CAMFlow = .no
@@ -69,24 +78,12 @@ typealias OfferID = String
         super.init()
         
         self.configurationJSON = configurationJSON
-        if var pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("Cleeng")?.general {
-            self.pluginConfiguration = pluginConfiguration
-            
-            if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
-                networkAdapter = CleengNetworkHandler(publisherID: publisherID)
-                networkAdapter.errorMessage = errorMessage()
-            }
-        }
+        self.pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("Cleeng")?.general ?? [:]
     }
     
     public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
         super.init()
         self.pluginConfiguration = screenModel.general
-        
-        if let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String {
-            networkAdapter = CleengNetworkHandler(publisherID: publisherID)
-            networkAdapter.errorMessage = errorMessage()
-        }
         
         let playableItems = dataSourceModel as? [ZPPlayable] ?? []
         self.currentPlaybleItem = playableItems.first
@@ -279,7 +276,7 @@ typealias OfferID = String
         }
     }
     
-    //MARK: - ZPPluggableScreenProtocol
+    // MARK: - ZPPluggableScreenProtocol
     
     public func createScreen() -> UIViewController {
         return UIViewController()
