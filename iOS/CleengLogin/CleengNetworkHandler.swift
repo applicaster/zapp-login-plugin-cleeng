@@ -75,11 +75,19 @@ class CleengNetworkHandler {
     }
     
     func subscriptions(token: String?, byAuthId: Int, offers: [String]?,
-                       completion: @escaping (Swift.Result<Data, Error>) -> Void) { //0 - by offers, 1 by auth ids
+                       completion: @escaping (Swift.Result<[CleengOffer], Error>) -> Void) { //0 - by offers, 1 by auth ids
         let api = CleengAPI.subscriptions(token: token,
                                           byAuthId: byAuthId,
                                           offers: offers)
-        performRequest(api: api, completion: completion)
+        performRequest(api: api) { result in
+            switch result {
+            case .success(let data):
+                let offers = try? JSONDecoder().decode([CleengOffer].self, from: data)
+                completion(.success(offers ?? []))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
     func purchaseItem(token: String?,

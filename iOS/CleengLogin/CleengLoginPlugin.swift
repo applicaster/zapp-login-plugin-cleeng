@@ -246,15 +246,6 @@ typealias OfferID = String
     public func getUserToken() -> String {
         return CleengLoginPlugin.userToken ?? ""
     }
-    
-    // MARK: - JSON Response parsing
-    
-    private func parseCleengOffersResponse(json: Data) -> [CleengOffer] {
-        guard let cleengOffers = try? JSONDecoder().decode([CleengOffer].self, from: json) else {
-            return []
-        }
-        return cleengOffers
-    }
 
     // MARK: - ZPScreenHookAdapterProtocol
     
@@ -330,11 +321,12 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func availableProducts(completion: @escaping (Result<[String], Error>) -> Void) {
-        networkAdapter.subscriptions(token: CleengLoginPlugin.userToken, byAuthId: 1,
-                                     offers: accessChecker.currentItemEntitlementsIds, completion: { (result) in
+        networkAdapter.subscriptions(token: CleengLoginPlugin.userToken,
+                                     byAuthId: 1,
+                                     offers: accessChecker.currentItemEntitlementsIds,
+                                     completion: { (result) in
             switch result {
-            case .success(let data):
-                let offers = self.parseCleengOffersResponse(json: data)
+            case .success(let offers):
                 self.offers = offers
                 self.currentAvailableOfferIDs = offers.reduce([:]) { (dict, item) -> [String: String] in
                     var dict = dict
