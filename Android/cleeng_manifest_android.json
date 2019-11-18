@@ -1588,6 +1588,38 @@
                 "key": "general/authentication_requirement"
               }
             ]
+          },
+          {
+            "key": "logout_title_text",
+            "type": "text_input",
+            "label_tooltip": "<p>The title text at the top of the logout screen.</p><p>This field is required in order for a logout UI to be displayed.</p>",
+            "initial_value": "Log Out",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "logout_description_text",
+            "type": "text_input",
+            "label_tooltip": "<p>The descriptive text below the title in the logout screen. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app.</p><p>This field is required in order for a logout UI to be displayed.</p>",
+            "initial_value": "Are you sure you want to log out?",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
           }
         ]
       }
