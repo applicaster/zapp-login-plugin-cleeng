@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'CleengLogin'
-  s.version      = '1.0.1'
+  s.version      = '1.0.0'
   s.summary      = 'Cleeng login plugin'
   s.license      = 'MIT'
   s.homepage     = 'https://github.com/applicaster/zapp-login-plugin-cleeng'
@@ -12,10 +12,10 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.static_framework = true
   s.dependency 'ZappPlugins'
-  s.dependency 'ZappLoginPluginsSDK', '= 8.0.3'
+  s.dependency 'ZappLoginPluginsSDK'
   s.dependency 'Alamofire'
   s.dependency 'CAM', '1.1.0'
-  s.dependency 'ComponentsSDK', '= 12.1.3'
+  s.dependency 'ComponentsSDK'
   s.xcconfig =  { 'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
     'ENABLE_BITCODE' => 'YES',
     'SWIFT_VERSION' => '5.0'

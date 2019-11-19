@@ -195,7 +195,7 @@ typealias OfferID = String
         var flow = self.flow
         
         if let _ = additionalParameters?["UserAccountTrigger"] as? Bool {
-            flowTrigger = .userAccountComponent
+            analytics.trigger = .userAccountComponent
             flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         }
         
