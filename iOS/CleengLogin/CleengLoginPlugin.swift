@@ -17,15 +17,8 @@ typealias OfferID = String
 
 @objc public class CleengLoginPlugin: NSObject, ZPLoginProviderUserDataProtocol, ZPAppLoadingHookProtocol, ZPScreenHookAdapterProtocol, ZPPluggableScreenProtocol {
     
-    public weak var screenPluginDelegate: ZPPlugableScreenDelegate?
     private var accessChecker = AccessChecker()
-    static var userToken: String?
-    private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
-    private var offers: [CleengOffer] = [] {
-        didSet {
-            cleengAnalyticsStorage.updatePurchasesProperties(from: offers)
-        }
-    }
+    private let analytics = AnalyticsStorage()
     
     lazy private var networkAdapter: CleengNetworkHandler = {
         guard let publisherID = pluginConfiguration["cleeng_login_publisher_id"] as? String else {
@@ -36,17 +29,10 @@ typealias OfferID = String
         
         return networkAdapter
     }()
-    
-    public var configurationJSON: NSDictionary?
-    
+
+    static var userToken: String?
+    private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     private var flow: CAMFlow = .no
-    private var currentPlaybleItem: ZPPlayable? {
-        didSet {
-            if let item = currentPlaybleItem {
-                cleengAnalyticsStorage.updateProperties(from: item)
-            }
-        }
-    }
     
     private var pluginConfiguration: [String: Any] = [:]
     lazy private var camConfiguration: [String: String] = {
@@ -73,12 +59,10 @@ typealias OfferID = String
         return result
     }()
     
-    public var isFlowBlocker: Bool {
-        return true
-    }
+    // MARK: - ZPAdapterProtocol
     
-    private let cleengAnalyticsStorage = AnalyticsStorage()
-    
+    public var configurationJSON: NSDictionary?
+
     public required override init() {
         super.init()
         
@@ -92,13 +76,24 @@ typealias OfferID = String
         self.pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("Cleeng")?.general ?? [:]
     }
     
+    // MARK: - ZPUIBuilderPluginsProtocol
+    
     public required init?(pluginModel: ZPPluginModel, screenModel: ZLScreenModel, dataSourceModel: NSObject?) {
         super.init()
         self.pluginConfiguration = screenModel.general
         
-        let playableItems = dataSourceModel as? [ZPPlayable] ?? []
-        self.currentPlaybleItem = playableItems.first
-        flow = accessChecker.getCamFlow(for: playableItems.first?.extensionsDictionary as? [String: Any])
+        if let playableItems = dataSourceModel as? [ZPPlayable],
+            let playableItem = playableItems.first,
+            let extensionsDictionary = playableItem.extensionsDictionary as? [String: Any] {
+            flow = accessChecker.getCamFlow(for: extensionsDictionary)
+            analytics.updateProperties(from: playableItem)
+        }
+    }
+    
+    // MARK: - ZPScreenHookAdapterProtocol
+    
+    public var isFlowBlocker: Bool {
+        return true
     }
     
     public required init?(pluginModel: ZPPluginModel, dataSourceModel: NSObject?) {
@@ -107,52 +102,22 @@ typealias OfferID = String
         assert(false, "Unexpected call of initialiizer")
     }
     
-    // MARK: - Private methods
-    
-    private func silentAuthorization(completion: @escaping () -> Void) {
-        guard let savedLoginToken = UserDefaults.standard.string(forKey: kCleengUserLoginToken) else {
-            completion()
-            return
-        }
-        
-        networkAdapter.extendToken(token: savedLoginToken) { _ in
-            completion()
-        }
+    public func requestScreenPluginPresentation(completion: @escaping (Bool) -> Void) {
+        completion(false)
     }
     
-    private func authorize(api: CleengAPI, completion: @escaping (Result<Void, Error>) -> Void) {
-        networkAdapter.authorize(apiRequest: api, completion: completion)
-    }
-
-    private func errorMessage() -> (ErrorCodes) -> String {
-        let nonexistentAlertKey = "nonexistent_user_alert_text"
-        let existingUserAlertKey = "existing_user_alert_text"
-        let invalidCredentialsAlertKey = "invalid_credentials_alert_text"
-        let defaultAlertKey = "default_alert_text"
-        
-        let nonexistentAlertMessage = pluginConfiguration[nonexistentAlertKey] as? String ?? ""
-        let existingUserAlertMessage = pluginConfiguration[existingUserAlertKey] as? String ?? ""
-        let invalidCredentialsAlertMessage = pluginConfiguration[invalidCredentialsAlertKey] as? String ?? ""
-        let defaultAlertMessage = pluginConfiguration[defaultAlertKey] as? String ?? ""
-        
-        let result: (ErrorCodes) -> String = { errorCode in
-            var errorMessage = ""
-            
-            switch errorCode {
-            case .nonexistentUser:
-                errorMessage = nonexistentAlertMessage
-            case .existingUser:
-                errorMessage = existingUserAlertMessage
-            case .invalidCredentials:
-                errorMessage = invalidCredentialsAlertMessage
-            case .unknown:
-                errorMessage = defaultAlertMessage
+    public func executeHook(presentationIndex: NSInteger,
+                            dataDict: [String: Any]?,
+                            taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
+        analytics.trigger = .tapCell
+        login(nil) { (operationStatus) in
+            switch operationStatus {
+            case .completedSuccessfully:
+                taskFinishedWithCompletion(true, nil, nil)
+            case .failed, .cancelled:
+                taskFinishedWithCompletion(false, nil, nil)
             }
-            
-            return errorMessage
         }
-        
-        return result
     }
     
     // MARK: - ZPAppLoadingHookProtocol
@@ -187,7 +152,7 @@ typealias OfferID = String
     
     private func executeTriggerOnAppLaunchFlow(displayViewController: UIViewController?,
                                                completion: (() -> Swift.Void)?) {
-        cleengAnalyticsStorage.trigger = .appLaunch
+        analytics.trigger = .appLaunch
         let flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         if flow != .no {
             guard let controller = displayViewController else {
@@ -229,8 +194,8 @@ typealias OfferID = String
         
         var flow = self.flow
         
-        if additionalParameters != nil {
-            flow = accessChecker.getCamFlow(for: additionalParameters)
+        if let parameters = additionalParameters {
+            flow = accessChecker.getCamFlow(for: parameters)
         }
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
@@ -258,30 +223,56 @@ typealias OfferID = String
         return CleengLoginPlugin.userToken ?? ""
     }
 
-    // MARK: - ZPScreenHookAdapterProtocol
-    
-    public func requestScreenPluginPresentation(completion: @escaping (Bool) -> Void) {
-        completion(false)
-    }
-    
-    public func executeHook(presentationIndex: NSInteger,
-                            dataDict: [String: Any]?,
-                            taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
-        cleengAnalyticsStorage.trigger = .tapCell
-        login(nil) { (operationStatus) in
-            switch operationStatus {
-            case .completedSuccessfully:
-                taskFinishedWithCompletion(true, nil, nil)
-            case .failed, .cancelled:
-                taskFinishedWithCompletion(false, nil, nil)
-            }
-        }
-    }
-    
     // MARK: - ZPPluggableScreenProtocol
+    
+    public weak var screenPluginDelegate: ZPPlugableScreenDelegate?
     
     public func createScreen() -> UIViewController {
         return UIViewController()
+    }
+    
+    // MARK: - Private methods
+    
+    private func silentAuthorization(completion: @escaping () -> Void) {
+        guard let savedLoginToken = UserDefaults.standard.string(forKey: kCleengUserLoginToken) else {
+            completion()
+            return
+        }
+        
+        networkAdapter.extendToken(token: savedLoginToken) { _ in
+            completion()
+        }
+    }
+    
+    private func errorMessage() -> (ErrorCodes) -> String {
+        let nonexistentAlertKey = "nonexistent_user_alert_text"
+        let existingUserAlertKey = "existing_user_alert_text"
+        let invalidCredentialsAlertKey = "invalid_credentials_alert_text"
+        let defaultAlertKey = "default_alert_text"
+        
+        let nonexistentAlertMessage = pluginConfiguration[nonexistentAlertKey] as? String ?? ""
+        let existingUserAlertMessage = pluginConfiguration[existingUserAlertKey] as? String ?? ""
+        let invalidCredentialsAlertMessage = pluginConfiguration[invalidCredentialsAlertKey] as? String ?? ""
+        let defaultAlertMessage = pluginConfiguration[defaultAlertKey] as? String ?? ""
+        
+        let result: (ErrorCodes) -> String = { errorCode in
+            var errorMessage = ""
+            
+            switch errorCode {
+            case .nonexistentUser:
+                errorMessage = nonexistentAlertMessage
+            case .existingUser:
+                errorMessage = existingUserAlertMessage
+            case .invalidCredentials:
+                errorMessage = invalidCredentialsAlertMessage
+            case .unknown:
+                errorMessage = defaultAlertMessage
+            }
+            
+            return errorMessage
+        }
+        
+        return result
     }
 }
 
@@ -305,26 +296,26 @@ extension CleengLoginPlugin: CAMDelegate {
                               completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.loginWithFacebook(email: userData.email,
                                               facebookId: userData.userId)
-        authorize(api: api, completion: completion)
+        networkAdapter.authorize(apiRequest: api, completion: completion)
     }
     
     public func facebookSignUp(userData: (email: String, userId: String),
                                completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.registerWithFacebook(email: userData.email,
                                                  facebookId: userData.userId)
-        authorize(api: api, completion: completion)
+        networkAdapter.authorize(apiRequest: api, completion: completion)
     }
     
     public func login(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.login(email: authData["email"] ?? "",
                                   password: authData["password"] ?? "")
-        authorize(api: api, completion: completion)
+        networkAdapter.authorize(apiRequest: api, completion: completion)
     }
     
     public func signUp(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
         let api = CleengAPI.register(email: authData["email"] ?? "",
                                      password: authData["password"] ?? "")
-        authorize(api: api, completion: completion)
+        networkAdapter.authorize(apiRequest: api, completion: completion)
     }
     
     public func resetPassword(data: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
@@ -338,7 +329,7 @@ extension CleengLoginPlugin: CAMDelegate {
                                      completion: { (result) in
             switch result {
             case .success(let offers):
-                self.offers = offers
+                self.analytics.updatePurchasesProperties(from: offers)
                 self.currentAvailableOfferIDs = offers.reduce([:]) { (dict, item) -> [String: String] in
                     var dict = dict
                     dict[item.appleProductID] = item.offerID
@@ -384,6 +375,6 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func analyticsStorage() -> AnalyticsStorageProtocol {
-        return cleengAnalyticsStorage
+        return analytics
     }
 }

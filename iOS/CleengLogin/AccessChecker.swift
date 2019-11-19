@@ -86,10 +86,7 @@ class AccessChecker {
         }
     }
     
-    public func getCamFlow(for dictionary: [String: Any]?) -> CAMFlow {
-        guard let dictionary = dictionary else {
-            return .no
-        }
+    public func getCamFlow(for dictionary: [String: Any]) -> CAMFlow {
         let authIds = flowParser.parseEntitlements(from: dictionary)
         setItemAuthIDs(from: authIds)
         let flow = flowParser.parseFlow(from: dictionary)
