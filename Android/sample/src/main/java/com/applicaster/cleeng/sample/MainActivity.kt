@@ -4,15 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.applicaster.cleeng.CleengLoginPlugin
-import com.applicaster.cleeng.network.NetworkHelper
-import com.applicaster.cleeng.network.Result
-import com.applicaster.cleeng.network.error.Error
-import com.applicaster.cleeng.network.executeRequest
-import com.applicaster.cleeng.network.handleResponse
-import com.applicaster.cleeng.network.request.SubscriptionsRequestData
-import com.applicaster.cleeng.network.response.AuthResponseData
-import com.applicaster.cleeng.network.response.OfferResponseData
-import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException

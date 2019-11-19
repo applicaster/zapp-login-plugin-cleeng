@@ -48,6 +48,11 @@
   "password_reset_confirmation_title_text":"Password Reset Delivered",
   "password_reset_confirmation_description_text":"Check your email in order reset your password for this account",
 
+  "logout_title_text": "Log out",
+  "logout_description_text": "Are you sure you want to log out?",
+  "logout_error_alert_text": "Logout error occurred",
+  "cancel_button_text":"Cancel",
+
   "facebook_permissions_alert_text":"Please provide Facebook permission to share email information in order to login with Facebook.",
 
   "default_alert_text":"An error occurred trying to process your request. Please go back and try again.",
