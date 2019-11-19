@@ -194,8 +194,9 @@ typealias OfferID = String
         
         var flow = self.flow
         
-        if let parameters = additionalParameters {
-            flow = accessChecker.getCamFlow(for: parameters)
+        if let _ = additionalParameters?["UserAccountTrigger"] as? Bool {
+            flowTrigger = .userAccountComponent
+            flow = accessChecker.getStartupFlow(for: pluginConfiguration)
         }
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
@@ -207,6 +208,10 @@ typealias OfferID = String
     }
     
     public func logout(_ completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
+        CleengLoginPlugin.userToken = nil
+        UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
+        AccessChecker.userPermissionEntitlementsIds.removeAll()
+        APAuthorizationManager.sharedInstance()?.updateAuthorizationTokens(withAuthorizationProviders: [])
         completion(.completedSuccessfully)
     }
     
