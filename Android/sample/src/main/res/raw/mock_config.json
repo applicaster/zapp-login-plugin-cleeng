@@ -149,6 +149,12 @@
   "confirmation_button_size_tablet":"14",
   "confirmation_button_color":"#ffffff",
 
+  "cancel_button_font_ios":"",
+  "cancel_button_font_android":"",
+  "cancel_button_size_phone":"14",
+  "cancel_button_size_tablet":"14",
+  "cancel_button_color":"#ffffff",
+
   "default_authentication_screen": "Login",
   "no_purchases_to_restore_alert_text": "No purchases to restore"
 }
