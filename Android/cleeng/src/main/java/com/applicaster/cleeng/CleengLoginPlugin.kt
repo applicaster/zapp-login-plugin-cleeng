@@ -33,7 +33,6 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     ) {
         if (Session.getPluginConfigurationParams().isEmpty())
             Session.pluginConfigurator = PluginConfigurator(mockPluginConfiguration)
-        Session.setCamFlow(CamFlow.LOGOUT)
         cleengService.mockStart(context)
     }
 
