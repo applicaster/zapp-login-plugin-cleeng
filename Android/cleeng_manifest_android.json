@@ -1398,7 +1398,7 @@
       },
       {
         "group": true,
-        "label": "Confirmation Screen",
+        "label": "Confirmation and Logout Screen",
         "tooltip": "The font that will be used for the text at the top of each screen in the gateway process",
         "folded": true,
         "fields": [
@@ -1502,6 +1502,43 @@
             "initial_value": "#ffffff"
           },
           {
+            "key": "cancel_button_text",
+            "type": "text_input",
+            "label_tooltip": "<p>The text on the button of a confirmation screen which indicates the user has read the message and does not want to execute the message of the screen, but rather move back.</p><p>This button only appears in the confirmation screen provided in the context of the logout process.</p>",
+            "initial_value": "Cancel"
+          },
+          {
+            "key": "cancel_button_color",
+            "label": "Cancel Button Font Color",
+            "type": "color_picker",
+            "label_tooltip": "The font-color for the Cancel Button Text",
+            "initial_value": "#ffffff"
+          },
+          {
+            "key": "cancel_button_font_ios",
+            "type": "ios_font_selector",
+            "label_tooltip": "The font (for iOS) for the Cancel Button Text"
+          },
+          {
+            "key": "cancel_button_font_android",
+            "type": "android_font_selector",
+            "label_tooltip": "The font (for Android) for the Cancel Button Text"
+          },
+          {
+            "key": "cancel_button_size_phone",
+            "label": "Cancel Button Font Size Phone",
+            "type": "number_input",
+            "label_tooltip": "The font-size (for smartphones) for the Cancel Button Text",
+            "initial_value": "14"
+          },
+          {
+            "key": "cancel_button_size_tablet",
+            "label": "Cancel Button Font Size Tablet",
+            "type": "number_input",
+            "label_tooltip": "The font-size (for tablets) for the Cancel Button Text",
+            "initial_value": "14"
+          },
+          {
             "key": "payment_confirmation_title_text",
             "type": "text_input",
             "label_tooltip": "<p>The title text at the top of confirmation notice after a payment was successful.</p><p>This field is required in order for a confirmation alert to be displayed.</p><p>This field is required in order for a confirmation alert to be displayed.</p>",
@@ -1578,6 +1615,54 @@
             "type": "text_input",
             "label_tooltip": "<p>The descriptive text below the title in the password reset confirmation notice. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app. </p><p>This field is required in order for a confirmation alert to be displayed.</p>",
             "initial_value": "Check your email in order reset your password for this account",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "logout_title_text",
+            "type": "text_input",
+            "label_tooltip": "<p>The title text at the top of the logout screen.</p><p>This field is required in order for a logout UI to be displayed.</p>",
+            "initial_value": "Log Out",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "logout_description_text",
+            "type": "text_input",
+            "label_tooltip": "<p>The descriptive text below the title in the logout screen. We recommend changing from the default value to better match your brand and the circumstances of the flow for accessing content in your app.</p><p>This field is required in order for a logout UI to be displayed.</p>",
+            "initial_value": "Are you sure you want to log out?",
+            "conditional_fields": [
+              {
+                "condition_value": [
+                  "always_require",
+                  "require_on_all_purchasable_items",
+                  "require_when_specified_on_the_data_source"
+                ],
+                "key": "general/authentication_requirement"
+              }
+            ]
+          },
+          {
+            "key": "logout_error_alert_text",
+            "type": "text_input",
+            "label_tooltip": "<p>The text that will be displayed in the alert message presented when the user tries to logout and the provider returns an error.</p><p>This will return to the logout screen.</p>",
+            "initial_value": "The logout process encountered an error. Please try again.",
             "conditional_fields": [
               {
                 "condition_value": [
