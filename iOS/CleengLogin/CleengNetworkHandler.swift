@@ -140,6 +140,7 @@ class CleengNetworkHandler {
                 
                 let uniqueOffers = Dictionary(grouping: restoredOffers, by: { $0.offerId }).keys
                 uniqueOffers.forEach({ (offerId) in
+                    group.enter()
                     self.verify(purchase: offerId, completion: { result in
                         switch result {
                         case .success:
