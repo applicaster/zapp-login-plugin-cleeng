@@ -31,10 +31,6 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     //pending offers, androidProductId as key and Cleeng offerID as value
     private val currentOffers: HashMap<String, String> = hashMapOf()
 
-    override fun activateRedeemCode(redeemCode: String, callback: RedeemCodeActivationCallback) {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun getPluginConfig() = Session.getPluginConfigurationParams()
 
     override fun isUserLogged(): Boolean = cleengService.getUserToken().isNotEmpty()
@@ -346,8 +342,6 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
             }
         }
     }
-
-    override fun isRedeemActivated(): Boolean = false //TODO: dummy. add proper handling
 
     private fun getErrorMessage(webError: WebServiceError?): String {
         return Session.pluginConfigurator?.getCleengErrorMessage(webError
