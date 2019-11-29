@@ -169,6 +169,16 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
+    override fun logout(isLogoutSuccess: Boolean) {
+        if (isLogoutSuccess) {
+            Session.drop()
+            cleengService.removeUserToken()
+            cleengService.logoutListener?.onResult(isLogoutSuccess)
+        } else {
+            cleengService.logoutListener?.onResult(isLogoutSuccess)
+        }
+    }
+
     override fun onItemPurchased(purchase: List<Purchase>, callback: PurchaseCallback) {
         purchase.forEachIndexed { index, item ->  subscribeOn(item, callback, index == purchase.lastIndex) }
     }

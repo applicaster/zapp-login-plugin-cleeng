@@ -15,6 +15,7 @@ import com.applicaster.cleeng.utils.isNullOrEmpty
 import com.applicaster.hook_screen.HookScreen
 import com.applicaster.hook_screen.HookScreenListener
 import com.applicaster.plugin_manager.hook.HookListener
+import com.applicaster.plugin_manager.login.LoginContract
 
 class CleengService {
 
@@ -25,6 +26,7 @@ class CleengService {
 
     var startUpHookListener: HookListener? = null
     var screenHookListener: HookScreenListener? = null
+    var logoutListener: LoginContract.Callback? = null
 
     fun mockStart(context: Context) {
         ContentAccessManager.onProcessStarted(camContract, context)
@@ -148,10 +150,15 @@ class CleengService {
         preferences.saveUserToken(token)
     }
 
+    fun removeUserToken() {
+        preferences.removeUserToken()
+    }
+
     fun isUserLogged(): Boolean = getUserToken().isNotEmpty()
 
-    fun logout() {
-        preferences.removeUserToken()
+    fun logout(context: Context, callback: LoginContract.Callback?) {
+        this.logoutListener = callback
+        ContentAccessManager.onProcessStarted(camContract, context)
     }
 
 }
