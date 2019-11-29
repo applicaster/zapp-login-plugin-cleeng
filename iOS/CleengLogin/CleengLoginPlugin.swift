@@ -133,18 +133,9 @@ typealias OfferID = String
     private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
                                                      completion: (() -> Swift.Void)?) {
         #if DEBUG
-        let alert = UIAlertController(title: "", message: "Logout?", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default) { _ in
-            CleengLoginPlugin.userToken = nil
-            UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
-            AccessChecker.userPermissionEntitlementsIds.removeAll()
-            APAuthorizationManager.sharedInstance()?.updateAuthorizationTokens(withAuthorizationProviders: [])
+        self.logout({ _ in
             self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
         })
-        alert.addAction(UIAlertAction(title: "Cancel", style: .default) { _ in
-            self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
-        })
-        UIViewController.topmostViewController()?.present(alert, animated: true, completion: nil)
         #else
         executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
         #endif
@@ -208,11 +199,17 @@ typealias OfferID = String
     }
     
     public func logout(_ completion: @escaping ((ZPLoginOperationStatus) -> Void)) {
-        CleengLoginPlugin.userToken = nil
-        UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
-        AccessChecker.userPermissionEntitlementsIds.removeAll()
-        APAuthorizationManager.sharedInstance()?.updateAuthorizationTokens(withAuthorizationProviders: [])
-        completion(.completedSuccessfully)
+        guard let controller = UIViewController.topmostViewController() else {
+            assert(false, "No topmost controller")
+            completion(.failed)
+            return
+        }
+        let contentAccessManager = ContentAccessManager(rootViewController: controller,
+                                                        camDelegate: self,
+                                                        camFlow: .logout) { (isCompleted) in
+            (isCompleted == true) ? completion(.completedSuccessfully) : completion(.failed)
+        }
+        contentAccessManager.startFlow()
     }
     
     public func isAuthenticated() -> Bool {
@@ -315,6 +312,14 @@ extension CleengLoginPlugin: CAMDelegate {
         let api = CleengAPI.login(email: authData["email"] ?? "",
                                   password: authData["password"] ?? "")
         networkAdapter.authorize(apiRequest: api, completion: completion)
+    }
+    
+    public func logout(completion: @escaping (Result<Void, Error>) -> Void) {
+        CleengLoginPlugin.userToken = nil
+        UserDefaults.standard.removeObject(forKey: kCleengUserLoginToken)
+        AccessChecker.userPermissionEntitlementsIds.removeAll()
+        APAuthorizationManager.sharedInstance()?.updateAuthorizationTokens(withAuthorizationProviders: [])
+        completion(.success)
     }
     
     public func signUp(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {

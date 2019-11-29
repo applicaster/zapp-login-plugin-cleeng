@@ -35,6 +35,8 @@ class AccessChecker {
             }
         case .no:
             isComply = true
+        default:
+            break
         }
         
         return isComply
@@ -72,6 +74,8 @@ class AccessChecker {
             } else {
                 shouldPresentStorefront = false
             }
+        } else {
+            shouldPresentStorefront = false
         }
         
         switch (isTriggerOnAppLaunch, shouldPresentStorefront) {
