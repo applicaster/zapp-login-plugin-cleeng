@@ -126,7 +126,7 @@ class ProductAPAtomEntryItem(private val playable: APAtomEntry) : ProductDataPro
     }
 
     override fun isAuthRequired(): Boolean {
-        return getSafety { playable.getExtension(ProductDataProvider.KEY_REQUIRE_AUTH, Boolean::class.java) } ?: false
+        return getSafety { playable.getExtension(ProductDataProvider.KEY_REQUIRE_AUTH, java.lang.Boolean::class.java) as Boolean } ?: false
     }
 
     override fun getProductIds(): ArrayList<String>? {
