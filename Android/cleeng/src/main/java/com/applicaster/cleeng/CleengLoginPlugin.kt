@@ -24,7 +24,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     private val cleengService: CleengService by lazy { CleengService() }
     private val screenLoader: ScreensDataLoader by lazy { ScreensDataLoader() }
 
-    private lateinit var hookListener: HookScreenListener
+    private var hookListener: HookScreenListener? = null
 
     //TODO: Test mock call that should emulate flow after click on video
     fun mockStartProcess(
@@ -187,7 +187,13 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         }
     }
 
-    override fun getListener(): HookScreenListener = hookListener
+    override fun getListener(): HookScreenListener = hookListener ?: object : HookScreenListener {
+        override fun hookCompleted(hookProps: MutableMap<String, Any>?) {
+        }
+
+        override fun hookFailed(hookProps: MutableMap<String, Any>?) {
+        }
+    }
 
     override fun hookDismissed() {
         // empty
