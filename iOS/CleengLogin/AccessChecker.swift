@@ -42,7 +42,11 @@ class AccessChecker {
         return isComply
     }
     
-    public func getStartupFlow(for dictionary: [String: Any]?) -> CAMFlow {
+    public func getUserAccountComponentFlow(for dictionary: [String: Any]?) -> CAMFlow {
+        return getStartupFlow(for: dictionary, true)
+    }
+    
+    public func getStartupFlow(for dictionary: [String: Any]?, _ isUserAccountComponent: Bool = false) -> CAMFlow {
         var isTriggerOnAppLaunch = false
         if let startOnAppLaunch = dictionary?["trigger_on_app_launch"] {
             if let flag = startOnAppLaunch as? Bool {
@@ -77,6 +81,8 @@ class AccessChecker {
         } else {
             shouldPresentStorefront = false
         }
+        
+        isTriggerOnAppLaunch = isUserAccountComponent ? true : isTriggerOnAppLaunch
         
         switch (isTriggerOnAppLaunch, shouldPresentStorefront) {
         case (true, false):
