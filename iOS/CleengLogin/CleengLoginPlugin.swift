@@ -187,7 +187,7 @@ typealias OfferID = String
         
         if let _ = additionalParameters?["UserAccountTrigger"] as? Bool {
             analytics.trigger = .userAccountComponent
-            flow = accessChecker.getStartupFlow(for: pluginConfiguration)
+            flow = accessChecker.getUserAccountComponentFlow(for: pluginConfiguration)
         }
         
         let contentAccessManager = ContentAccessManager(rootViewController: controller,
