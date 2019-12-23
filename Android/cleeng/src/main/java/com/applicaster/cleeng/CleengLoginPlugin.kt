@@ -134,7 +134,10 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        context?.let { cleengService.logout(it, callback) }
+        context?.let {
+            Session.setCamFlow(CamFlow.LOGOUT)
+            cleengService.logout(it, callback)
+        }
     }
 
     override fun generateFragment(screenMap: HashMap<String, Any>?, dataSource: Serializable?): Fragment? =
