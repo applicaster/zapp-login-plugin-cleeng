@@ -1682,7 +1682,7 @@
     {
       "key": "android_assets_bundle",
       "type": "uploader",
-      "label_tooltip": "Please upload a zip file which will provide all the relevant design assets required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource <a href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'>here</a>."
+      "label_tooltip": "Please upload a zip file which will provide all the relevant Android design assets required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here <a href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'>here</a>."
     }
   ],
   "hooks": {
