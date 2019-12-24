@@ -107,17 +107,13 @@ class CleengService {
     fun handleLogin(model: Any?, hookScreen: HookScreen, context: Context) {
         screenHookListener = hookScreen.getListener()
         itemAccessHandler.fetchProductData(model)
-        if (camContract.getCamFlow() != CamFlow.EMPTY) {
-            if (getUserToken().isEmpty()) {
-                ContentAccessManager.onProcessStarted(camContract, context)
-            } else {
-                if (Session.isAccessGranted())
-                    screenHookListener?.hookCompleted(mutableMapOf())
-                else
-                    ContentAccessManager.onProcessStarted(camContract, context)
-            }
+        if (getUserToken().isEmpty()) {
+            ContentAccessManager.onProcessStarted(camContract, context)
         } else {
-            screenHookListener?.hookCompleted(mutableMapOf())
+            if (Session.isAccessGranted())
+                screenHookListener?.hookCompleted(mutableMapOf())
+            else
+                ContentAccessManager.onProcessStarted(camContract, context)
         }
     }
 
