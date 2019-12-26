@@ -52,10 +52,10 @@ object Session {
         availableProductIds.clear()
     }
 
-    enum class TriggerStatus {
-        APP_LAUNCH,
-        TAP_CELL,
-        USER_ACCOUNT_COMPONENT,
-        NOT_SET
+    enum class TriggerStatus(val value: String) {
+        APP_LAUNCH("App Launch"),
+        TAP_CELL("Tap Cell"),
+        USER_ACCOUNT_COMPONENT("User Accounts Component"),
+        NOT_SET("Not Set")
     }
 }

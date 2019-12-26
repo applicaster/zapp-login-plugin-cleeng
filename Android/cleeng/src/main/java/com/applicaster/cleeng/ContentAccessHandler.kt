@@ -170,7 +170,11 @@ class ContentAccessHandler(private val cleengService: CleengService) {
 
     private fun setAnalyticsSessionParams(entityType: String, entityName: String) {
         Session.analyticsDataProvider.apply {
-            this.entityType = entityType
+            this.entityType =
+                if (Session.triggerStatus == Session.TriggerStatus.USER_ACCOUNT_COMPONENT)
+                    Session.triggerStatus.value
+                else
+                    entityType
             this.entityName = entityName
         }
     }
