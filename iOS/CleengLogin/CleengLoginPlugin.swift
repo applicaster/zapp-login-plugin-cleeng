@@ -125,20 +125,8 @@ typealias OfferID = String
     public func executeAfterAppRootPresentation(displayViewController: UIViewController?,
                                                 completion: (() -> Swift.Void)?) {
         silentAuthorization(completion: { () in
-            self.executeAfterAppRootPresentationFlow(displayViewController: displayViewController,
-                                                     completion: completion)
-        })
-    }
-    
-    private func executeAfterAppRootPresentationFlow(displayViewController: UIViewController?,
-                                                     completion: (() -> Swift.Void)?) {
-        #if DEBUG
-        self.logout({ _ in
             self.executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
         })
-        #else
-        executeTriggerOnAppLaunchFlow(displayViewController: displayViewController, completion: completion)
-        #endif
     }
     
     private func executeTriggerOnAppLaunchFlow(displayViewController: UIViewController?,
