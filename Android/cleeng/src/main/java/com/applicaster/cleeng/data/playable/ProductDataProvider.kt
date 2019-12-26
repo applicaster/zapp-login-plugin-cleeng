@@ -106,7 +106,8 @@ class ProductAPModelItem(private val apModel: APModel) : ProductDataProvider {
     }
 
     override fun getEntityType(): String {
-        return AnalyticsUtil.KEY_NONE_PROVIDED
+        val defaultValue = "None provided"
+        return defaultValue
     }
 
     override fun getEntityName(): String {
