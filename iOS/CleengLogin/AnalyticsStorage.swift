@@ -51,4 +51,9 @@ public class AnalyticsStorage: AnalyticsStorageProtocol {
             itemType = "Video"
         }
     }
+    
+    func updatePropertiesForUserAccountComponent() {
+        trigger = .userAccountComponent
+        itemType = "UserAccount Component"
+    }
 }
