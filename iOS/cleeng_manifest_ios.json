@@ -11,8 +11,8 @@
   "platform": "ios",
   "author_name": "Roman Karpievich, Egor Brel",
   "author_email": "r.karpievich@applicaster.com",
-  "manifest_version": "1.0.7",
-  "dependency_version": "1.0.7",
+  "manifest_version": "1.0.8",
+  "dependency_version": "1.0.8",
   "name": "Cleeng Login and Payments",
   "description": "",
   "cover_image": "",
@@ -1891,7 +1891,7 @@
     {
       "key": "ios_assets_bundle",
       "type": "uploader",
-      "label_tooltip": "Please upload a zip file which will provide all the relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource \u003ca href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'\u003ehere\u003c/a\u003e."
+      "label_tooltip": "Please upload a zip file which will provide all the iOS relevant design assets to required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource \u003ca href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'\u003ehere\u003c/a\u003e."
     }
   ],
   "hooks": {
