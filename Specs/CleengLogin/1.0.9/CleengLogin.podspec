@@ -12,10 +12,10 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.static_framework = true
   s.dependency 'ZappPlugins'
-  s.dependency 'ZappLoginPluginsSDK', '= 8.0.3'
+  s.dependency 'ZappLoginPluginsSDK'
   s.dependency 'Alamofire'
   s.dependency 'CAM', '2.0.2'
-  s.dependency 'ComponentsSDK', '= 12.1.3'
+  s.dependency 'ComponentsSDK'
   s.xcconfig =  { 'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
     'ENABLE_BITCODE' => 'YES',
     'SWIFT_VERSION' => '5.1'
