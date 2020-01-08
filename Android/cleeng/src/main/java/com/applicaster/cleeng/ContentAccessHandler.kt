@@ -45,25 +45,11 @@ class ContentAccessHandler(private val cleengService: CleengService) {
      */
     private fun matchAuthFlowValues(extensionsData: Pair<Auth, Purchase>): CamFlow {
         return when (extensionsData) {
-            (Auth.REQUIRED to Purchase.NOT_AVAILABLE) -> {
-                if (!cleengService.isUserLogged())
-                    return CamFlow.AUTHENTICATION
-                CamFlow.EMPTY
-            }
-            (Auth.REQUIRED to Purchase.AVAILABLE) -> {
-                if (!cleengService.isUserLogged())
-                    return CamFlow.AUTH_AND_STOREFRONT
-                CamFlow.STOREFRONT
-            }
-            (Auth.NOT_REQUIRED to Purchase.AVAILABLE) -> {
-                CamFlow.STOREFRONT
-            }
-            (Auth.NOT_REQUIRED to Purchase.NOT_AVAILABLE) -> {
-                CamFlow.EMPTY
-            }
-            else -> {
-                CamFlow.AUTHENTICATION
-            }
+            (Auth.REQUIRED to Purchase.NOT_AVAILABLE) -> CamFlow.AUTHENTICATION
+            (Auth.REQUIRED to Purchase.AVAILABLE) -> CamFlow.AUTH_AND_STOREFRONT
+            (Auth.NOT_REQUIRED to Purchase.AVAILABLE) -> CamFlow.STOREFRONT
+            (Auth.NOT_REQUIRED to Purchase.NOT_AVAILABLE) -> CamFlow.EMPTY
+            else -> CamFlow.AUTHENTICATION
         }
     }
 
