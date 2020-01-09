@@ -1215,11 +1215,9 @@
             "conditional_fields": [
               {
                 "condition_value": [
-                  "always_require",
-                  "require_on_all_purchasable_items",
-                  "require_when_specified_on_the_data_source"
+                  true
                 ],
-                "key": "general/authentication_requirement"
+                "key": "general/require_payment"
               }
             ]
           },
@@ -1231,11 +1229,9 @@
             "conditional_fields": [
               {
                 "condition_value": [
-                  "always_require",
-                  "require_on_all_purchasable_items",
-                  "require_when_specified_on_the_data_source"
+                  true
                 ],
-                "key": "general/authentication_requirement"
+                "key": "general/require_payment"
               }
             ]
           },
