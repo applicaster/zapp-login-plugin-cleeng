@@ -49,7 +49,7 @@
           {
             "key": "authentication_requirement",
             "type": "select",
-            "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication.</p>",
+            "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication, per the protocol described here. The word here should link to the following document: <a href='https://developer.applicaster.com/Zapp-Pipes/protocols/login_and_payment_protocol.html'/></p>",
             "initial_value": "Always require",
             "options": [
               {
@@ -72,6 +72,7 @@
           },
           {
             "key": "require_payment",
+            "label": "App Includes Purchasable Content",
             "type": "switch",
             "label_tooltip": "<p>When this field is on, the plugin will check if content requires payment (an entitlement or purchasable product) when given content is triggered.</p><p>This field also influences what configuration fields are available for the plugin.</p>",
             "initial_value": "true"
