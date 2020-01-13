@@ -701,32 +701,32 @@
           {
             "key": "custom_link_font_ios",
             "type": "ios_font_selector",
-            "label_tooltip": "The styling for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens)."
+            "label_tooltip": "The font (for iOS) for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens)."
           },
           {
             "key": "custom_link_font_android",
             "type": "android_font_selector",
-            "label_tooltip": "The styling for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens)."
+            "label_tooltip": "The font (for Android) for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens)."
           },
           {
             "key": "custom_link_size_phone",
             "label": "Custom Link Font Size Phone",
             "type": "number_input",
-            "label_tooltip": "The styling for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens).",
+            "label_tooltip": "The font size (for smartphones) for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens).",
             "initial_value": "11"
           },
           {
             "key": "custom_link_size_tablet",
             "label": "Custom Link Font Size Tablet",
             "type": "number_input",
-            "label_tooltip": "The styling for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens).",
+            "label_tooltip": "The font size (for tablets) for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens).",
             "initial_value": "11"
           },
           {
             "key": "custom_link_color",
             "label": "Custom Link Font Color",
             "type": "color_picker",
-            "label_tooltip": "The styling for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens).",
+            "label_tooltip": "The font color for any custom links presented. The links and text for these would be defined in the configuration for the given screens (supported in login, sign-up, and storefront screens).",
             "initial_value": "#ffffff"
           }
         ]
@@ -1888,7 +1888,7 @@
     {
       "key": "android_assets_bundle",
       "type": "uploader",
-      "label_tooltip": "Please upload a zip file which will provide all the relevant Android design assets required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource here <a href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'>here</a>."
+      "label_tooltip": "Please upload a zip file which will provide all the relevant Android design assets required for the screens of this plugin. For a guide on how to create such a zip file, please direct your designer to the resource <a href='https://assets-production.applicaster.com.s3.amazonaws.com/applicaster-employees/marketplace/OPT/Login%20Plugin%20-%20Designer%20Documentation.sketch'>here</a>."
     }
   ],
   "hooks": {
