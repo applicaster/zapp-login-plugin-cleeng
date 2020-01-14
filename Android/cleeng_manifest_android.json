@@ -934,7 +934,7 @@
           {
             "key": "login_screen_custom_link_1",
             "type": "text_input",
-            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, no links will be presented.",
+            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, the link will not be presented.",
             "conditional_fields": [
               {
                 "condition_value": [
@@ -949,7 +949,7 @@
           {
             "key": "login_screen_custom_link_1_text",
             "type": "text_input",
-            "label_tooltip": "<p>The text the user will see for the first custom link presented to the user. If not populated, no links will be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
+            "label_tooltip": "<p>The text the user will see for the first custom link presented to the user. If not populated, the link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
             "initial_value": "Leave it blank",
             "conditional_fields": [
               {
@@ -958,7 +958,6 @@
                   "require_on_all_purchasable_items",
                   "require_when_specified_on_the_data_source"
                 ],
-                "key": "general/authentication_requirement",
                 "key": "general/authentication_requirement"
               }
             ]
@@ -966,7 +965,7 @@
           {
             "key": "login_screen_custom_link_2",
             "type": "text_input",
-            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, a second link will not be presented to the user.",
+            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, the link will not be presented to the user.",
             "conditional_fields": [
               {
                 "condition_value": [
@@ -981,7 +980,7 @@
           {
             "key": "login_screen_custom_link_2_text",
             "type": "text_input",
-            "label_tooltip": "<p>The text the user will see for the second custom link presented to the user. If not populated, the second link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
+            "label_tooltip": "<p>The text the user will see for the second custom link presented to the user.If not populated, the link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
             "initial_value": "Leave it blank",
             "conditional_fields": [
               {
