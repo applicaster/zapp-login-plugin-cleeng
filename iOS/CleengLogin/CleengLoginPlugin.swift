@@ -73,7 +73,7 @@ typealias OfferID = String
         super.init()
         
         self.configurationJSON = configurationJSON
-        self.pluginConfiguration = ZLComponentsManager.screenComponentForPluginID("Cleeng")?.general ?? [:]
+        self.pluginConfiguration = ZAAppConnector.sharedInstance().genericDelegate.screenModelForPluginID(pluginID: "Cleeng", dataSource: nil)?.general ?? [:]
     }
     
     // MARK: - ZPUIBuilderPluginsProtocol
