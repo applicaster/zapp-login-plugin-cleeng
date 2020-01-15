@@ -11,8 +11,8 @@
   "platform": "ios",
   "author_name": "Roman Karpievich, Egor Brel",
   "author_email": "r.karpievich@applicaster.com",
-  "manifest_version": "1.0.10",
-  "dependency_version": "1.0.10",
+  "manifest_version": "1.0.11",
+  "dependency_version": "1.0.11",
   "name": "Cleeng Login and Payments",
   "description": "",
   "cover_image": "",
@@ -27,7 +27,7 @@
     "5af949534da8f300080050f9",
     "5c882170bc9708000894152b"
   ],
-  "min_zapp_sdk": "13.0.0-RC",
+  "min_zapp_sdk": "14.0.0-RC",
   "deprecated_since_zapp_sdk": "",
   "unsupported_since_zapp_sdk": "",
   "react_native": false,
@@ -1083,7 +1083,7 @@
           {
             "key": "sign_up_screen_custom_link_1",
             "type": "text_input",
-            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, no links will be presented.",
+            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, the link will not be presented.",
             "conditional_fields": [
               {
                 "condition_value": [
@@ -1098,7 +1098,7 @@
           {
             "key": "sign_up_screen_custom_link_1_text",
             "type": "text_input",
-            "label_tooltip": "<p>The text the user will see for the first custom link presented to the user. If not populated, no links will be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
+            "label_tooltip": "<p>The text the user will see for the first custom link presented to the user. If not populated, the link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
             "initial_value": "Leave it blank",
             "conditional_fields": [
               {
@@ -1114,7 +1114,7 @@
           {
             "key": "sign_up_screen_custom_link_2",
             "type": "text_input",
-            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, a second link will not be presented to the user.",
+            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, the link will not be presented to the user.",
             "conditional_fields": [
               {
                 "condition_value": [
@@ -1129,7 +1129,7 @@
           {
             "key": "sign_up_screen_custom_link_2_text",
             "type": "text_input",
-            "label_tooltip": "<p>The text the user will see for the second custom link presented to the user. If not populated, the second link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
+            "label_tooltip": "<p>The text the user will see for the second custom link presented to the user. If not populated, the link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
             "initial_value": "Leave it blank",
             "conditional_fields": [
               {
@@ -1492,7 +1492,7 @@
           {
             "key": "storefront_screen_custom_link_1",
             "type": "text_input",
-            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, no links will be presented.",
+            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, the link will not be presented.",
             "conditional_fields": [
               {
                 "condition_value": [
@@ -1505,7 +1505,7 @@
           {
             "key": "storefront_screen_custom_link_1_text",
             "type": "text_input",
-            "label_tooltip": "<p>The text the user will see for the first custom link presented to the user. If not populated, no links will be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
+            "label_tooltip": "<p>The text the user will see for the first custom link presented to the user. If not populated, the link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
             "initial_value": "Leave it blank",
             "conditional_fields": [
               {
@@ -1519,7 +1519,7 @@
           {
             "key": "storefront_screen_custom_link_2",
             "type": "text_input",
-            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, a second link will not be presented to the user.",
+            "label_tooltip": "The url scheme for where to deliver the end user upon clicking the custom link. If not populated, the link will not be presented to the user.",
             "conditional_fields": [
               {
                 "condition_value": [
@@ -1532,7 +1532,7 @@
           {
             "key": "storefront_screen_custom_link_2_text",
             "type": "text_input",
-            "label_tooltip": "<p>The text the user will see for the second custom link presented to the user. If not populated, the second link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
+            "label_tooltip": "<p>The text the user will see for the second custom link presented to the user. If not populated, the link will not be presented.</p><p>We recommend keeping this text short to keep the screen clean (e.g. “Privacy”)</p>",
             "initial_value": "Leave it blank",
             "conditional_fields": [
               {
