@@ -11,8 +11,8 @@
   "platform": "ios",
   "author_name": "Roman Karpievich, Egor Brel",
   "author_email": "r.karpievich@applicaster.com",
-  "manifest_version": "1.0.11",
-  "dependency_version": "1.0.11",
+  "manifest_version": "1.0.12",
+  "dependency_version": "1.0.12",
   "name": "Cleeng Login and Payments",
   "description": "",
   "cover_image": "",
@@ -27,7 +27,7 @@
     "5af949534da8f300080050f9",
     "5c882170bc9708000894152b"
   ],
-  "min_zapp_sdk": "14.0.0-RC",
+  "min_zapp_sdk": "13.0.0-RC",
   "deprecated_since_zapp_sdk": "",
   "unsupported_since_zapp_sdk": "",
   "react_native": false,
@@ -48,7 +48,7 @@
           {
             "key": "authentication_requirement",
             "type": "select",
-            "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication, per the protocol described here. The word here should link to the following document: <a href='https://developer.applicaster.com/Zapp-Pipes/protocols/login_and_payment_protocol.html'/></p>",
+            "label_tooltip": "<p>This field determines if/when authentication would be required to access content and also influences what configuration fields are available for the plugin.</p><p>If “Require when specified on the data source” is selected, then the feeds delivered by the data source provider must identify relevant content as requiring authentication, per the protocol described here. <a href='https://developer.applicaster.com/Zapp-Pipes/protocols/login_and_payment_protocol.html'/></p>",
             "initial_value": "Always require",
             "options": [
               {
