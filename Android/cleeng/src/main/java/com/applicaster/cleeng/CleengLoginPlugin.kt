@@ -51,12 +51,14 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         additionalParams: MutableMap<Any?, Any?>?,
         callback: LoginContract.Callback?
     ) {
-        if (isTriggeredByComponent(additionalParams))
-            additionalParams?.let {
-                handleUserAccountComponentTrigger(callback, context)
-            }
-        else
-            context?.let { cleengService.handleLogin(playable, this, it) }
+        if (!cleengService.isUserLogged()) {
+            if (isTriggeredByComponent(additionalParams))
+                additionalParams?.let {
+                    handleUserAccountComponentTrigger(callback, context)
+                }
+            else
+                context?.let { cleengService.handleLogin(playable, this, it) }
+        }
     }
 
     private fun isTriggeredByComponent(params: MutableMap<Any?, Any?>?) =
@@ -111,7 +113,10 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
             authConfigLink?.let {
                 val authFields = screenLoader.loadAuthFieldsJson(it)
                 val mutableConfig = pluginConfig.toMutableMap()
-                mutableConfig[key] = authFields
+                if (authFields.isEmpty())
+                    mutableConfig[key] = authConfigLink
+                else
+                    mutableConfig[key] = authFields
                 Session.pluginConfigurator = PluginConfigurator(mutableConfig)
             }
         }
