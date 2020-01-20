@@ -6,7 +6,7 @@ import android.util.Log
 import com.applicaster.cam.CamFlow
 import com.applicaster.cam.Trigger
 import com.applicaster.cleeng.network.executeRequest
-import com.applicaster.cleeng.screenmetadata.ScreensDataLoader
+import com.applicaster.cleeng.utils.isNullOrEmpty
 import com.applicaster.hook_screen.HookScreen
 import com.applicaster.hook_screen.HookScreenListener
 import com.applicaster.hook_screen.HookScreenManager
@@ -14,6 +14,7 @@ import com.applicaster.plugin_manager.hook.HookListener
 import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
+import com.applicaster.zapp.configfetcher.ZappConfigFetcher
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -22,7 +23,6 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
     private val TAG = CleengLoginPlugin::class.java.simpleName
 
     private val cleengService: CleengService by lazy { CleengService() }
-    private val screenLoader: ScreensDataLoader by lazy { ScreensDataLoader() }
 
     private var hookListener: HookScreenListener? = null
 
@@ -73,7 +73,7 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         Session.triggerStatus = Session.TriggerStatus.USER_ACCOUNT_COMPONENT
         Session.analyticsDataProvider.trigger = Trigger.UAC
         context?.let {
-                cleengService.handleLaunchWithoutPlayable(it, completionListener, true)
+            cleengService.handleLaunchWithoutPlayable(it, completionListener, true)
         }
     }
 
@@ -95,30 +95,13 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         Session.triggerStatus = Session.TriggerStatus.APP_LAUNCH
         Session.analyticsDataProvider.trigger = Trigger.APP_LAUNCH
         executeRequest {
-            loadPluginConfig()
-
+            loadPluginConfig(context)
             if (context != null && listener != null)
                 cleengService.handleLaunchWithoutPlayable(
                     context,
                     listener,
                     Session.pluginConfigurator?.isTriggerOnAppLaunch() ?: false
                 )
-        }
-    }
-
-    private suspend fun loadAuthConfigJson(pluginConfig: Map<String, String>?) {
-        val key = "authentication_input_fields"
-        if (pluginConfig?.containsKey(key) == true) {
-            val authConfigLink = pluginConfig[key]
-            authConfigLink?.let {
-                val authFields = screenLoader.loadAuthFieldsJson(it)
-                val mutableConfig = pluginConfig.toMutableMap()
-                if (authFields.isEmpty())
-                    mutableConfig[key] = authConfigLink
-                else
-                    mutableConfig[key] = authFields
-                Session.pluginConfigurator = PluginConfigurator(mutableConfig)
-            }
         }
     }
 
@@ -146,7 +129,10 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         }
     }
 
-    override fun generateFragment(screenMap: HashMap<String, Any>?, dataSource: Serializable?): Fragment? =
+    override fun generateFragment(
+        screenMap: HashMap<String, Any>?,
+        dataSource: Serializable?
+    ): Fragment? =
         null
 
     override fun present(
@@ -174,25 +160,16 @@ class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {
         this.hookListener = hookListener
         executeRequest {
             val dataSource: Any? = hookProps?.get(HookScreenManager.HOOK_PROPS_DATASOURCE_KEY)
-            val pluginConfig = getPluginConfiguration()
-            if (pluginConfig != null)
-                loadAuthConfigJson(pluginConfig)
+            loadPluginConfig(context)
             cleengService.handleLogin(dataSource, this, context)
         }
     }
 
-    private suspend fun loadPluginConfig() =
-        screenLoader.loadScreensData()?.let { loadAuthConfigJson(it) }
-
-    private fun getPluginConfiguration(): Map<String, String>? {
-        val fullPluginConfig =
-            Gson().fromJson(hook["screenMap"].orEmpty(), Map::class.java) as? Map<String, Any>
-        val generalConfig: MutableMap<Any?, Any?>? =
-            fullPluginConfig?.get("general") as? MutableMap<Any?, Any?>
-
-        //transform MutableMap<Any?, Any?>? to Map<String, String>?
-        return generalConfig?.entries?.associate { entry ->
-            entry.key.toString() to entry.value.toString()
+    private suspend fun loadPluginConfig(context: Context?) {
+        if (Session.pluginConfigurator?.getPluginConfig().isNullOrEmpty()) {
+            val configFetcher = ZappConfigFetcher("cleeng")
+            val pluginConfig = configFetcher.loadFullConfig(context, true, hook)
+            Session.pluginConfigurator = PluginConfigurator(pluginConfig)
         }
     }
 
