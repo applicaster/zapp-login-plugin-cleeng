@@ -54,6 +54,6 @@ public class AnalyticsStorage: AnalyticsStorageProtocol {
     
     func updatePropertiesForUserAccountComponent() {
         trigger = .userAccountComponent
-        itemType = "UserAccount Component"
+        itemType = "UserAccounts Component"
     }
 }
