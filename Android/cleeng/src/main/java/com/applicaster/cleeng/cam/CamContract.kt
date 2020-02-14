@@ -12,18 +12,16 @@ import com.applicaster.cam.params.billing.ProductType
 import com.applicaster.cleeng.CleengService
 import com.applicaster.cleeng.Session
 import com.applicaster.cleeng.data.Offer
-import com.applicaster.cleeng.network.Result
+import com.applicaster.cleeng.network.*
 import com.applicaster.cleeng.network.error.WebServiceError
-import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.request.*
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.isNullOrEmpty
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
 import org.json.JSONObject
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 class CamContract(private val cleengService: CleengService) : ICamContract {
     private val TAG = CamContract::class.java.canonicalName
@@ -281,8 +279,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
      */
     private fun finishPurchaseFlow(purchasedOfferId: String, callback: ActionCallback, shouldSendCallback: Boolean) {
         var registeredOffers: List<AuthResponseData> = arrayListOf()
-        val coroutineContext: CoroutineContext = UI
-        launch(coroutineContext) {
+        scope.launch{
             try {
                 repeat(PURCHASE_VERIFICATION_CALL_MAX_NUM) {
                     val result = cleengService.networkHelper.extendToken(cleengService.getUserToken())
@@ -293,7 +290,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                                     it.token?.let { token -> cleengService.saveUserToken(token) }
                                 } else if (it.offerId == purchasedOfferId) {
                                     registeredOffers = result.value
-                                    coroutineContext.cancel()
+                                    scope.cancel()
                                     return@repeat
                                 }
                             }
@@ -305,6 +302,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 saveOwnedUserProducts(registeredOffers, callback, shouldSendCallback)
             }
         }
+    }
+
+    private val scope by lazy {
+        val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
+        CoroutineScope(coroutineContext)
     }
 
     private fun saveOwnedUserProducts(registeredOffers: List<AuthResponseData>, callback: ActionCallback, shouldSendCallback: Boolean) {
