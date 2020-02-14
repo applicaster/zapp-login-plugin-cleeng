@@ -33,6 +33,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun isUserLogged(): Boolean = cleengService.getUserToken().isNotEmpty()
 
+    //user activation is not used for Cleeng service
+    override fun isUserActivated(): Boolean = true
+
     override fun loadEntitlements(callback: EntitlementsLoadCallback) {
         val requestData = SubscriptionsRequestData(
                 1,
@@ -40,8 +43,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 cleengService.getUserToken()
         )
         executeRequest {
-            val result = cleengService.networkHelper.requestSubscriptions(requestData)
-            when (result) {
+            when (val result = cleengService.networkHelper.requestSubscriptions(requestData)) {
                 is Result.Success -> {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     val billingOfferList: ArrayList<BillingOffer> = arrayListOf()
@@ -140,6 +142,27 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun sendAuthActivationCode(
+        authFieldsInput: HashMap<String, String>,
+        callback: SendAuthActivationCodeCallback
+    ) {
+        callback.onCodeSendingSuccess()
+    }
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun activateAccount(
+        authFieldsInput: HashMap<String, String>,
+        callback: AccountActivationCallback
+    ) {
+        callback.onActionSuccess()
+    }
+
     override fun signupWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
         executeRequest {
             val result = cleengService.networkHelper.registerFacebook(
@@ -167,13 +190,13 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun logout(isLogoutSuccess: Boolean) {
-        if (isLogoutSuccess) {
+    override fun logout(isConfirmedByUser: Boolean) {
+        if (isConfirmedByUser) {
             Session.drop()
             cleengService.removeUserToken()
-            cleengService.logoutListener?.onResult(isLogoutSuccess)
+            cleengService.logoutListener?.onResult(isConfirmedByUser)
         } else {
-            cleengService.logoutListener?.onResult(isLogoutSuccess)
+            cleengService.logoutListener?.onResult(isConfirmedByUser)
         }
     }
 
@@ -182,12 +205,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     }
 
     override fun onPurchasesRestored(purchases: List<Purchase>, callback: RestoreCallback) {
-        //Test fun for new restore API.
-        // TODO: Uncomment when server-side implementation will be finished
         sendRestoredSubscriptions(purchases, callback)
-        //Restore implementation based on regular purchase server API (i.e. /subscription)
-        //TODO: Remove this when server-side implementation will be finished
-//        purchases.forEachIndexed { index, item ->  subscribeOn(item, callback, index == purchase.lastIndex) }
     }
 
     /**
@@ -353,6 +371,26 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
             }
         }
+    }
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun sendPasswordActivationCode(
+        authFieldsInput: HashMap<String, String>,
+        callback: SendPasswordActivationCodeCallback
+    ) {
+        callback.onCodeSendingSuccess()
+    }
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun updatePassword(
+        authFieldsInput: HashMap<String, String>,
+        callback: PasswordUpdateCallback
+    ) {
+        callback.onActionSuccess()
     }
 
     private fun getErrorMessage(webError: WebServiceError?): String {

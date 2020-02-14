@@ -54,7 +54,7 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // Cam framework
-    def camPath = 'com.applicaster:applicaster-cam-framework:2.0.1'
+    def camPath = 'com.applicaster:applicaster-cam-framework:3.1.0'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         implementation project(':cam')
@@ -63,7 +63,7 @@ dependencies {
     }
 
     // Applicaster SDK
-    def applicasterSDKPath = 'com.applicaster:applicaster-android-sdk:4.0.0'
+    def applicasterSDKPath = 'com.applicaster:applicaster-android-sdk:5.0.1'
     // Check if an open SDK is defined - if not use the closed one.
     def devSDK = findProject(':applicaster-android-sdk')
     if (devSDK != null) {
@@ -79,7 +79,7 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.2.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
 
 //---------------------------------- Bintray ----------------------------------//
@@ -94,7 +94,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.17"
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
