@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 7
-        versionName "1.1.2"
+        versionCode 8
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -54,7 +54,7 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // Cam framework
-    def camPath = 'com.applicaster:applicaster-cam-framework:3.1.0'
+    def camPath = 'com.applicaster:applicaster-cam-framework:4.0.0'
     def devCAM = findProject(':cam')
     if (devCAM != null) {
         implementation project(':cam')
@@ -137,7 +137,7 @@ publishing {
             if (versionFromTag != null) {
                 // Check if version from tag equals to version from properties
                 if (!compareVersions(versionFromTag, VERSION))
-                    throw new Exception("Incomparable version value from tag and properties!")
+                    throw new Exception("Incomparable version value from tag (${versionFromTag}) and properties (${VERSION})!")
 
                 // There is a tag existing on the current commit - we can upload to Bintray
                 version versionFromTag
