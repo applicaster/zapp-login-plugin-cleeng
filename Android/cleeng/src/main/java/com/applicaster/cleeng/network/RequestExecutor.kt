@@ -2,16 +2,33 @@ package com.applicaster.cleeng.network
 
 import com.applicaster.cleeng.network.error.ErrorUtil
 import com.applicaster.cleeng.network.error.WebServiceError
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import retrofit2.Response
+import kotlin.coroutines.CoroutineContext
+import com.applicaster.cleeng.network.exceptionHandler as exceptionHandler1
 
+
+private lateinit var job: Job
 private lateinit var exceptionHandler: CleengCoroutineExceptionHandler
+private val scope by lazy {
+    job = Job()
+    exceptionHandler1 = CleengCoroutineExceptionHandler {  }
+    val coroutineContext: CoroutineContext = Dispatchers.Main + job + exceptionHandler1
+    CoroutineScope(coroutineContext)
+}
 
 fun executeRequest(request: suspend () -> Unit) {
-    launch(UI) {
+    scope.launch {
         request()
     }
+}
+
+fun cancelCurrentJob() {
+    if (::job.isInitialized && job.isActive)
+        job.cancel()
 }
 
 fun <R> handleResponse(response: Response<R>): Result<R, WebServiceError> {

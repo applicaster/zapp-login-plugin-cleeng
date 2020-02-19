@@ -12,18 +12,16 @@ import com.applicaster.cam.params.billing.ProductType
 import com.applicaster.cleeng.CleengService
 import com.applicaster.cleeng.Session
 import com.applicaster.cleeng.data.Offer
-import com.applicaster.cleeng.network.Result
+import com.applicaster.cleeng.network.*
 import com.applicaster.cleeng.network.error.WebServiceError
-import com.applicaster.cleeng.network.executeRequest
 import com.applicaster.cleeng.network.request.*
 import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.isNullOrEmpty
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
 import org.json.JSONObject
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 class CamContract(private val cleengService: CleengService) : ICamContract {
     private val TAG = CamContract::class.java.canonicalName
@@ -35,6 +33,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun isUserLogged(): Boolean = cleengService.getUserToken().isNotEmpty()
 
+    //user activation is not used for Cleeng service
+    override fun isUserActivated(): Boolean = true
+
     override fun loadEntitlements(callback: EntitlementsLoadCallback) {
         val requestData = SubscriptionsRequestData(
                 1,
@@ -42,8 +43,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 cleengService.getUserToken()
         )
         executeRequest {
-            val result = cleengService.networkHelper.requestSubscriptions(requestData)
-            when (result) {
+            when (val result = cleengService.networkHelper.requestSubscriptions(requestData)) {
                 is Result.Success -> {
                     val responseDataResult: List<SubscriptionsResponseData>? = result.value
                     val billingOfferList: ArrayList<BillingOffer> = arrayListOf()
@@ -142,6 +142,27 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun sendAuthActivationCode(
+        authFieldsInput: HashMap<String, String>,
+        callback: SendAuthActivationCodeCallback
+    ) {
+        callback.onCodeSendingSuccess()
+    }
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun activateAccount(
+        authFieldsInput: HashMap<String, String>,
+        callback: AccountActivationCallback
+    ) {
+        callback.onActionSuccess()
+    }
+
     override fun signupWithFacebook(email: String, id: String, callback: FacebookAuthCallback) {
         executeRequest {
             val result = cleengService.networkHelper.registerFacebook(
@@ -169,13 +190,13 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
         }
     }
 
-    override fun logout(isLogoutSuccess: Boolean) {
-        if (isLogoutSuccess) {
+    override fun logout(isConfirmedByUser: Boolean) {
+        if (isConfirmedByUser) {
             Session.drop()
             cleengService.removeUserToken()
-            cleengService.logoutListener?.onResult(isLogoutSuccess)
+            cleengService.logoutListener?.onResult(isConfirmedByUser)
         } else {
-            cleengService.logoutListener?.onResult(isLogoutSuccess)
+            cleengService.logoutListener?.onResult(isConfirmedByUser)
         }
     }
 
@@ -184,12 +205,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
     }
 
     override fun onPurchasesRestored(purchases: List<Purchase>, callback: RestoreCallback) {
-        //Test fun for new restore API.
-        // TODO: Uncomment when server-side implementation will be finished
         sendRestoredSubscriptions(purchases, callback)
-        //Restore implementation based on regular purchase server API (i.e. /subscription)
-        //TODO: Remove this when server-side implementation will be finished
-//        purchases.forEachIndexed { index, item ->  subscribeOn(item, callback, index == purchase.lastIndex) }
     }
 
     /**
@@ -281,8 +297,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
      */
     private fun finishPurchaseFlow(purchasedOfferId: String, callback: ActionCallback, shouldSendCallback: Boolean) {
         var registeredOffers: List<AuthResponseData> = arrayListOf()
-        val coroutineContext: CoroutineContext = UI
-        launch(coroutineContext) {
+        scope.launch{
             try {
                 repeat(PURCHASE_VERIFICATION_CALL_MAX_NUM) {
                     val result = cleengService.networkHelper.extendToken(cleengService.getUserToken())
@@ -293,7 +308,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                                     it.token?.let { token -> cleengService.saveUserToken(token) }
                                 } else if (it.offerId == purchasedOfferId) {
                                     registeredOffers = result.value
-                                    coroutineContext.cancel()
+                                    scope.cancel()
                                     return@repeat
                                 }
                             }
@@ -305,6 +320,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 saveOwnedUserProducts(registeredOffers, callback, shouldSendCallback)
             }
         }
+    }
+
+    private val scope by lazy {
+        val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
+        CoroutineScope(coroutineContext)
     }
 
     private fun saveOwnedUserProducts(registeredOffers: List<AuthResponseData>, callback: ActionCallback, shouldSendCallback: Boolean) {
@@ -351,6 +371,26 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 }
             }
         }
+    }
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun sendPasswordActivationCode(
+        authFieldsInput: HashMap<String, String>,
+        callback: SendPasswordActivationCodeCallback
+    ) {
+        callback.onCodeSendingSuccess()
+    }
+
+    /**
+     * Feature is not used for Cleeng service
+     */
+    override fun updatePassword(
+        authFieldsInput: HashMap<String, String>,
+        callback: PasswordUpdateCallback
+    ) {
+        callback.onActionSuccess()
     }
 
     private fun getErrorMessage(webError: WebServiceError?): String {

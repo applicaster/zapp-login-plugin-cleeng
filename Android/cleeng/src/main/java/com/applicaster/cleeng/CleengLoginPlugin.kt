@@ -1,8 +1,8 @@
 package com.applicaster.cleeng
 
 import android.content.Context
-import android.support.v4.app.Fragment
 import android.util.Log
+import androidx.fragment.app.Fragment
 import com.applicaster.cam.CamFlow
 import com.applicaster.cam.Trigger
 import com.applicaster.cleeng.network.executeRequest
@@ -15,7 +15,6 @@ import com.applicaster.plugin_manager.login.LoginContract
 import com.applicaster.plugin_manager.playersmanager.Playable
 import com.applicaster.plugin_manager.screen.PluginScreen
 import com.applicaster.zapp.configfetcher.ZappConfigFetcher
-import com.google.gson.Gson
 import java.io.Serializable
 
 class CleengLoginPlugin : LoginContract, PluginScreen, HookScreen {

@@ -1,10 +1,11 @@
 package com.applicaster.cleeng.network
 
 import android.util.Log
-import kotlinx.coroutines.experimental.CoroutineExceptionHandler
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlin.coroutines.CoroutineContext
 
-class CleengCoroutineExceptionHandler(private val handler: (Throwable) -> Unit) : CoroutineExceptionHandler {
+class CleengCoroutineExceptionHandler(private val handler: (Throwable) -> Unit) :
+    CoroutineExceptionHandler {
 
     private val TAG = CleengCoroutineExceptionHandler::class.java.simpleName
 

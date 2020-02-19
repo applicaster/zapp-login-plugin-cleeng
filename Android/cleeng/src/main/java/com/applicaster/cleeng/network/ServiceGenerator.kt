@@ -1,7 +1,6 @@
 package com.applicaster.cleeng.network
 
 import com.google.gson.GsonBuilder
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -26,7 +25,6 @@ class ServiceGenerator {
             retrofit = retrofitBuilder.apply {
                 baseUrl(baseUrl)
                 addConverterFactory(GsonConverterFactory.create(gson))
-                addCallAdapterFactory(CoroutineCallAdapterFactory())
                 client(getHttpClient())
             }.build()
             return retrofit.create(serviceClass)
