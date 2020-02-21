@@ -377,22 +377,26 @@ extension CleengLoginPlugin: CAMDelegate {
     
     public func activateAccount(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
         assert(false, "Unexpeted call")
+        completion(.success)
     }
     
     public func sendAuthActivationCode(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
         assert(false, "Unexpeted call")
+        completion(.success)
     }
     
     public func updatePassword(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
         assert(false, "Unexpeted call")
+        completion(.success)
     }
     
     public func sendPasswordActivationCode(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
         assert(false, "Unexpeted call")
+        completion(.success)
     }
     
     public func isUserActivated() -> Bool {
         assert(false, "Unexpeted call")
-        return false
+        return true
     }
 }
