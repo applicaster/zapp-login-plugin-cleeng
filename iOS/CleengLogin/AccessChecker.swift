@@ -60,7 +60,7 @@ class AccessChecker {
         
         var shouldPresentStorefront = false
         
-        if let storefrontOnAppLaunch = dictionary?["present_storefront_upon_launch"] {
+        if let storefrontOnAppLaunch = dictionary?["present_storefront_upon_launch"], isTriggerOnAppLaunch {
             if let flag = storefrontOnAppLaunch as? Bool {
                 shouldPresentStorefront = flag
             } else if let num = storefrontOnAppLaunch as? Int {
