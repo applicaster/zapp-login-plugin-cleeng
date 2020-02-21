@@ -6,7 +6,6 @@
 //
 
 import ZappPlugins
-import ZappLoginPluginsSDK
 import CAM
 import ComponentsSDK
 
@@ -374,5 +373,26 @@ extension CleengLoginPlugin: CAMDelegate {
     
     public func analyticsStorage() -> AnalyticsStorageProtocol {
         return analytics
+    }
+    
+    public func activateAccount(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
+        assert(false, "Unexpeted call")
+    }
+    
+    public func sendAuthActivationCode(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
+        assert(false, "Unexpeted call")
+    }
+    
+    public func updatePassword(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
+        assert(false, "Unexpeted call")
+    }
+    
+    public func sendPasswordActivationCode(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
+        assert(false, "Unexpeted call")
+    }
+    
+    public func isUserActivated() -> Bool {
+        assert(false, "Unexpeted call")
+        return false
     }
 }
