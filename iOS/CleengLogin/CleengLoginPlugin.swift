@@ -315,28 +315,8 @@ extension CleengLoginPlugin: CAMDelegate {
         networkAdapter.authorize(apiRequest: api, completion: completion)
     }
     
-    public func isUserActivated() -> Bool {
-        return true
-    }
-    
-    public func activateAccount(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
-        
-    }
-    
-    public func sendAuthActivationCode(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
-        
-    }
-    
-    public func updatePassword(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
-        
-    }
-    
     public func resetPassword(data: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
         networkAdapter.resetPassword(data: data, completion: completion)
-    }
-    
-    public func sendPasswordActivationCode(data: [String : String], completion: @escaping (Result<Void, Error>) -> Void) {
-        
     }
     
     public func availableProducts(completion: @escaping (Result<[String], Error>) -> Void) {
