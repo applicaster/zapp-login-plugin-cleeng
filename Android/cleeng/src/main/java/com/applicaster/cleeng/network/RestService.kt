@@ -7,7 +7,6 @@ import com.applicaster.cleeng.network.response.AuthResponseData
 import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.RestoreSubscriptionsResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
-import kotlinx.coroutines.experimental.Deferred
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -18,62 +17,62 @@ interface RestService {
 
     @FormUrlEncoded
     @POST("register")
-    fun registerEmail(
+    suspend fun registerEmail(
         @Field("email") email: String,
         @Field("password") password: String,
         @Field("country") country: String,
         @Field("locale") locale: String,
         @Field("currency") currency: String
-    ): Deferred<Response<List<AuthResponseData>>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("register")
-    fun registerFacebook(
+    suspend fun registerFacebook(
         @Field("email") email: String,
         @Field("facebookId") facebookId: String,
         @Field("country") country: String,
         @Field("locale") locale: String,
         @Field("currency") currency: String
-    ): Deferred<Response<List<AuthResponseData>>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("login")
-    fun loginEmail(
+    suspend fun loginEmail(
         @Field("email") email: String,
         @Field("password") password: String
-    ): Deferred<Response<List<AuthResponseData>>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("login")
-    fun loginFacebook(
+    suspend fun loginFacebook(
         @Field("email") email: String,
         @Field("facebookId") facebookId: String
-    ): Deferred<Response<List<AuthResponseData>>>
+    ): Response<List<AuthResponseData>>
 
     @FormUrlEncoded
     @POST("passwordReset")
-    fun resetPassword(
+    suspend fun resetPassword(
         @Field("email") email: String
-    ): Deferred<Response<ResetPasswordResponseData>>
+    ): Response<ResetPasswordResponseData>
 
     @FormUrlEncoded
     @POST("extendToken")
-    fun extendToken(
+    suspend fun extendToken(
         @Field("token") token: String
-    ): Deferred<Response<List<AuthResponseData>>>
+    ): Response<List<AuthResponseData>>
 
     @POST("subscriptions")
-    fun requestSubscriptions(
+    suspend fun requestSubscriptions(
         @Body subscriptionsRequestData: SubscriptionsRequestData
-    ): Deferred<Response<List<SubscriptionsResponseData>>>
+    ): Response<List<SubscriptionsResponseData>>
 
     @POST("subscription")
-    fun subscribe(
+    suspend fun subscribe(
         @Body subscribeRequestData: SubscribeRequestData
-    ): Deferred<Response<Unit>>
+    ): Response<Unit>
 
     @POST("restoreSubscriptions")
-    fun restoreSubscriptions(
+    suspend fun restoreSubscriptions(
         @Body restoreSubscriptionsData: RestoreSubscriptionsRequestData
-    ): Deferred<Response<List<RestoreSubscriptionsResponseData>>>
+    ): Response<List<RestoreSubscriptionsResponseData>>
 }

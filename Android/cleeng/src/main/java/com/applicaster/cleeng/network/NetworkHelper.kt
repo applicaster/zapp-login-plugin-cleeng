@@ -28,7 +28,7 @@ class NetworkHelper {
                     locale,
                     currency
                 )
-            }.await()
+            }
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -45,7 +45,7 @@ class NetworkHelper {
                     locale,
                     currency
                 )
-            }.await()
+            }
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -54,7 +54,7 @@ class NetworkHelper {
 
     suspend fun login(email: String, password: String): Result<List<AuthResponseData>, WebServiceError> {
         return try {
-            val response = retrofitService.loginEmail(email, password).await()
+            val response = retrofitService.loginEmail(email, password)
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -63,7 +63,7 @@ class NetworkHelper {
 
     suspend fun loginFacebook(email: String, facebookId: String): Result<List<AuthResponseData>, WebServiceError> {
         return try {
-            val response = retrofitService.loginFacebook(email, facebookId).await()
+            val response = retrofitService.loginFacebook(email, facebookId)
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -72,7 +72,7 @@ class NetworkHelper {
 
     suspend fun resetPassword(email: String): Result<ResetPasswordResponseData, WebServiceError> {
         return try {
-            val response = retrofitService.resetPassword(email).await()
+            val response = retrofitService.resetPassword(email)
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -81,7 +81,7 @@ class NetworkHelper {
 
     suspend fun extendToken(token: String): Result<List<AuthResponseData>, WebServiceError> {
         return try {
-            val response = retrofitService.extendToken(token).await()
+            val response = retrofitService.extendToken(token)
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -90,7 +90,7 @@ class NetworkHelper {
 
     suspend fun requestSubscriptions(requestData: SubscriptionsRequestData): Result<List<SubscriptionsResponseData>, WebServiceError> {
         return try {
-            val response = retrofitService.requestSubscriptions(requestData).await()
+            val response = retrofitService.requestSubscriptions(requestData)
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -99,7 +99,7 @@ class NetworkHelper {
 
     suspend fun subscribe(requestData: SubscribeRequestData): Result<Unit, WebServiceError> {
         return try {
-            val response = retrofitService.subscribe(requestData).await()
+            val response = retrofitService.subscribe(requestData)
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
@@ -109,7 +109,7 @@ class NetworkHelper {
     suspend fun restoreSubscriptions(requestData: RestoreSubscriptionsRequestData):
             Result<List<RestoreSubscriptionsResponseData>, WebServiceError> {
         return try {
-            val response = retrofitService.restoreSubscriptions(requestData).await()
+            val response = retrofitService.restoreSubscriptions(requestData)
             handleResponse(response)
         } catch (t: Throwable) {
             Result.Failure(WebServiceError.DEFAULT)
