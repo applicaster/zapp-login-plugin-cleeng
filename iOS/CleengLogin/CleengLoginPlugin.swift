@@ -7,7 +7,7 @@
 
 import ZappPlugins
 import CAM
-import ComponentsSDK
+import ApplicasterSDK
 
 let kCleengUserLoginToken = "CleengUserLoginToken"
 
