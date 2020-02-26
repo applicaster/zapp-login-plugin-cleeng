@@ -310,9 +310,36 @@ extension CleengLoginPlugin: CAMDelegate {
     }
     
     public func signUp(authData: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {
-        let api = CleengAPI.register(email: authData["email"] ?? "",
-                                     password: authData["password"] ?? "")
-        networkAdapter.authorize(apiRequest: api, completion: completion)
+        let email = authData["email"]
+        let password = authData["password"]
+        
+        let api = CleengAPI.register(email: email ?? "",
+                                     password: password ?? "")
+        
+        networkAdapter.authorize(apiRequest: api) { [weak self] (registerResult) in
+            // when the user already exists, generate a token directly
+            if
+                let email = email,
+                password == nil, // this indicates to try and generate the customer token for a login plugin that uses cleeng for purchases only
+                case let .failure(cleengError as CleengError) = registerResult,
+                case let .requestError(cleengRequestError) = cleengError,
+                cleengRequestError.errorCode == .existingUser {
+                    
+                let generateCustomerTokenApi = CleengAPI.generateCustomerToken(email: email)
+                self?.networkAdapter.authorize(apiRequest: generateCustomerTokenApi) { generateCustomerTokenResult in
+                    guard case .success = generateCustomerTokenResult else {
+                        completion(registerResult)
+                        return
+                    }
+                    
+                    completion(generateCustomerTokenResult)
+                }
+                
+                return
+            }
+            
+            completion(registerResult)
+        }
     }
     
     public func resetPassword(data: [String: String], completion: @escaping (Result<Void, Error>) -> Void) {

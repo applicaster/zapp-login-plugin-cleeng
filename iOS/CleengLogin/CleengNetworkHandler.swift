@@ -24,7 +24,7 @@ class CleengNetworkHandler {
         isPerformingAuthorizationFlow = true
 
         switch apiRequest {
-        case .login, .loginWithFacebook, .register, .registerWithFacebook:
+        case .login, .loginWithFacebook, .register, .registerWithFacebook, .generateCustomerToken:
             performRequest(api: apiRequest) { (result) in
                 self.isPerformingAuthorizationFlow = false
                 

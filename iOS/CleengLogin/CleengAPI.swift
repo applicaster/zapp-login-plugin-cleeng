@@ -21,6 +21,7 @@ enum CleengAPI {
                       receiptData: Data, isRestored: Bool)
     case purchaseItemUsingCode(offerId: String, token: String, reedeemCode: String)
     case restore(receipts: [RestorePurchaseData], token: String, receipt: String)
+    case generateCustomerToken(email: String)
 }
     
 extension CleengAPI {
@@ -44,6 +45,9 @@ extension CleengAPI {
             return "subscription"
         case .restore:
             return "restoreSubscriptions"
+        case .generateCustomerToken:
+            return "generateCustomerToken"
+            
         }
     }
     
@@ -120,6 +124,8 @@ extension CleengAPI {
                     "receipts": receipts,
                     "token": userToken,
                     "receiptData": receipt]
+        case .generateCustomerToken(let email):
+            return ["email": email]
         }
     }
 }
