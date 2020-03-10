@@ -20,6 +20,7 @@ import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.isNullOrEmpty
 import kotlinx.coroutines.*
+import kotlinx.coroutines.android.UI
 import org.json.JSONObject
 import kotlin.coroutines.CoroutineContext
 
@@ -297,7 +298,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
      */
     private fun finishPurchaseFlow(purchasedOfferId: String, callback: ActionCallback, shouldSendCallback: Boolean) {
         var registeredOffers: List<AuthResponseData> = arrayListOf()
-        scope.launch{
+        GlobalScope.launch(UI){
             try {
                 repeat(PURCHASE_VERIFICATION_CALL_MAX_NUM) {
                     val result = cleengService.networkHelper.extendToken(cleengService.getUserToken())
@@ -308,7 +309,7 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                                     it.token?.let { token -> cleengService.saveUserToken(token) }
                                 } else if (it.offerId == purchasedOfferId) {
                                     registeredOffers = result.value
-                                    scope.cancel()
+                                    UI.cancel()
                                     return@repeat
                                 }
                             }
@@ -320,11 +321,6 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
                 saveOwnedUserProducts(registeredOffers, callback, shouldSendCallback)
             }
         }
-    }
-
-    private val scope by lazy {
-        val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
-        CoroutineScope(coroutineContext)
     }
 
     private fun saveOwnedUserProducts(registeredOffers: List<AuthResponseData>, callback: ActionCallback, shouldSendCallback: Boolean) {
