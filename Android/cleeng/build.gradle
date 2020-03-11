@@ -55,7 +55,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // Cam framework
     def devCAM = findProject(':cam')
-    def camPath = 'com.applicaster:applicaster-cam-framework:4.2.0'
+    def camPath = 'com.applicaster:applicaster-cam-framework:4.3.0'
     if (devCAM != null) {
         implementation project(':cam')
     } else {
