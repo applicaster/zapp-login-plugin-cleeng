@@ -251,8 +251,8 @@
           {
             "key": "authentication_input_fields",
             "type": "uploader",
-            "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file [here](https://github.com/applicaster/applicaster-cam-framework/wiki/Authentication-Fields-Configuration)",
-            "conditional_fields": [
+            "label_tooltip": "Please upload a JSON file with a section for the sign-up and login screens, with each section containing the expected input fields for the given screen. Please follow the format and guidance outlined in the example file <a href='https://github.com/applicaster/applicaster-cam-framework/wiki/Authentication-Fields-Configuration'>.</a>",
+			"conditional_fields": [
               {
                 "condition_value": [
                   "always_require",
