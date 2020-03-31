@@ -6,6 +6,7 @@ import com.applicaster.cam.CamFlow
 import com.applicaster.cam.ContentAccessManager
 import com.applicaster.cleeng.cam.CamContract
 import com.applicaster.cleeng.data.Offer
+import com.applicaster.cleeng.data.SessionParams
 import com.applicaster.cleeng.network.NetworkHelper
 import com.applicaster.cleeng.network.Result
 import com.applicaster.cleeng.network.executeRequest
@@ -76,7 +77,7 @@ class CleengService {
                         // and added to session from data that was passed as parameter
                         Session.availableProductIds.addAll(availableProductsIds)
                         if (!Session.isAccessGranted()) {
-                            itemAccessHandler.setSessionParams(false, availableProductsIds)
+                            itemAccessHandler.setSessionParams(SessionParams(false, availableProductsIds))
                             ContentAccessManager.onProcessStarted(camContract, context)
                         } else {
                             startUpHookListener?.onHookFinished()
@@ -94,7 +95,7 @@ class CleengService {
                         Session.pluginConfigurator?.getAppLevelEntitlements()?.filterTo(appLevelEntitlements) {
                             it.isNotEmpty()
                         }
-                        itemAccessHandler.setSessionParams(true, appLevelEntitlements)
+                        itemAccessHandler.setSessionParams(SessionParams(true, appLevelEntitlements))
                         ContentAccessManager.onProcessStarted(camContract, context)
                     } else {
                         startUpHookListener?.onHookFinished()
@@ -106,7 +107,7 @@ class CleengService {
 
     fun handleLogin(model: Any?, hookScreen: HookScreen, context: Context) {
         screenHookListener = hookScreen.getListener()
-        itemAccessHandler.fetchProductData(model)
+        itemAccessHandler.setSessionParams(itemAccessHandler.fetchProductData(model))
         if (getUserToken().isEmpty()) {
             ContentAccessManager.onProcessStarted(camContract, context)
         } else {
