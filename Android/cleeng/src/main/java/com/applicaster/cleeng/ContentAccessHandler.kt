@@ -3,8 +3,7 @@ package com.applicaster.cleeng
 import com.applicaster.app.APProperties
 import com.applicaster.atom.model.APAtomEntry
 import com.applicaster.cam.CamFlow
-import com.applicaster.cam.ContentAccessManager
-import com.applicaster.cam.Trigger
+import com.applicaster.cleeng.data.SessionParams
 import com.applicaster.cleeng.data.playable.ProductDataProvider
 import com.applicaster.cleeng.utils.CleengAsyncTaskListener
 import com.applicaster.cleeng.utils.isNullOrEmpty
@@ -22,20 +21,22 @@ class ContentAccessHandler(private val cleengService: CleengService) {
      * Set available product ids relevant to this user session and decide which [CamFlow] we need to be used
      * Available product ids can be obtained in many different ways (from playable / from plugin config)
      */
-    fun setSessionParams(isAuthRequired: Boolean, parsedProductIds: List<String>) {
+    fun setSessionParams(sessionParams: SessionParams) {
         Session.availableProductIds.clear()
         //check if session started on app launch or tap cell and state of storefront on launch
         if (
-            (Session.triggerStatus == Session.TriggerStatus.TAP_CELL)
-            || (Session.triggerStatus == Session.TriggerStatus.APP_LAUNCH
-                    && Session.pluginConfigurator?.isPresentStorefrontOnLaunch() == true)
+                (Session.triggerStatus == Session.TriggerStatus.TAP_CELL)
+                || (Session.triggerStatus == Session.TriggerStatus.APP_LAUNCH
+                        && Session.pluginConfigurator?.isPresentStorefrontOnLaunch() == true)
         ) {
-            Session.availableProductIds.addAll(parsedProductIds)
+            sessionParams.parsedProductIds?.let {
+                Session.availableProductIds.addAll(sessionParams.parsedProductIds)
+            }
         }
 
         // constructing flow based on content data
         val productsOption = Purchase.fromValue(Session.availableProductIds)
-        val authOption = Auth.fromValue(isAuthRequired)
+        val authOption = Auth.fromValue(sessionParams.isAuthRequired)
         val camFlow = matchAuthFlowValues(authOption to productsOption)
         Session.setCamFlow(camFlow)
     }
@@ -56,27 +57,28 @@ class ContentAccessHandler(private val cleengService: CleengService) {
     /**
      * parsing data from video item, obtaining information about
      */
-    fun fetchProductData(playableData: Any?) {
+    fun fetchProductData(playableData: Any?): SessionParams {
         val productDataProvider = ProductDataProvider.fromPlayable(playableData)
         if (productDataProvider != null) {
-            val legacyAuthProviderIds = productDataProvider.getLegacyProviderIds()
-            if (legacyAuthProviderIds == null) {
-                //obtain data from DSP
-                val isAuthRequired: Boolean = productDataProvider.isAuthRequired()
-                val productIds = productDataProvider.getProductIds()
-                setSessionParams(isAuthRequired, productIds.orEmpty())
-            } else {
-                // if legacyAuthProviderIds is not empty we should init CamFlow.AUTH_AND_STOREFRONT
-                // otherwise CamFlow.EMPTY
-                setSessionParams(legacyAuthProviderIds.isNotEmpty(), legacyAuthProviderIds)
-            }
-
             //analytics data
             setAnalyticsSessionParams(
                     productDataProvider.getEntityType(),
                     productDataProvider.getEntityName()
             )
+
+            val legacyAuthProviderIds = productDataProvider.getLegacyProviderIds()
+            if (legacyAuthProviderIds == null) {
+                //obtain data from DSP
+                val isAuthRequired: Boolean = productDataProvider.isAuthRequired()
+                val productIds = productDataProvider.getProductIds()
+                return SessionParams(isAuthRequired, productIds)
+            } else {
+                // if legacyAuthProviderIds is not empty we should init CamFlow.AUTH_AND_STOREFRONT
+                // otherwise CamFlow.EMPTY
+                return SessionParams(legacyAuthProviderIds.isNotEmpty(), legacyAuthProviderIds)
+            }
         }
+        return SessionParams(false, null)
     }
 
     fun checkItemLocked(model: Any?, callback: LoginContract.Callback?) {
@@ -127,12 +129,12 @@ class ContentAccessHandler(private val cleengService: CleengService) {
     fun isItemLocked(model: Any?, callback: LoginContract.Callback? = null): Boolean {
         when (model) {
             is Playable, is APAtomEntry -> {
-                fetchProductData(model)
-                if (Session.availableProductIds.isEmpty()) {
+                val sessionParams = fetchProductData(model)
+                if (sessionParams.parsedProductIds?.isEmpty() == true) {
                     callback?.onResult(false)
                     return false
                 } else {
-                    Session.availableProductIds.forEach { productId ->
+                    sessionParams.parsedProductIds?.forEach { productId ->
                         if (isUserOffersComply(productId)) {
                             callback?.onResult(false)
                             return false
