@@ -29,9 +29,7 @@ class ContentAccessHandler(private val cleengService: CleengService) {
                 || (Session.triggerStatus == Session.TriggerStatus.APP_LAUNCH
                         && Session.pluginConfigurator?.isPresentStorefrontOnLaunch() == true)
         ) {
-            sessionParams.parsedProductIds?.let {
-                Session.availableProductIds.addAll(sessionParams.parsedProductIds)
-            }
+            Session.availableProductIds.addAll(sessionParams.parsedProductIds)
         }
 
         // constructing flow based on content data
@@ -71,14 +69,14 @@ class ContentAccessHandler(private val cleengService: CleengService) {
                 //obtain data from DSP
                 val isAuthRequired: Boolean = productDataProvider.isAuthRequired()
                 val productIds = productDataProvider.getProductIds()
-                return SessionParams(isAuthRequired, productIds)
+                return SessionParams(isAuthRequired, productIds ?: listOf())
             } else {
                 // if legacyAuthProviderIds is not empty we should init CamFlow.AUTH_AND_STOREFRONT
                 // otherwise CamFlow.EMPTY
                 return SessionParams(legacyAuthProviderIds.isNotEmpty(), legacyAuthProviderIds)
             }
         }
-        return SessionParams(false, null)
+        return SessionParams(false, listOf())
     }
 
     fun checkItemLocked(model: Any?, callback: LoginContract.Callback?) {
@@ -130,11 +128,11 @@ class ContentAccessHandler(private val cleengService: CleengService) {
         when (model) {
             is Playable, is APAtomEntry -> {
                 val sessionParams = fetchProductData(model)
-                if (sessionParams.parsedProductIds?.isEmpty() == true) {
+                if (sessionParams.parsedProductIds.isEmpty()) {
                     callback?.onResult(false)
                     return false
                 } else {
-                    sessionParams.parsedProductIds?.forEach { productId ->
+                    sessionParams.parsedProductIds.forEach { productId ->
                         if (isUserOffersComply(productId)) {
                             callback?.onResult(false)
                             return false
