@@ -396,9 +396,14 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun getCamFlow(): CamFlow = Session.getCamFlow()
 
-    override fun onCamFinished() {
+    override fun onCamFinished(success: Boolean) {
         cleengService.startUpHookListener?.onHookFinished()
-        cleengService.screenHookListener?.hookCompleted(mutableMapOf())
+        if(success){
+            cleengService.screenHookListener?.hookCompleted(mutableMapOf())
+        }else {
+            cleengService.screenHookListener?.hookFailed(mutableMapOf())
+        }
+
     }
 
     override fun getAnalyticsDataProvider(): IAnalyticsDataProvider = Session.analyticsDataProvider
