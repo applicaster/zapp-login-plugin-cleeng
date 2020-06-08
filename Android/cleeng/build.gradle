@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 15
-        versionName "2.6.1"
+        versionCode 16
+        versionName "2.6.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,7 +55,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // Cam framework
     def devCAM = findProject(':cam')
-    def camPath = 'com.applicaster:applicaster-cam-framework:4.4.1'
+    def camPath = 'com.applicaster:applicaster-cam-framework:4.4.2'
     if (devCAM != null) {
         implementation project(':cam')
     } else {
