@@ -176,6 +176,7 @@ typealias OfferID = String
             let _ = additionalParameters?["ManualLogin"],
             let _ = additionalParameters?["authorization_providers_ids"] as? [Int] {
             flow = accessChecker.getCamFlow(for: extensionsDictionary)
+            analytics.updatePropertiesForManualStart()
         }
 
         if let _ = additionalParameters?["UserAccountTrigger"] as? Bool {
