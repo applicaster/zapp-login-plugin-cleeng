@@ -56,4 +56,9 @@ public class AnalyticsStorage: AnalyticsStorageProtocol {
         trigger = .userAccountComponent
         itemType = "UserAccounts Component"
     }
+
+    func updatePropertiesForManualStart() {
+        trigger = .tapCell
+        itemType = "Manual Start"
+    }
 }
