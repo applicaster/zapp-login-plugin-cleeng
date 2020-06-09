@@ -172,6 +172,12 @@ typealias OfferID = String
         
         var flow = self.flow
         
+        if  let extensionsDictionary = additionalParameters,
+            let _ = additionalParameters?["ManualLogin"],
+            let _ = additionalParameters?["authorization_providers_ids"] as? [Int] {
+            flow = accessChecker.getCamFlow(for: extensionsDictionary)
+        }
+
         if let _ = additionalParameters?["UserAccountTrigger"] as? Bool {
             analytics.updatePropertiesForUserAccountComponent()
             flow = accessChecker.getUserAccountComponentFlow(for: pluginConfiguration)
