@@ -398,9 +398,9 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     override fun onCamFinished(success: Boolean) {
         cleengService.startUpHookListener?.onHookFinished()
-        if(success){
+        if(success) {
             cleengService.screenHookListener?.hookCompleted(mutableMapOf())
-        }else {
+        } else {
             cleengService.screenHookListener?.hookFailed(mutableMapOf())
         }
 
