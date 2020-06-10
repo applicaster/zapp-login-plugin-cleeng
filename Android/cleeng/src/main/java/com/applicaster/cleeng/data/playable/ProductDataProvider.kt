@@ -165,7 +165,7 @@ class ProductMapDataItem(private val dataSource: Map<*, *>) : ProductDataProvide
                     dataSource[ProductDataProvider.KEY_EXTENSIONS] as? Map<String, Any>?
             val ids = extensions?.get(ProductDataProvider.KEY_LEGACY_AUTH_PROVIDER_IDS) as? List<Double>
             ids?.map { it.toString() }
-        } ?: arrayListOf()
+        }
     }
 
     override fun isAuthRequired(): Boolean {
@@ -183,7 +183,7 @@ class ProductMapDataItem(private val dataSource: Map<*, *>) : ProductDataProvide
             extensions?.filterKeys {
                 it == ProductDataProvider.KEY_DS_PRODUCT_ID
             }?.values as? ArrayList<String>
-        } ?: arrayListOf()
+        }
     }
 
     override fun getEntityType(): String {
