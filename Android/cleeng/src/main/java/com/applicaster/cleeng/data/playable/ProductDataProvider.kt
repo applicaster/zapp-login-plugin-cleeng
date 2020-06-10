@@ -1,7 +1,6 @@
 package com.applicaster.cleeng.data.playable
 
 import com.applicaster.atom.model.APAtomEntry
-import com.applicaster.cam.analytics.AnalyticsUtil
 import com.applicaster.model.APChannel
 import com.applicaster.model.APModel
 
@@ -27,6 +26,7 @@ interface ProductDataProvider {
                 is APAtomEntry.APAtomEntryPlayable -> ProductAPAtomEntryPlayableItem(dataItem)
                 is APAtomEntry -> ProductAPAtomEntryItem(dataItem)
                 is APChannel -> ProductAPChannelItem(dataItem)
+                is Map<*, *> -> ProductMapDataItem(dataItem)
                 else -> null
             }
         }
@@ -34,6 +34,9 @@ interface ProductDataProvider {
         const val KEY_LEGACY_AUTH_PROVIDER_IDS = "authorization_providers_ids"
         const val KEY_REQUIRE_AUTH = "requires_authentication"
         const val KEY_DS_PRODUCT_ID = "ds_product_ids"
+        const val KEY_EXTENSIONS = "extensions"
+        const val KEY_TYPE = "type"
+        const val KEY_TITLE = "title"
     }
 }
 
@@ -117,24 +120,33 @@ class ProductAPModelItem(private val apModel: APModel) : ProductDataProvider {
 
 class ProductAPAtomEntryItem(private val playable: APAtomEntry) : ProductDataProvider {
     override fun getLegacyProviderIds(): List<String>? {
-        val data = getSafety { playable.getExtension(
+        val data = getSafety {
+            playable.getExtension(
                 ProductDataProvider.KEY_LEGACY_AUTH_PROVIDER_IDS,
                 List::class.java
-        ) as? List<Double> }
+            ) as? List<Double>
+        }
         return data?.map {
             it.toInt().toString()
         }
     }
 
     override fun isAuthRequired(): Boolean {
-        return getSafety { playable.getExtension(ProductDataProvider.KEY_REQUIRE_AUTH, java.lang.Boolean::class.java) as Boolean } ?: false
+        return getSafety {
+            playable.getExtension(
+                ProductDataProvider.KEY_REQUIRE_AUTH,
+                java.lang.Boolean::class.java
+            ) as Boolean
+        } ?: false
     }
 
     override fun getProductIds(): ArrayList<String>? {
-        return getSafety { playable.getExtension(
-            ProductDataProvider.KEY_DS_PRODUCT_ID,
-            List::class.java
-        ) as? ArrayList<String> }
+        return getSafety {
+            playable.getExtension(
+                ProductDataProvider.KEY_DS_PRODUCT_ID,
+                List::class.java
+            ) as? ArrayList<String>
+        }
     }
 
     override fun getEntityType(): String {
@@ -143,5 +155,47 @@ class ProductAPAtomEntryItem(private val playable: APAtomEntry) : ProductDataPro
 
     override fun getEntityName(): String {
         return getSafety { playable.playable.playableName }.orEmpty()
+    }
+}
+
+class ProductMapDataItem(private val dataSource: Map<*, *>) : ProductDataProvider {
+    override fun getLegacyProviderIds(): List<String>? {
+        return getSafety {
+            val extensions: Map<String, Any>? =
+                    dataSource[ProductDataProvider.KEY_EXTENSIONS] as? Map<String, Any>?
+            val ids = extensions?.get(ProductDataProvider.KEY_LEGACY_AUTH_PROVIDER_IDS) as? List<Double>
+            ids?.map { it.toString() }
+        } ?: arrayListOf()
+    }
+
+    override fun isAuthRequired(): Boolean {
+        return getSafety {
+            val extensions: Map<String, Any>? =
+                    dataSource[ProductDataProvider.KEY_EXTENSIONS] as? Map<String, Any>?
+            extensions?.get(ProductDataProvider.KEY_REQUIRE_AUTH) as? Boolean
+        } ?: false
+    }
+
+    override fun getProductIds(): ArrayList<String>? {
+        return getSafety {
+            val extensions: Map<String, Any>? =
+                    dataSource[ProductDataProvider.KEY_EXTENSIONS] as? Map<String, Any>?
+            extensions?.filterKeys {
+                it == ProductDataProvider.KEY_DS_PRODUCT_ID
+            }?.values as? ArrayList<String>
+        } ?: arrayListOf()
+    }
+
+    override fun getEntityType(): String {
+        return getSafety {
+            val typeStr = dataSource[ProductDataProvider.KEY_TYPE] as? String
+            APAtomEntry.Type.fromStr(typeStr).name
+        }.orEmpty()
+    }
+
+    override fun getEntityName(): String {
+        return getSafety {
+            dataSource[ProductDataProvider.KEY_TITLE] as? String
+        }.orEmpty()
     }
 }
