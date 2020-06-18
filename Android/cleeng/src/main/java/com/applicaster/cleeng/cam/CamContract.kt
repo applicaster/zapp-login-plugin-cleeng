@@ -20,7 +20,6 @@ import com.applicaster.cleeng.network.response.ResetPasswordResponseData
 import com.applicaster.cleeng.network.response.SubscriptionsResponseData
 import com.applicaster.cleeng.utils.isNullOrEmpty
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.UI
 import org.json.JSONObject
 import kotlin.coroutines.CoroutineContext
 
@@ -29,6 +28,11 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
 
     //pending offers, androidProductId as key and Cleeng offerID as value
     private val currentOffers: HashMap<String, String> = hashMapOf()
+
+    private val scope by lazy {
+        val coroutineContext: CoroutineContext = Dispatchers.Main + Job()
+        CoroutineScope(coroutineContext)
+    }
 
     override fun getPluginConfig() = Session.getPluginConfigurationParams()
 
@@ -298,18 +302,17 @@ class CamContract(private val cleengService: CleengService) : ICamContract {
      */
     private fun finishPurchaseFlow(purchasedOfferId: String, callback: ActionCallback, shouldSendCallback: Boolean) {
         var registeredOffers: List<AuthResponseData> = arrayListOf()
-        GlobalScope.launch(UI){
+        scope.launch{
             try {
                 repeat(PURCHASE_VERIFICATION_CALL_MAX_NUM) {
-                    val result = cleengService.networkHelper.extendToken(cleengService.getUserToken())
-                    when (result) {
+                    when (val result = cleengService.networkHelper.extendToken(cleengService.getUserToken())) {
                         is Result.Success -> {
                             result.value?.forEach {
                                 if (it.offerId.isNullOrEmpty()) {
                                     it.token?.let { token -> cleengService.saveUserToken(token) }
                                 } else if (it.offerId == purchasedOfferId) {
                                     registeredOffers = result.value
-                                    UI.cancel()
+                                    scope.cancel()
                                     return@repeat
                                 }
                             }
