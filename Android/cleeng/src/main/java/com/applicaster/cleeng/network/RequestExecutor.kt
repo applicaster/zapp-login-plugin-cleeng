@@ -3,11 +3,10 @@ package com.applicaster.cleeng.network
 import com.applicaster.cleeng.network.error.ErrorUtil
 import com.applicaster.cleeng.network.error.WebServiceError
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.UI
 import retrofit2.Response
 
 fun executeRequest(request: suspend () -> Unit) {
-    GlobalScope.launch(UI) {
+    GlobalScope.launch(Dispatchers.Main) {
         request()
     }
 }
