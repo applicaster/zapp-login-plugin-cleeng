@@ -164,7 +164,7 @@ class ProductMapDataItem(private val dataSource: Map<*, *>) : ProductDataProvide
             val extensions: Map<String, Any>? =
                     dataSource[ProductDataProvider.KEY_EXTENSIONS] as? Map<String, Any>?
             val ids = extensions?.get(ProductDataProvider.KEY_LEGACY_AUTH_PROVIDER_IDS) as? List<Double>
-            ids?.map { it.toString() }
+            ids?.map { it.toInt().toString() }
         }
     }
 
