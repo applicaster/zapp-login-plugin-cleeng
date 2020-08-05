@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'CleengLogin'
-  s.version      = '2.4.0'
+  s.version      = '2.5.0'
   s.summary      = 'Cleeng login plugin'
   s.license      = 'MIT'
   s.homepage     = 'https://github.com/applicaster/zapp-login-plugin-cleeng'
