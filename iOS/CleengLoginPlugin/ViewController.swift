@@ -9,7 +9,6 @@
 import UIKit
 import ZappPlugins
 import CleengLogin
-import ZappLoginPluginsSDK
 
 class ViewController: UIViewController {
 
@@ -24,7 +23,7 @@ class ViewController: UIViewController {
         let entitlementsKey = "ds_product_ids"
         let item = Playable()
         item.extensionsDictionary = [authKey: true, entitlementsKey: ["48"]]
-        let login = ZPLoginManager.sharedInstance.createWithUserData()
+        let login = ZAAppConnector.sharedInstance().pluginsDelegate?.loginPluginsManager?.createWithUserData()
         pluggableLogin = login
         if let login = login {
             let params = ["playable_items": NSArray(array: [item])]

@@ -167,7 +167,7 @@ class CleengNetworkHandler {
     
     func performRequest(api: CleengAPI, completion: @escaping (Swift.Result<Data, Error>) -> Void) {
         let parameters = api.params.merge(["publisherId": publisherID])
-        Alamofire.request(api.url, method: api.httpMethod, parameters: parameters, encoding: JSONEncoding.default).responseJSON { (response) in
+        Alamofire.Session.default.request(api.url, method: api.httpMethod, parameters: parameters, encoding: JSONEncoding.default).responseJSON { (response) in
             switch response.result {
             case .success:
                 guard let code = response.response?.statusCode, let data = response.data else {

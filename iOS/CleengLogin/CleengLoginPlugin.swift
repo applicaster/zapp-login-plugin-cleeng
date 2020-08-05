@@ -30,6 +30,13 @@ typealias OfferID = String
     }()
 
     static var userToken: String?
+    private var hasLocalUserToken:Bool {
+        guard let _ = UserDefaults.standard.string(forKey: kCleengUserLoginToken) else {
+            return false
+        }
+        return true
+    }
+    
     private var currentAvailableOfferIDs = [StoreID: OfferID]() // offerStoreID: OfferID
     private var flow: CAMFlow = .no
     
@@ -207,7 +214,12 @@ typealias OfferID = String
     }
     
     public func isAuthenticated() -> Bool {
-        return CleengLoginPlugin.userToken != nil
+        if ZAAppConnector.sharedInstance().connectivityDelegate.isOffline() {
+            return hasLocalUserToken
+        }
+        else {
+            return CleengLoginPlugin.userToken != nil
+        }
     }
     
     public func isPerformingAuthorizationFlow() -> Bool {
