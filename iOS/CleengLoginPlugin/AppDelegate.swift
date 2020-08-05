@@ -8,7 +8,6 @@
 
 import UIKit
 import ZappPlugins
-import ZappLoginPluginsSDK
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        if let login = ZPLoginManager.sharedInstance.createWithUserData() as? ZPAppLoadingHookProtocol {
+        if let login = ZAAppConnector.sharedInstance().pluginsDelegate?.loginPluginsManager?.createWithUserData() as? ZPAppLoadingHookProtocol {
             login.executeOnLaunch?(completion: nil)
             if launchOptions == nil {
                 DispatchQueue.main.async {
