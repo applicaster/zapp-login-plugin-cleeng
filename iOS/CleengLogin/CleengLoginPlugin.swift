@@ -116,6 +116,13 @@ typealias OfferID = String
                             dataDict: [String: Any]?,
                             taskFinishedWithCompletion: @escaping (Bool, NSError?, [String: Any]?) -> Void) {
         analytics.trigger = .tapCell
+        
+        //if offline, call the completion with current saved tokem
+        guard ZAAppConnector.sharedInstance().connectivityDelegate.isOnline() else {
+            taskFinishedWithCompletion(isAuthenticated(), nil, nil)
+            return
+        }
+        
         login(nil) { (operationStatus) in
             switch operationStatus {
             case .completedSuccessfully:
@@ -157,11 +164,24 @@ typealias OfferID = String
     // MARK: - ZPLoginProviderUserDataProtocol
  
     public func isUserComply(policies: [String: NSObject]) -> Bool {
+        
+        //if offline, call the completion with the indication of saved tokem
+        guard ZAAppConnector.sharedInstance().connectivityDelegate.isOnline() else {
+            return isAuthenticated()
+        }
+        
         let result = accessChecker.isUserComply(policies: policies, isAuthenticated: isAuthenticated())
         return result
     }
     
     public func isUserComply(policies: [String: NSObject], completion: @escaping (Bool) -> Void) {
+        
+        //if offline, call the completion with the indication of saved tokem
+        guard ZAAppConnector.sharedInstance().connectivityDelegate.isOnline() else {
+            completion(isAuthenticated())
+            return
+        }
+        
         let result = accessChecker.isUserComply(policies: policies, isAuthenticated: isAuthenticated())
         completion(result)
     }
