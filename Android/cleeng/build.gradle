@@ -55,7 +55,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // Cam framework
     def devCAM = findProject(':cam')
-    def camPath = 'com.applicaster:applicaster-cam-framework:4.5.0'
+    def camPath = 'com.applicaster:applicaster-cam-framework:4.6.0'
     if (devCAM != null) {
         implementation project(':cam')
     } else {
@@ -63,7 +63,7 @@ dependencies {
     }
 
     // Applicaster SDK
-    def applicasterSDKPath = 'com.applicaster:applicaster-android-sdk:5.0.1'
+    def applicasterSDKPath = 'com.applicaster:applicaster-android-sdk:6.2.0'
     // Check if an open SDK is defined - if not use the closed one.
     def devSDK = findProject(':applicaster-android-sdk')
     if (devSDK != null) {
