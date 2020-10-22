@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name         = 'CleengLogin'
-  s.version      = '2.5.0'
+  s.version      = '2.5.2'
   s.summary      = 'Cleeng login plugin'
   s.license      = 'MIT'
   s.homepage     = 'https://github.com/applicaster/zapp-login-plugin-cleeng'
-  s.author       = {"Brel Egor" => "brel@scand.com"}
+  s.author       = {"Applicaster" => "developer@applicaster.com"}
   s.ios.deployment_target = '10.0'
   s.swift_version = '5.1'
   s.source       = { :git => "https://github.com/applicaster/zapp-login-plugin-cleeng", :tag => 'ios-' + s.version.to_s }
