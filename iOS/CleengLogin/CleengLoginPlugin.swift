@@ -403,7 +403,10 @@ extension CleengLoginPlugin: CAMDelegate {
                                        productId: product.productIdentifier)
         }
         
-        let receipt = restoredItems.first!.receipt.base64EncodedString()
+        guard let receipt = restoredItems.first?.receipt.base64EncodedString() else {
+            completion(.failure(CleengError.serverError))
+            return
+        }
         networkAdapter.restore(purchases: purchases,
                                token: CleengLoginPlugin.userToken ?? "",
                                receipt: receipt,
