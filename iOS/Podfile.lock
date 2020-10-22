@@ -1,8 +1,8 @@
 PODS:
-  - Alamofire (5.2.1)
+  - Alamofire (5.2.2)
   - ApplicasterIAP (0.0.5)
-  - ApplicasterSDK (12.6.1):
-    - Alamofire (= 5.2.1)
+  - ApplicasterSDK (13.0.0):
+    - Alamofire (= 5.2.2)
     - CocoaLumberjack/Swift (= 3.5.3)
     - SSZipArchive (= 2.1.0)
     - TTTAttributedLabel (= 2.1.0)
@@ -11,7 +11,7 @@ PODS:
   - CAM (3.5.0):
     - ApplicasterIAP
     - ZappPlugins (>= 11.1.2)
-  - CleengLogin (2.4.0):
+  - CleengLogin (2.5.0):
     - Alamofire
     - ApplicasterSDK
     - CAM
@@ -54,11 +54,11 @@ EXTERNAL SOURCES:
     :path: "../CleengLogin.podspec"
 
 SPEC CHECKSUMS:
-  Alamofire: e911732990610fe89af59ac0077f923d72dc3dfd
+  Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
   ApplicasterIAP: 52b26e42126693cf42926b8d9e86fd4445533ee8
-  ApplicasterSDK: de495c1b6e7bf6820535f9f5abae16ad7bf86473
+  ApplicasterSDK: 2aed1b8696366c3d39821cf9b1624b66cef328cb
   CAM: 3622f8265e97e7fd2ec3733b7b8ad50efeba15fd
-  CleengLogin: 120bc83486144d4a804dab222819de9a9b41ce87
+  CleengLogin: 693be7b74381cc9f1c333d8dc22057e0083482de
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   SSZipArchive: 1e8e53dcb11bca3ded4738958dc49fc467320a14
   TTTAttributedLabel: f8c7f1dbc7b8f7168e23e8b4764dda2e3b74aae8
