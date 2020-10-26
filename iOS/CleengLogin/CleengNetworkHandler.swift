@@ -217,6 +217,13 @@ class CleengNetworkHandler {
                         completion(.success)
                         return
                     }
+                    else if cleengTokens.count > 0 { //if response returned with tokens but empty offer, stop proceeding and return server error
+                        timer.invalidate()
+                        let requestError = RequestError(from: .unknown,
+                                                        with: "Unable to find valid subscription")
+                        completion(.failure(CleengError.serverDoesntVerifyPurchase(requestError)))
+                        return
+                    }
                 case .failure:
                     break
                 }
